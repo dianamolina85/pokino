@@ -1121,12 +1121,14 @@
             playerName: "",
             playerId: "",
             isDealer: false,
-            playerBalance: 0
+            playerBalance: 0,
+            connectionRef: null
         };
         
         let isListening = false;
         let clickTimeout = null;
         let selectedPlayerForBalance = null;
+        let cleanupInterval = null;
         
         // ============================================
         // INICIALIZACIÓN
@@ -1141,9 +1143,48 @@
                 document.getElementById('playerName').textContent = savedName;
                 document.getElementById('nameModal').classList.remove('show');
                 startFirebaseListeners();
+                registerPlayer();
             } else {
                 document.getElementById('nameModal').classList.add('show');
             }
+            
+            // Limpiar jugadores inactivos cada 30 segundos
+            cleanupInterval = setInterval(cleanupInactivePlayers, 30000);
+            
+            // Detectar cierre de pestaña
+            window.addEventListener('beforeunload', handleBeforeUnload);
+        }
+        
+        function handleBeforeUnload() {
+            // Asegurar que el jugador se elimine al cerrar la pestaña
+            if (gameState.playerId) {
+                database.ref(`players/${gameState.playerId}`).remove();
+            }
+        }
+        
+        function cleanupInactivePlayers() {
+            const now = Date.now();
+            const maxInactiveTime = 120000; // 2 minutos
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                
+                Object.entries(players).forEach(([playerId, player]) => {
+                    if (player.lastSeen && (now - player.lastSeen > maxInactiveTime)) {
+                        // Eliminar jugador inactivo
+                        database.ref(`players/${playerId}`).remove();
+                        
+                        // Liberar su cartón si lo tenía
+                        if (player.boardId) {
+                            database.ref(`gameState/boards/${player.boardId - 1}`).update({
+                                owner: null,
+                                ownerName: null,
+                                locked: false
+                            });
+                        }
+                    }
+                });
+            });
         }
         
         function savePlayerName() {
@@ -1169,21 +1210,30 @@
         
         function registerPlayer() {
             const playerRef = database.ref(`players/${gameState.playerId}`);
-            playerRef.set({
-                name: gameState.playerName,
-                online: true,
-                lastSeen: Date.now(),
-                boardId: null,
-                balance: 0
-            });
             
-            setInterval(() => {
-                playerRef.update({
-                    lastSeen: Date.now()
+            // Primero, eliminar cualquier dato anterior de este jugador
+            playerRef.remove().then(() => {
+                // Ahora registrar el jugador
+                playerRef.set({
+                    name: gameState.playerName,
+                    online: true,
+                    lastSeen: Date.now(),
+                    boardId: null,
+                    balance: 0,
+                    sessionId: gameState.playerId
                 });
-            }, 30000);
-            
-            playerRef.onDisconnect().remove();
+                
+                // Configurar onDisconnect para eliminar al jugador
+                playerRef.onDisconnect().remove();
+                
+                // Actualizar lastSeen periódicamente
+                setInterval(() => {
+                    playerRef.update({
+                        lastSeen: Date.now(),
+                        online: true
+                    });
+                }, 15000);
+            });
         }
         
         function startFirebaseListeners() {
@@ -1199,9 +1249,27 @@
                 }
             });
             
+            // Escuchar cambios en jugadores para actualizar la lista
             database.ref('players').on('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 updatePlayersList(players);
+            });
+            
+            // Detectar cuando un jugador se desconecta
+            database.ref('players').on('child_removed', (snapshot) => {
+                const playerId = snapshot.key;
+                const player = snapshot.val();
+                
+                if (player && player.boardId) {
+                    // Liberar el cartón del jugador desconectado
+                    database.ref(`gameState/boards/${player.boardId - 1}`).update({
+                        owner: null,
+                        ownerName: null,
+                        locked: false
+                    });
+                }
+                
+                showNotification(`👋 ${player ? player.name : 'Jugador'} se ha desconectado`, 'warning');
             });
         }
         
@@ -1308,7 +1376,12 @@
             container.innerHTML = '';
             
             const playerArray = Object.entries(players)
-                .filter(([id, p]) => p.online && (Date.now() - p.lastSeen < 60000))
+                .filter(([id, p]) => {
+                    // Filtrar jugadores realmente activos
+                    const isActive = p.online && p.sessionId === id;
+                    const isRecent = (Date.now() - (p.lastSeen || 0)) < 120000; // 2 minutos
+                    return isActive && isRecent;
+                })
                 .map(([id, p]) => ({ ...p, id }))
                 .sort((a, b) => a.name.localeCompare(b.name));
             
@@ -2127,6 +2200,14 @@
                 notif.classList.remove('show');
             }, 3000);
         }
+        
+        // Limpiar al cerrar la página
+        window.addEventListener('unload', () => {
+            if (cleanupInterval) clearInterval(cleanupInterval);
+            if (gameState.playerId) {
+                database.ref(`players/${gameState.playerId}`).remove();
+            }
+        });
         
         window.onload = initGame;
     </script>
