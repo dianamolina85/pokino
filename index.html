@@ -75,6 +75,18 @@
             margin-right: 10px;
         }
         
+        .player-balance {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
         .dealer-badge {
             background: linear-gradient(135deg, #f39c12, #e67e22);
             color: white;
@@ -126,6 +138,27 @@
             margin-bottom: 10px;
         }
         
+        .game-info {
+            background: #e8f4fc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            text-align: center;
+        }
+        
+        .game-info .round {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2980b9;
+        }
+        
+        .game-info .hand {
+            font-size: 1.1em;
+            color: #e67e22;
+            font-weight: bold;
+        }
+        
         .card-display {
             background: white;
             padding: 20px;
@@ -167,7 +200,7 @@
         
         .card-actions {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 10px;
             margin-bottom: 15px;
         }
@@ -198,6 +231,12 @@
         
         .btn-draw:hover {
             background: linear-gradient(135deg, #229954, #1e8449);
+        }
+        
+        .btn-draw:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .btn-init {
@@ -288,18 +327,6 @@
         .pot-label {
             font-weight: bold;
             color: #2c3e50;
-        }
-        
-        .hand-counter {
-            text-align: center;
-            padding: 12px;
-            background: #e8f4fc;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-weight: bold;
-            color: #2980b9;
-            font-size: 1.2em;
-            border: 2px dashed #3498db;
         }
         
         /* Cartones de Juego */
@@ -543,6 +570,15 @@
             padding: 4px 10px;
             border-radius: 15px;
             font-size: 0.9em;
+            margin-left: 8px;
+        }
+        
+        .player-balance-display {
+            background: #27ae60;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
         }
         
         .player-item.dealer .player-board {
@@ -686,6 +722,50 @@
             border-top: 2px solid #ecf0f1;
         }
         
+        /* Modal de Saldo */
+        .balance-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .balance-modal.show {
+            display: flex;
+        }
+        
+        .balance-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .balance-input {
+            padding: 12px;
+            font-size: 1.2em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 15px 0;
+            width: 80%;
+            text-align: center;
+        }
+        
+        .balance-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
         /* Historial */
         .history-container {
             margin-top: 25px;
@@ -794,6 +874,10 @@
             .modal-actions {
                 grid-template-columns: 1fr;
             }
+            
+            .balance-actions {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -804,6 +888,7 @@
             <p class="subtitle">¡Tu tradición familiar de POKENO ahora online!</p>
             <div class="zoom-note">📹 Conéctate por Zoom o Meet para ver a tu familia</div>
             <div class="player-info">👤 Jugador: <span id="playerName">Esperando...</span></div>
+            <div class="player-balance" id="playerBalance" style="display:none;">💰 Saldo: $<span id="balanceAmount">0</span></div>
             <div id="dealerBadge" class="dealer-badge" style="display:none;">👑 ¡Eres el CRUPIER!</div>
         </header>
         
@@ -817,20 +902,21 @@
         <div class="game-container">
             <!-- Panel de Control - Lector de Cartas -->
             <div class="control-panel">
-                <div class="hand-counter">MANO ACTUAL: <span id="handCounter">1</span></div>
+                <div class="game-info">
+                    <div class="round">Ronda: <span id="roundNumber">1</span></div>
+                    <div class="hand">Mano: <span id="handNumber">1</span> de 6</div>
+                </div>
                 
                 <div class="dealer-controls" id="dealerControls" style="display:none;">
                     <div class="section-title">👑 CONTROLES DEL CRUPIER</div>
-                    <div class="card-actions">
-                        <button class="btn-dealer btn-init" onclick="initHand()">
-                            <span>▶️ INICIAR MANO</span>
-                        </button>
-                        <button class="btn-dealer btn-end" onclick="endHand()" disabled>
-                            <span>⏹️ FINALIZAR MANO</span>
-                        </button>
-                    </div>
+                    <button class="btn-dealer btn-init" onclick="initHand()" id="initHandBtn">
+                        <span>▶️ INICIAR MANO</span>
+                    </button>
                     <button class="btn-dealer btn-draw" onclick="drawRandomCard()" disabled id="drawBtn">
                         <span>🎴 LANZAR CARTA</span>
+                    </button>
+                    <button class="btn-dealer btn-end" onclick="endRound()" id="endRoundBtn" style="display:none;">
+                        <span>🏁 FINALIZAR RONDA</span>
                     </button>
                 </div>
                 
@@ -839,7 +925,7 @@
                     <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
                 </div>
                 
-                <div class="section-title">📋 CARTAS CANTADAS</div>
+                <div class="section-title">📋 CARTAS CANTADAS (<span id="cardsCount">0</span>)</div>
                 <div class="cards-summary" id="cardsSummary">
                     <div class="empty-summary">Aún no se han cantado cartas</div>
                 </div>
@@ -878,8 +964,8 @@
                     <button class="btn-dealer btn-end" onclick="showHistoryModal()">
                         <span>📊 HISTORIAL</span>
                     </button>
-                    <button class="btn-dealer btn-warning" onclick="resetGame()" style="background:linear-gradient(135deg, #f39c12, #e67e22);">
-                        <span>⚠️ REINICIAR TODO</span>
+                    <button class="btn-dealer btn-warning" onclick="resetAllBalances()" style="background:linear-gradient(135deg, #f39c12, #e67e22);">
+                        <span>🔄 REINICIAR SALDOS</span>
                     </button>
                 </div>
                 
@@ -887,15 +973,16 @@
                 <div style="background:white;padding:15px;border-radius:8px;font-size:0.9em;line-height:1.6;">
                     <p><strong>Para JUGADORES:</strong></p>
                     <p>• Selecciona un cartón libre</p>
-                    <p>• Haz click en las casillas para marcar</p>
-                    <p>• Doble click para desmarcar</p>
-                    <p>• Canta tu premio cuando lo tengas</p>
+                    <p>• Click para marcar, doble click para desmarcar</p>
+                    <p>• Canta premio cuando lo tengas</p>
+                    <p>• Al final de ronda, puedes cambiar de cartón</p>
                     <br>
                     <p><strong>Para CRUPIER:</strong></p>
-                    <p>• Inicia la mano cuando todos estén listos</p>
-                    <p>• Lanza cartas con el botón</p>
+                    <p>• Carga saldo a cada jugador</p>
+                    <p>• Inicia mano cuando todos estén listos</p>
+                    <p>• Lanza cartas aleatorias</p>
                     <p>• Verifica y aprueba premios</p>
-                    <p>• Finaliza la mano cuando sea necesario</p>
+                    <p>• Finaliza ronda después de 6 manos</p>
                 </div>
             </div>
         </div>
@@ -953,21 +1040,51 @@
         </div>
     </div>
     
+    <!-- Modal de Carga de Saldo -->
+    <div class="balance-modal" id="balanceModal">
+        <div class="balance-content">
+            <div class="modal-title">💰 Cargar Saldo a Jugador</div>
+            <p id="balancePlayerName" style="font-size:1.2em;margin:15px 0;font-weight:bold;">Jugador</p>
+            <input type="number" id="balanceAmountInput" class="balance-input" placeholder="Monto en monedas" min="0">
+            <div class="balance-actions">
+                <button class="btn-dealer btn-init" onclick="saveBalance()">✅ CARGAR SALDO</button>
+                <button class="btn-dealer btn-end" onclick="document.getElementById('balanceModal').classList.remove('show')">❌ CANCELAR</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Fin de Ronda -->
+    <div class="modal" id="endRoundModal">
+        <div class="modal-content">
+            <div class="modal-title">🏁 ¡Ronda Finalizada!</div>
+            <p style="font-size:1.2em;margin:20px 0;">Se han completado las 6 manos.</p>
+            <div style="background:#f8f9fa;padding:15px;border-radius:10px;margin:20px 0;">
+                <h3 style="color:#2c3e50;margin-bottom:10px;">💰 Saldos Actuales:</h3>
+                <div id="finalBalancesList"></div>
+            </div>
+            <p style="margin:20px 0;font-weight:bold;">¿Desean continuar con otra ronda?</p>
+            <div class="modal-actions">
+                <button class="btn-dealer btn-init" onclick="startNewRound()">✅ SÍ, CONTINUAR</button>
+                <button class="btn-dealer btn-end" onclick="resetGame()">❌ NO, FINALIZAR</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Notificación -->
     <div class="notification" id="notification">¡Carta cantada!</div>
     
     <script>
         // ============================================
-        // 🔥 CONFIGURACIÓN DE FIREBASE - PEGA TUS DATOS AQUÍ
+        // 🔥 CONFIGURACIÓN DE FIREBASE
         // ============================================
         const firebaseConfig = {
-            apiKey: "TU_API_KEY_AQUI",
-            authDomain: "TU_PROYECTO.firebaseapp.com",
-            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
-            projectId: "TU_PROYECTO",
-            storageBucket: "TU_PROYECTO.appspot.com",
-            messagingSenderId: "TU_MESSAGING_SENDER_ID",
-            appId: "TU_APP_ID"
+            apiKey: "AIzaSyBHBM1weX8-v_dk88QluRgFSXRD4NrNLmQ",
+            authDomain: "pokino-4383c.firebaseapp.com",
+            databaseURL: "https://pokino-4383c-default-rtdb.firebaseio.com",
+            projectId: "pokino-4383c",
+            storageBucket: "pokino-4383c.firebasestorage.app",
+            messagingSenderId: "607174478777",
+            appId: "1:607174478777:web:0b16906bd16ed568d60468"
         };
         
         // Inicializar Firebase
@@ -978,9 +1095,11 @@
         // ESTADO DEL JUEGO
         // ============================================
         let gameState = {
+            round: 1,
             currentHand: 1,
             cardsUsed: [],
             currentCard: null,
+            cardsCount: 0,
             pots: {
                 pokino: 0,
                 poker: 0,
@@ -997,14 +1116,17 @@
             claimingBoardId: null,
             handStarted: false,
             handFinished: false,
+            roundFinished: false,
             dealerId: null,
             playerName: "",
             playerId: "",
-            isDealer: false
+            isDealer: false,
+            playerBalance: 0
         };
         
         let isListening = false;
         let clickTimeout = null;
+        let selectedPlayerForBalance = null;
         
         // ============================================
         // INICIALIZACIÓN
@@ -1051,7 +1173,8 @@
                 name: gameState.playerName,
                 online: true,
                 lastSeen: Date.now(),
-                boardId: null
+                boardId: null,
+                balance: 0
             });
             
             setInterval(() => {
@@ -1084,9 +1207,11 @@
         
         function initializeGameInFirebase() {
             const initialGameState = {
+                round: 1,
                 currentHand: 1,
                 cardsUsed: [],
                 currentCard: null,
+                cardsCount: 0,
                 pots: {
                     pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
                 },
@@ -1097,6 +1222,7 @@
                 claimingBoardId: null,
                 handStarted: false,
                 handFinished: false,
+                roundFinished: false,
                 dealerId: null
             };
             
@@ -1141,9 +1267,11 @@
         }
         
         function loadGameState(data) {
+            gameState.round = data.round || 1;
             gameState.currentHand = data.currentHand || 1;
             gameState.cardsUsed = data.cardsUsed || [];
             gameState.currentCard = data.currentCard || null;
+            gameState.cardsCount = data.cardsCount || 0;
             gameState.pots = data.pots || { pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0 };
             gameState.boards = data.boards || generateInitialBoards();
             gameState.history = data.history || [];
@@ -1152,6 +1280,7 @@
             gameState.claimingBoardId = data.claimingBoardId || null;
             gameState.handStarted = data.handStarted || false;
             gameState.handFinished = data.handFinished || false;
+            gameState.roundFinished = data.roundFinished || false;
             gameState.dealerId = data.dealerId || null;
             gameState.isDealer = (gameState.dealerId === gameState.playerId);
             
@@ -1193,10 +1322,47 @@
                 playerEl.className = `player-item ${gameState.dealerId === player.id ? 'dealer' : ''}`;
                 playerEl.innerHTML = `
                     <span class="player-name">${player.name}</span>
-                    <span class="player-board">${player.boardId ? `Cartón #${player.boardId}` : 'Sin cartón'}</span>
+                    ${player.boardId ? `<span class="player-board">Cartón #${player.boardId}</span>` : ''}
+                    <span class="player-balance-display">$${player.balance || 0}</span>
                 `;
+                
+                // Si es crupier y el jugador no tiene saldo, mostrar botón para cargar
+                if (gameState.isDealer && (!player.balance || player.balance === 0)) {
+                    const loadBtn = document.createElement('button');
+                    loadBtn.className = 'btn-dealer btn-init';
+                    loadBtn.style.marginTop = '8px';
+                    loadBtn.style.width = '100%';
+                    loadBtn.style.padding = '8px';
+                    loadBtn.innerHTML = '<span>💰 Cargar Saldo</span>';
+                    loadBtn.onclick = () => openBalanceModal(player.id, player.name);
+                    playerEl.appendChild(loadBtn);
+                }
+                
                 container.appendChild(playerEl);
             });
+        }
+        
+        function openBalanceModal(playerId, playerName) {
+            selectedPlayerForBalance = playerId;
+            document.getElementById('balancePlayerName').textContent = playerName;
+            document.getElementById('balanceAmountInput').value = '';
+            document.getElementById('balanceModal').classList.add('show');
+        }
+        
+        function saveBalance() {
+            const amount = parseInt(document.getElementById('balanceAmountInput').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('⚠️ Ingresa un monto válido', 'warning');
+                return;
+            }
+            
+            database.ref(`players/${selectedPlayerForBalance}`).update({
+                balance: amount
+            });
+            
+            document.getElementById('balanceModal').classList.remove('show');
+            showNotification(`✅ Saldo cargado exitosamente`, 'success');
         }
         
         // ============================================
@@ -1231,7 +1397,7 @@
                     const isCenter = idx === 12; // Centro del 5x5
                     const isCorner = idx === 0 || idx === 4 || idx === 20 || idx === 24; // 4 esquinas
                     const isFull = idx >= 5 && idx <= 9; // Segunda línea (índices 5-9)
-                    const isPoker = idx >= 20 && idx <= 24; // Quinta línea (índices 20-24)
+                    const isPoker = idx >= 15 && idx <= 19; // Cuarta línea (índices 15-19)
                     
                     let classes = 'board-cell';
                     
@@ -1256,9 +1422,9 @@
                             <button class="claim-btn pokino" onclick="event.stopPropagation(); claimPrize('pokino', ${board.id})" title="Pokino">P</button>
                             <button class="claim-btn poker" onclick="event.stopPropagation(); claimPrize('poker', ${board.id})" title="Poker">PK</button>
                             <button class="claim-btn full" onclick="event.stopPropagation(); claimPrize('full', ${board.id})" title="Full">F</button>
-                            <button class="claim-btn centro" onclick="event.stopPropagation(); claimPrize('centro', ${board.id})" title="Centro">C</button>
+                            <button class="claim-btn centro" onclick="event.stopPropagation(); claimPrize('centro', ${board.id})" id="centroBtn-${board.id}" title="Centro">C</button>
                             <button class="claim-btn esquinas" onclick="event.stopPropagation(); claimPrize('esquinas', ${board.id})" title="Esquinas">E</button>
-                            ${gameState.currentHand % 6 === 0 ? 
+                            ${gameState.currentHand === 6 ? 
                                 `<button class="claim-btn especial" onclick="event.stopPropagation(); claimPrize('especial', ${board.id})" title="Especial">ES</button>` : 
                                 `<button class="claim-btn especial" disabled title="Especial (Mano 6)">ES</button>`
                             }
@@ -1269,11 +1435,27 @@
                 boardEl.innerHTML = boardHTML;
                 container.appendChild(boardEl);
             });
+            
+            // Deshabilitar botón de centro si ya se lanzaron 6+ cartas
+            if (gameState.cardsCount >= 6) {
+                document.querySelectorAll('[id^="centroBtn-"]').forEach(btn => {
+                    btn.disabled = true;
+                });
+            } else {
+                document.querySelectorAll('[id^="centroBtn-"]').forEach(btn => {
+                    btn.disabled = false;
+                });
+            }
         }
         
         function selectBoard(boardId) {
             if (gameState.handStarted && !gameState.handFinished) {
                 showNotification('⚠️ La mano ya comenzó. Espera a que termine.', 'warning');
+                return;
+            }
+            
+            if (gameState.roundFinished) {
+                showNotification('⚠️ La ronda terminó. Espera a que se reinicie.', 'warning');
                 return;
             }
             
@@ -1367,7 +1549,7 @@
             display.innerHTML = `
                 <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
                 <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
-                <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta actual</div>
+                <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
             `;
         }
         
@@ -1395,7 +1577,7 @@
             const availableCards = allCards.filter(c => !gameState.cardsUsed.includes(c));
             
             if (availableCards.length === 0) {
-                showNotification('🎉 ¡No quedan cartas! Finaliza la mano.', 'success');
+                showNotification('🎉 ¡No quedan cartas!', 'success');
                 return;
             }
             
@@ -1404,6 +1586,7 @@
             
             gameState.currentCard = newCard;
             gameState.cardsUsed.push(newCard);
+            gameState.cardsCount++;
             
             gameState.boards.forEach(board => {
                 board.cards.forEach((c, idx) => {
@@ -1413,6 +1596,7 @@
                 });
             });
             
+            // Actualizar pozos (cada carta suma $10 a cada pozo)
             Object.keys(gameState.pots).forEach(pot => {
                 gameState.pots[pot] += 10;
             });
@@ -1420,6 +1604,7 @@
             database.ref('gameState').update({
                 currentCard: newCard,
                 cardsUsed: gameState.cardsUsed,
+                cardsCount: gameState.cardsCount,
                 pots: gameState.pots,
                 boards: gameState.boards
             });
@@ -1453,48 +1638,46 @@
                 return;
             }
             
+            if (gameState.roundFinished) {
+                showNotification('⚠️ La ronda terminó. Reinicia para continuar.', 'warning');
+                return;
+            }
+            
             const playersWithBoards = Object.values(gameState.boards).filter(b => b.owner).length;
             if (playersWithBoards === 0) {
                 showNotification('⚠️ Espera a que al menos un jugador seleccione cartón', 'warning');
                 return;
             }
             
-            database.ref('gameState').update({
-                handStarted: true,
-                handFinished: false,
-                currentCard: null
+            // Verificar que todos los jugadores con cartón tengan saldo
+            const playersRef = database.ref('players');
+            playersRef.once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                let hasInsufficientBalance = false;
+                
+                Object.entries(players).forEach(([id, player]) => {
+                    if (player.boardId && (!player.balance || player.balance <= 0)) {
+                        hasInsufficientBalance = true;
+                    }
+                });
+                
+                if (hasInsufficientBalance) {
+                    showNotification('⚠️ Algunos jugadores no tienen saldo suficiente', 'warning');
+                    return;
+                }
+                
+                database.ref('gameState').update({
+                    handStarted: true,
+                    handFinished: false,
+                    currentCard: null,
+                    cardsCount: 0
+                });
+                
+                document.getElementById('drawBtn').disabled = false;
+                document.getElementById('initHandBtn').disabled = true;
+                
+                showNotification('▶️ ¡Mano iniciada! Lanza cartas cuando estén listos', 'success');
             });
-            
-            document.getElementById('drawBtn').disabled = false;
-            document.getElementById('drawBtn').innerHTML = '<span>🎴 LANZAR CARTA</span>';
-            
-            showNotification('▶️ ¡Mano iniciada! Lanza cartas cuando estén listos', 'success');
-        }
-        
-        function endHand() {
-            if (!gameState.isDealer) {
-                showNotification('⚠️ Solo el crupier puede finalizar la mano', 'warning');
-                return;
-            }
-            
-            if (!gameState.handStarted || gameState.handFinished) {
-                showNotification('⚠️ No hay mano activa para finalizar', 'warning');
-                return;
-            }
-            
-            if (gameState.currentClaim) {
-                showNotification('⚠️ Resuelve el premio actual primero', 'warning');
-                return;
-            }
-            
-            database.ref('gameState').update({
-                handFinished: true
-            });
-            
-            document.getElementById('drawBtn').disabled = true;
-            document.getElementById('drawBtn').innerHTML = '<span>✅ MANO FINALIZADA</span>';
-            
-            showNotification('⏹️ ¡Mano finalizada! Prepara la siguiente', 'success');
         }
         
         function claimPrize(prizeType, boardId) {
@@ -1514,6 +1697,12 @@
             const markedCount = board.marked.filter(m => m).length;
             if (markedCount === 0) {
                 showNotification('❌ No tienes cartas marcadas', 'error');
+                return;
+            }
+            
+            // Verificar centro solo hasta 6ta carta
+            if (prizeType === 'centro' && gameState.cardsCount > 6) {
+                showNotification('❌ El centro solo se puede cantar hasta la 6ta carta', 'error');
                 return;
             }
             
@@ -1550,7 +1739,7 @@
                 const isCenter = idx === 12;
                 const isCorner = idx === 0 || idx === 4 || idx === 20 || idx === 24;
                 const isFull = idx >= 5 && idx <= 9;
-                const isPoker = idx >= 20 && idx <= 24;
+                const isPoker = idx >= 15 && idx <= 19;
                 const isMarked = board.marked[idx];
                 
                 const cell = document.createElement('div');
@@ -1598,28 +1787,77 @@
             const prizeAmount = gameState.pots[gameState.currentClaim];
             const prizeName = gameState.currentClaim.toUpperCase();
             
-            const newHistory = [...gameState.history];
-            newHistory.push({
-                hand: gameState.currentHand,
-                date: new Date().toLocaleDateString(),
-                winner: gameState.claimingPlayer,
-                prize: prizeName,
-                amount: prizeAmount
+            // Buscar el jugador que ganó y actualizar su saldo
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                let winnerId = null;
+                
+                Object.entries(players).forEach(([id, player]) => {
+                    if (player.name === gameState.claimingPlayer) {
+                        winnerId = id;
+                        const newBalance = (player.balance || 0) + prizeAmount;
+                        
+                        database.ref(`players/${id}`).update({
+                            balance: newBalance
+                        });
+                    }
+                });
+                
+                // Guardar en historial
+                const newHistory = [...gameState.history];
+                newHistory.push({
+                    round: gameState.round,
+                    hand: gameState.currentHand,
+                    date: new Date().toLocaleDateString(),
+                    winner: gameState.claimingPlayer,
+                    prize: prizeName,
+                    amount: prizeAmount
+                });
+                
+                // Reiniciar pozo
+                gameState.pots[gameState.currentClaim] = 0;
+                
+                // Si es POKINO, terminar la mano
+                const shouldEndHand = (gameState.currentClaim === 'pokino');
+                
+                const updates = {
+                    history: newHistory,
+                    pots: gameState.pots,
+                    currentClaim: null,
+                    claimingPlayer: null,
+                    claimingBoardId: null
+                };
+                
+                if (shouldEndHand) {
+                    updates.handFinished = true;
+                    updates.handStarted = false;
+                    
+                    // Incrementar mano si no es la última
+                    if (gameState.currentHand < 6) {
+                        updates.currentHand = gameState.currentHand + 1;
+                    } else {
+                        updates.roundFinished = true;
+                    }
+                }
+                
+                database.ref('gameState').update(updates);
+                
+                document.getElementById('verificationModal').classList.remove('show');
+                
+                if (shouldEndHand) {
+                    document.getElementById('drawBtn').disabled = true;
+                    document.getElementById('initHandBtn').disabled = false;
+                    
+                    if (gameState.currentHand === 6) {
+                        document.getElementById('endRoundBtn').style.display = 'block';
+                        showNotification(`🎉 ¡Mano ${gameState.currentHand} terminada! Ronda completada.`, 'success');
+                    } else {
+                        showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
+                    }
+                } else {
+                    showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}`, 'success');
+                }
             });
-            
-            gameState.pots[gameState.currentClaim] = 0;
-            
-            database.ref('gameState').update({
-                history: newHistory,
-                pots: gameState.pots,
-                currentClaim: null,
-                claimingPlayer: null,
-                claimingBoardId: null
-            });
-            
-            document.getElementById('verificationModal').classList.remove('show');
-            
-            showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}`, 'success');
         }
         
         function denyClaim() {
@@ -1636,6 +1874,150 @@
             
             document.getElementById('verificationModal').classList.remove('show');
             showNotification('❌ Premio denegado. Continuamos jugando', 'warning');
+        }
+        
+        function endRound() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede finalizar la ronda', 'warning');
+                return;
+            }
+            
+            if (!gameState.roundFinished) {
+                showNotification('⚠️ La ronda aún no ha terminado', 'warning');
+                return;
+            }
+            
+            // Mostrar resumen de saldos
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                const balancesList = document.getElementById('finalBalancesList');
+                balancesList.innerHTML = '';
+                
+                Object.entries(players)
+                    .filter(([id, p]) => p.online && p.boardId)
+                    .sort((a, b) => b[1].balance - a[1].balance)
+                    .forEach(([id, player]) => {
+                        const div = document.createElement('div');
+                        div.style.padding = '8px';
+                        div.style.margin = '5px 0';
+                        div.style.background = '#fff';
+                        div.style.borderRadius = '5px';
+                        div.innerHTML = `<strong>${player.name}:</strong> $${player.balance || 0}`;
+                        balancesList.appendChild(div);
+                    });
+                
+                document.getElementById('endRoundModal').classList.add('show');
+            });
+        }
+        
+        function startNewRound() {
+            document.getElementById('endRoundModal').classList.remove('show');
+            
+            // Desbloquear todos los cartones para que puedan cambiar
+            gameState.boards.forEach(board => {
+                board.locked = false;
+                board.owner = null;
+                board.ownerName = null;
+                board.marked = Array(25).fill(false);
+            });
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                
+                Object.keys(players).forEach(playerId => {
+                    database.ref(`players/${playerId}`).update({
+                        boardId: null
+                    });
+                });
+                
+                database.ref('gameState').update({
+                    round: gameState.round + 1,
+                    currentHand: 1,
+                    cardsUsed: [],
+                    currentCard: null,
+                    cardsCount: 0,
+                    pots: {
+                        pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
+                    },
+                    boards: gameState.boards,
+                    handStarted: false,
+                    handFinished: false,
+                    roundFinished: false
+                });
+                
+                document.getElementById('endRoundBtn').style.display = 'none';
+                document.getElementById('drawBtn').disabled = true;
+                document.getElementById('initHandBtn').disabled = false;
+                
+                showNotification(`✨ ¡Ronda ${gameState.round + 1} iniciada! Seleccionen nuevos cartones.`, 'success');
+            });
+        }
+        
+        function resetGame() {
+            if (!gameState.isDealer && gameState.dealerId) {
+                showNotification('⚠️ Solo el crupier puede reiniciar el juego', 'warning');
+                return;
+            }
+            
+            if (!confirm('⚠️ ¿Seguro que quieres finalizar el juego? Se perderá todo el progreso.')) {
+                return;
+            }
+            
+            document.getElementById('endRoundModal').classList.remove('show');
+            
+            database.ref('gameState').set({
+                round: 1,
+                currentHand: 1,
+                cardsUsed: [],
+                currentCard: null,
+                cardsCount: 0,
+                pots: {
+                    pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
+                },
+                boards: generateInitialBoards(),
+                history: [],
+                currentClaim: null,
+                claimingPlayer: null,
+                claimingBoardId: null,
+                handStarted: false,
+                handFinished: false,
+                roundFinished: false,
+                dealerId: null
+            });
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                Object.keys(players).forEach(playerId => {
+                    database.ref(`players/${playerId}`).update({
+                        boardId: null,
+                        balance: 0
+                    });
+                });
+            });
+            
+            showNotification('🔄 ¡Juego reiniciado completamente!', 'success');
+        }
+        
+        function resetAllBalances() {
+            if (!gameState.isDealer && gameState.dealerId) {
+                showNotification('⚠️ Solo el crupier puede reiniciar saldos', 'warning');
+                return;
+            }
+            
+            if (!confirm('⚠️ ¿Seguro que quieres reiniciar TODOS los saldos a 0?')) {
+                return;
+            }
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                Object.keys(players).forEach(playerId => {
+                    database.ref(`players/${playerId}`).update({
+                        balance: 0
+                    });
+                });
+            });
+            
+            showNotification('🔄 ¡Todos los saldos han sido reiniciados a 0!', 'success');
         }
         
         function showHistoryModal() {
@@ -1656,7 +2038,7 @@
                     div.style.padding = '12px';
                     div.style.borderBottom = '1px solid #ecf0f1';
                     div.innerHTML = `
-                        <div style="font-weight:bold;color:#3498db;">Mano #${item.hand}</div>
+                        <div style="font-weight:bold;color:#3498db;">Ronda ${item.round} - Mano ${item.hand}</div>
                         <div style="color:#7f8c8d;margin:5px 0;">${item.date}</div>
                         <div style="color:#e67e22;font-weight:bold;">${item.winner}</div>
                         <div style="color:#27ae60;font-weight:bold;">${item.prize}: $${item.amount}</div>
@@ -1668,52 +2050,10 @@
             document.getElementById('historyModal').classList.add('show');
         }
         
-        function resetGame() {
-            if (!gameState.isDealer && gameState.dealerId) {
-                showNotification('⚠️ Solo el crupier puede reiniciar el juego', 'warning');
-                return;
-            }
-            
-            if (gameState.currentClaim) {
-                showNotification('⚠️ Espera a que se resuelva el premio actual', 'warning');
-                return;
-            }
-            
-            if (!confirm('⚠️ ¿Seguro que quieres reiniciar TODO el juego? Se perderá el historial y los pozos acumulados.')) {
-                return;
-            }
-            
-            const initialGameState = {
-                currentHand: 1,
-                cardsUsed: [],
-                currentCard: null,
-                pots: {
-                    pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
-                },
-                boards: generateInitialBoards(),
-                history: [],
-                currentClaim: null,
-                claimingPlayer: null,
-                claimingBoardId: null,
-                handStarted: false,
-                handFinished: false,
-                dealerId: null
-            };
-            
-            database.ref('gameState').set(initialGameState);
-            
-            database.ref('players').once('value', (snapshot) => {
-                const players = snapshot.val() || {};
-                Object.keys(players).forEach(playerId => {
-                    database.ref(`players/${playerId}/boardId`).set(null);
-                });
-            });
-            
-            showNotification('🔄 ¡Juego reiniciado completamente!', 'success');
-        }
-        
         function updateDisplay() {
-            document.getElementById('handCounter').textContent = gameState.currentHand;
+            document.getElementById('roundNumber').textContent = gameState.round;
+            document.getElementById('handNumber').textContent = gameState.currentHand;
+            document.getElementById('cardsCount').textContent = gameState.cardsCount;
             
             document.getElementById('potPokino').textContent = `$${gameState.pots.pokino}`;
             document.getElementById('potPoker').textContent = `$${gameState.pots.poker}`;
@@ -1748,7 +2088,7 @@
                     const div = document.createElement('div');
                     div.className = 'history-item';
                     div.innerHTML = `
-                        <div class="history-hand">Mano #${item.hand}</div>
+                        <div class="history-hand">R${item.round}-M${item.hand}</div>
                         <div class="history-date">${item.date}</div>
                         <div class="history-winner">${item.winner}</div>
                         <div class="history-prize">${item.prize}: $${item.amount}</div>
@@ -1763,6 +2103,16 @@
             if (gameState.isDealer) {
                 document.getElementById('drawBtn').disabled = !gameState.handStarted || gameState.handFinished;
             }
+            
+            // Actualizar saldo del jugador
+            database.ref(`players/${gameState.playerId}`).once('value', (snapshot) => {
+                const player = snapshot.val();
+                if (player && player.balance !== undefined) {
+                    document.getElementById('playerBalance').style.display = 'inline-block';
+                    document.getElementById('balanceAmount').textContent = player.balance;
+                    gameState.playerBalance = player.balance;
+                }
+            });
         }
         
         function showNotification(message, type = 'success') {
