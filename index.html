@@ -436,7 +436,7 @@
         .board-cell.spade, .board-cell.club { color: #2c3e50; }
         
         .board-cell.marked {
-            background: rgba(0, 0, 0, 0.65); /* Negro translúcido */
+            background: rgba(0, 0, 0, 0.65);
             color: white !important;
             border-color: #000;
             transform: scale(1.05);
@@ -1678,6 +1678,13 @@
                 .filter(([id, p]) => {
                     const isActive = p.online && p.sessionId === id;
                     const isRecent = (Date.now() - (p.lastSeen || 0)) < 120000;
+                    
+                    // ✅ CORREGIDO: El crupier SIEMPRE aparece (sin importar approved)
+                    if (gameState.dealerId === id) {
+                        return isActive && isRecent;
+                    }
+                    
+                    // Los demás jugadores solo si están aprobados
                     const isApproved = p.approved === true;
                     return isActive && isRecent && isApproved;
                 })
@@ -1698,10 +1705,7 @@
                     <span class="player-balance-display">$${player.balance || 0}</span>
                 `;
                 
-                // ✅ CORREGIDO: Botón aparece SIEMPRE que:
-                // - Es el crupier
-                // - La mano NO ha iniciado (fase de preparación)
-                // - El jugador tiene menos de 6 monedas
+                // ✅ CORREGIDO: El crupier puede cargarse saldo a SÍ MISMO y a otros
                 if (gameState.isDealer && !gameState.handStarted && (player.balance || 0) < 6) {
                     const loadBtn = document.createElement('button');
                     loadBtn.className = 'btn-dealer btn-init';
