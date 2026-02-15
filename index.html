@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SABADITO ALEGRE - POKENO</title>
     
-    <!-- Firebase SDK - Ya incluido -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
@@ -25,7 +25,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -64,23 +64,36 @@
             font-size: 0.9em;
         }
         
-        .player-name {
+        .player-info {
             background: white;
-            padding: 10px;
+            padding: 12px;
             border-radius: 20px;
             display: inline-block;
             margin-top: 10px;
             font-weight: bold;
             color: #2c3e50;
+            margin-right: 10px;
+        }
+        
+        .dealer-badge {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         
         .game-container {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 320px 1fr 280px;
             gap: 20px;
         }
         
-        /* Panel de Control */
+        /* Panel de Control - Lector de Cartas */
         .control-panel {
             background: #f5f9ff;
             padding: 15px;
@@ -100,45 +113,113 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
-        .card-reader {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding-right: 5px;
+        .dealer-controls {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
         }
         
-        .card-btn {
-            padding: 10px;
+        .dealer-controls .section-title {
+            background: rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        }
+        
+        .card-display {
             background: white;
-            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            border: 3px solid #3498db;
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .card-display .card-text {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .card-display .card-symbol {
+            font-size: 4em;
+            margin: 0;
+        }
+        
+        .card-display.heart .card-text,
+        .card-display.heart .card-symbol,
+        .card-display.diamond .card-text,
+        .card-display.diamond .card-symbol {
+            color: #e74c3c;
+        }
+        
+        .card-display.spade .card-text,
+        .card-display.spade .card-symbol,
+        .card-display.club .card-text,
+        .card-display.club .card-symbol {
+            color: #2c3e50;
+        }
+        
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn-dealer {
+            padding: 15px;
+            border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .card-btn.heart, .card-btn.diamond { color: #e74c3c; }
-        .card-btn.spade, .card-btn.club { color: #2c3e50; }
-        
-        .card-btn:hover:not(.used) {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        .btn-dealer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
         
-        .card-btn.used {
-            background: #27ae60;
-            color: white !important;
-            border-color: #229954;
-            cursor: not-allowed;
-            opacity: 0.9;
+        .btn-draw {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+        
+        .btn-draw:hover {
+            background: linear-gradient(135deg, #229954, #1e8449);
+        }
+        
+        .btn-init {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-init:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+        }
+        
+        .btn-end {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .btn-end:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
         }
         
         .cards-summary {
-            max-height: 180px;
+            max-height: 250px;
             overflow-y: auto;
             background: white;
             padding: 12px;
@@ -159,8 +240,17 @@
             text-align: center;
         }
         
-        .cards-summary .card-item.heart, .cards-summary .card-item.diamond { color: #e74c3c; font-weight: bold; }
-        .cards-summary .card-item.spade, .cards-summary .card-item.club { color: #2c3e50; font-weight: bold; }
+        .cards-summary .card-item.heart,
+        .cards-summary .card-item.diamond {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .cards-summary .card-item.spade,
+        .cards-summary .card-item.club {
+            color: #2c3e50;
+            font-weight: bold;
+        }
         
         .empty-summary {
             text-align: center;
@@ -200,71 +290,6 @@
             color: #2c3e50;
         }
         
-        .actions {
-            margin-top: 25px;
-            display: grid;
-            gap: 12px;
-        }
-        
-        .btn {
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1.05em;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-        }
-        
-        .btn:active {
-            transform: translateY(1px);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
-        }
-        
-        .btn-warning {
-            background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #d35400 0%, #b04800 100%);
-        }
-        
-        .btn-info {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-        }
-        
-        .btn-info:hover {
-            background: linear-gradient(135deg, #2980b9 0%, #2573a7 100%);
-        }
-        
         .hand-counter {
             text-align: center;
             padding: 12px;
@@ -280,9 +305,9 @@
         /* Cartones de Juego */
         .boards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 18px;
-            max-height: 750px;
+            max-height: 800px;
             overflow-y: auto;
             padding: 10px 5px;
             padding-right: 10px;
@@ -297,6 +322,8 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.1);
             position: relative;
             transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         }
         
         .board:hover:not(.selected):not(.locked) {
@@ -307,7 +334,7 @@
         .board.selected {
             border-color: #27ae60;
             box-shadow: 0 0 25px rgba(39, 174, 96, 0.4);
-            transform: scale(1.03);
+            transform: scale(1.02);
             z-index: 10;
         }
         
@@ -333,17 +360,22 @@
         }
         
         .board-owner {
-            font-size: 0.8em;
+            font-size: 0.85em;
             color: #3498db;
             margin-top: 5px;
             font-weight: bold;
+            background: #e3f2fd;
+            padding: 3px 8px;
+            border-radius: 15px;
+            display: inline-block;
         }
         
         .board-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
+            gap: 5px;
             margin-bottom: 15px;
+            flex-grow: 1;
         }
         
         .board-cell {
@@ -353,12 +385,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75em;
+            font-size: 0.7em;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
             padding: 4px;
+            user-select: none;
         }
         
         .board-cell.heart, .board-cell.diamond { color: #e74c3c; }
@@ -375,7 +408,7 @@
             background: #f39c12;
             color: white !important;
             font-weight: bold;
-            font-size: 0.85em;
+            font-size: 0.75em;
         }
         
         .board-cell.center.marked {
@@ -385,51 +418,70 @@
         .board-cell.corner {
             background: #9b59b6;
             color: white !important;
+            font-weight: bold;
+            font-size: 0.75em;
         }
         
         .board-cell.corner.marked {
             background: #8e44ad;
         }
         
-        .claim-panel {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 2px dashed #ecf0f1;
-            display: none;
-        }
-        
-        .board.selected .claim-panel {
-            display: block;
-        }
-        
-        .claim-title {
-            font-size: 0.95em;
-            color: #7f8c8d;
-            margin-bottom: 8px;
+        .board-cell.full {
+            background: #3498db;
+            color: white !important;
             font-weight: bold;
+            font-size: 0.75em;
         }
         
-        .claim-btns {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+        .board-cell.full.marked {
+            background: #2980b9;
+        }
+        
+        .board-cell.poker {
+            background: #1abc9c;
+            color: white !important;
+            font-weight: bold;
+            font-size: 0.75em;
+        }
+        
+        .board-cell.poker.marked {
+            background: #16a085;
+        }
+        
+        /* Panel de Canto - Derecha */
+        .claim-panel {
+            position: absolute;
+            right: -120px;
+            top: 15px;
+            width: 110px;
+            display: none;
+            flex-direction: column;
             gap: 8px;
         }
         
+        .board.selected .claim-panel {
+            display: flex;
+        }
+        
         .claim-btn {
-            padding: 10px;
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            padding: 8px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.75em;
             font-weight: bold;
             transition: all 0.2s;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            height: 80px;
+            min-width: 40px;
         }
         
         .claim-btn:hover {
-            background: linear-gradient(135deg, #2980b9 0%, #2573a7 100%);
-            transform: scale(1.03);
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: scale(1.05);
         }
         
         .claim-btn:disabled {
@@ -439,11 +491,63 @@
         }
         
         .claim-btn.pokino { background: linear-gradient(135deg, #27ae60, #229954); }
-        .claim-btn.poker { background: linear-gradient(135deg, #e67e22, #d35400); }
-        .claim-btn.full { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .claim-btn.poker { background: linear-gradient(135deg, #1abc9c, #16a085); }
+        .claim-btn.full { background: linear-gradient(135deg, #3498db, #2980b9); }
         .claim-btn.centro { background: linear-gradient(135deg, #f39c12, #e67e22); }
-        .claim-btn.esquinas { background: linear-gradient(135deg, #1abc9c, #16a085); }
+        .claim-btn.esquinas { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
         .claim-btn.especial { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        
+        /* Lista de Jugadores */
+        .players-online {
+            text-align: center;
+            padding: 15px;
+            background: #e8f8f5;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #1abc9c;
+        }
+        
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .player-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #1abc9c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        
+        .player-item.dealer {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+        
+        .player-name {
+            color: #2c3e50;
+        }
+        
+        .player-board {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        
+        .player-item.dealer .player-board {
+            background: #f39c12;
+        }
         
         /* Modal de Verificación */
         .modal {
@@ -646,52 +750,40 @@
             transform: translateX(0);
         }
         
-        .players-online {
-            text-align: center;
-            padding: 10px;
-            background: #e8f8f5;
-            border-radius: 8px;
-            margin: 15px 0;
-            border: 2px solid #1abc9c;
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
         
-        .players-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 8px;
+        .notification.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
         }
         
-        .player-badge {
-            background: #1abc9c;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: bold;
+        .notification.success {
+            background: linear-gradient(135deg, #27ae60, #229954);
         }
         
-        @media (max-width: 900px) {
+        @media (max-width: 1200px) {
             .game-container {
                 grid-template-columns: 1fr;
             }
             
-            .card-reader {
-                grid-template-columns: repeat(3, 1fr);
+            .claim-panel {
+                position: static;
+                width: 100%;
+                flex-direction: row;
+                height: auto;
+            }
+            
+            .claim-btn {
+                writing-mode: horizontal-tb;
+                height: auto;
+                min-width: auto;
+                flex: 1;
             }
         }
         
         @media (max-width: 600px) {
             .boards-container {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            }
-            
-            .card-reader {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .claim-btns {
                 grid-template-columns: 1fr;
             }
             
@@ -711,23 +803,41 @@
             <h1>🎉 SABADITO ALEGRE 🎉</h1>
             <p class="subtitle">¡Tu tradición familiar de POKENO ahora online!</p>
             <div class="zoom-note">📹 Conéctate por Zoom o Meet para ver a tu familia</div>
-            <div class="player-name" id="playerNameDisplay">👤 Jugador: <span id="playerName">Esperando...</span></div>
+            <div class="player-info">👤 Jugador: <span id="playerName">Esperando...</span></div>
+            <div id="dealerBadge" class="dealer-badge" style="display:none;">👑 ¡Eres el CRUPIER!</div>
         </header>
         
         <div class="players-online">
             <strong>👥 Jugadores conectados:</strong>
             <div class="players-list" id="playersList">
-                <div style="color:#95a5a6;font-style:italic;">Cargando...</div>
+                <div style="color:#95a5a6;font-style:italic;text-align:center;">Cargando...</div>
             </div>
         </div>
         
         <div class="game-container">
-            <!-- Panel de Control -->
+            <!-- Panel de Control - Lector de Cartas -->
             <div class="control-panel">
                 <div class="hand-counter">MANO ACTUAL: <span id="handCounter">1</span></div>
                 
-                <div class="section-title">🃏 LECTOR DE CARTAS</div>
-                <div class="card-reader" id="cardReader"></div>
+                <div class="dealer-controls" id="dealerControls" style="display:none;">
+                    <div class="section-title">👑 CONTROLES DEL CRUPIER</div>
+                    <div class="card-actions">
+                        <button class="btn-dealer btn-init" onclick="initHand()">
+                            <span>▶️ INICIAR MANO</span>
+                        </button>
+                        <button class="btn-dealer btn-end" onclick="endHand()" disabled>
+                            <span>⏹️ FINALIZAR MANO</span>
+                        </button>
+                    </div>
+                    <button class="btn-dealer btn-draw" onclick="drawRandomCard()" disabled id="drawBtn">
+                        <span>🎴 LANZAR CARTA</span>
+                    </button>
+                </div>
+                
+                <div class="section-title">🃏 CARTA ACTUAL</div>
+                <div class="card-display" id="currentCardDisplay">
+                    <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
+                </div>
                 
                 <div class="section-title">📋 CARTAS CANTADAS</div>
                 <div class="cards-summary" id="cardsSummary">
@@ -743,24 +853,11 @@
                     <div class="pot-item"><span class="pot-label">Esquinas:</span> <strong id="potEsquinas">$0</strong></div>
                     <div class="pot-item"><span class="pot-label">Especial:</span> <strong id="potEspecial">$0</strong></div>
                 </div>
-                
-                <div class="section-title">🎮 ACCIONES</div>
-                <div class="actions">
-                    <button class="btn btn-primary" onclick="startNewHand()">
-                        <span>🔄 NUEVA MANO</span>
-                    </button>
-                    <button class="btn btn-warning" onclick="resetGame()">
-                        <span>⚠️ REINICIAR TODO</span>
-                    </button>
-                    <button class="btn btn-info" onclick="showHistoryModal()">
-                        <span>📊 HISTORIAL</span>
-                    </button>
-                </div>
             </div>
             
             <!-- Cartones de Juego -->
             <div>
-                <div class="section-title">🎲 CARTONES (13 FIJOS) - Selecciona TU cartón</div>
+                <div class="section-title">🎲 CARTONES (5x5) - Selecciona TU cartón</div>
                 <div class="boards-container" id="boardsContainer"></div>
                 
                 <div class="history-container">
@@ -768,6 +865,37 @@
                     <div class="history-list" id="historyList">
                         <div class="empty-history">Aún no hay partidas jugadas</div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Panel Derecha - Acciones Extra -->
+            <div class="control-panel">
+                <div class="section-title">🎮 ACCIONES</div>
+                <div class="actions" style="margin-top:0;">
+                    <button class="btn-dealer btn-init" onclick="becomeDealer()" id="becomeDealerBtn">
+                        <span>👑 SER CRUPIER</span>
+                    </button>
+                    <button class="btn-dealer btn-end" onclick="showHistoryModal()">
+                        <span>📊 HISTORIAL</span>
+                    </button>
+                    <button class="btn-dealer btn-warning" onclick="resetGame()" style="background:linear-gradient(135deg, #f39c12, #e67e22);">
+                        <span>⚠️ REINICIAR TODO</span>
+                    </button>
+                </div>
+                
+                <div class="section-title" style="margin-top:20px;">ℹ️ INSTRUCCIONES</div>
+                <div style="background:white;padding:15px;border-radius:8px;font-size:0.9em;line-height:1.6;">
+                    <p><strong>Para JUGADORES:</strong></p>
+                    <p>• Selecciona un cartón libre</p>
+                    <p>• Haz click en las casillas para marcar</p>
+                    <p>• Doble click para desmarcar</p>
+                    <p>• Canta tu premio cuando lo tengas</p>
+                    <br>
+                    <p><strong>Para CRUPIER:</strong></p>
+                    <p>• Inicia la mano cuando todos estén listos</p>
+                    <p>• Lanza cartas con el botón</p>
+                    <p>• Verifica y aprueba premios</p>
+                    <p>• Finaliza la mano cuando sea necesario</p>
                 </div>
             </div>
         </div>
@@ -793,8 +921,8 @@
             </div>
             
             <div class="modal-actions">
-                <button class="btn btn-primary" onclick="approveClaim()">✅ ¡APROBAR! - Pagar pozo</button>
-                <button class="btn btn-danger" onclick="denyClaim()">❌ DENEGAR - Continuar juego</button>
+                <button class="btn-dealer btn-init" onclick="approveClaim()">✅ ¡APROBAR! - Pagar pozo</button>
+                <button class="btn-dealer btn-end" onclick="denyClaim()">❌ DENEGAR - Continuar juego</button>
             </div>
         </div>
     </div>
@@ -808,7 +936,7 @@
                 <div id="historyContent"></div>
             </div>
             <div style="margin-top:20px;">
-                <button class="btn btn-primary" onclick="document.getElementById('historyModal').classList.remove('show')">Cerrar</button>
+                <button class="btn-dealer btn-init" onclick="document.getElementById('historyModal').classList.remove('show')">Cerrar</button>
             </div>
         </div>
     </div>
@@ -820,7 +948,7 @@
             <p style="margin:20px 0;font-size:1.1em;">Por favor, ingresa tu nombre para jugar:</p>
             <input type="text" id="playerNameInput" placeholder="Tu nombre" style="padding:12px;width:80%;font-size:1.1em;border:2px solid #ddd;border-radius:8px;text-align:center;">
             <div style="margin-top:20px;">
-                <button class="btn btn-primary" onclick="savePlayerName()">✅ ¡Entrar al juego!</button>
+                <button class="btn-dealer btn-init" onclick="savePlayerName()">✅ ¡Entrar al juego!</button>
             </div>
         </div>
     </div>
@@ -830,17 +958,16 @@
     
     <script>
         // ============================================
-        // 🔥 CONFIGURACIÓN DE FIREBASE - PEGA AQUÍ TUS DATOS
+        // 🔥 CONFIGURACIÓN DE FIREBASE - PEGA TUS DATOS AQUÍ
         // ============================================
-        // REEMPLAZA ESTE OBJETO CON TU CONFIGURACIÓN REAL DE FIREBASE
         const firebaseConfig = {
-            apiKey: "AIzaSyBHBM1weX8-v_dk88QluRgFSXRD4NrNLmQ",
-            authDomain: "pokino-4383c.firebaseapp.com",
-            databaseURL: "https://pokino-4383c-default-rtdb.firebaseio.com",
-            projectId: "pokino-4383c",
-            storageBucket: "pokino-4383c.firebasestorage.app",
-            messagingSenderId: "607174478777",
-            appId: "1:607174478777:web:0b16906bd16ed568d60468"
+            apiKey: "TU_API_KEY_AQUI",
+            authDomain: "TU_PROYECTO.firebaseapp.com",
+            databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
+            projectId: "TU_PROYECTO",
+            storageBucket: "TU_PROYECTO.appspot.com",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
         };
         
         // Inicializar Firebase
@@ -853,6 +980,7 @@
         let gameState = {
             currentHand: 1,
             cardsUsed: [],
+            currentCard: null,
             pots: {
                 pokino: 0,
                 poker: 0,
@@ -866,17 +994,22 @@
             history: [],
             currentClaim: null,
             claimingPlayer: null,
+            claimingBoardId: null,
+            handStarted: false,
+            handFinished: false,
+            dealerId: null,
             playerName: "",
-            playerId: ""
+            playerId: "",
+            isDealer: false
         };
         
         let isListening = false;
+        let clickTimeout = null;
         
         // ============================================
         // INICIALIZACIÓN
         // ============================================
         function initGame() {
-            // Verificar si ya tiene nombre guardado
             const savedName = localStorage.getItem('sabaditoPlayerName');
             const savedId = localStorage.getItem('sabaditoPlayerId');
             
@@ -908,9 +1041,7 @@
             document.getElementById('playerName').textContent = nameInput;
             document.getElementById('nameModal').classList.remove('show');
             
-            // Registrar jugador en Firebase
             registerPlayer();
-            
             startFirebaseListeners();
         }
         
@@ -919,37 +1050,32 @@
             playerRef.set({
                 name: gameState.playerName,
                 online: true,
-                lastSeen: Date.now()
+                lastSeen: Date.now(),
+                boardId: null
             });
             
-            // Actualizar lastSeen periódicamente
             setInterval(() => {
                 playerRef.update({
                     lastSeen: Date.now()
                 });
             }, 30000);
             
-            // Manejar desconexión
             playerRef.onDisconnect().remove();
         }
         
         function startFirebaseListeners() {
             if (isListening) return;
-            
             isListening = true;
             
-            // Escuchar cambios en el juego
             database.ref('gameState').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     loadGameState(data);
                 } else {
-                    // Inicializar juego si no existe
                     initializeGameInFirebase();
                 }
             });
             
-            // Escuchar jugadores conectados
             database.ref('players').on('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 updatePlayersList(players);
@@ -960,16 +1086,18 @@
             const initialGameState = {
                 currentHand: 1,
                 cardsUsed: [],
+                currentCard: null,
                 pots: {
-                    pokino: 0,
-                    poker: 0,
-                    full: 0,
-                    centro: 0,
-                    esquinas: 0,
-                    especial: 0
+                    pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
                 },
                 boards: generateInitialBoards(),
-                history: []
+                history: [],
+                currentClaim: null,
+                claimingPlayer: null,
+                claimingBoardId: null,
+                handStarted: false,
+                handFinished: false,
+                dealerId: null
             };
             
             database.ref('gameState').set(initialGameState);
@@ -977,33 +1105,37 @@
         
         function generateInitialBoards() {
             const boards = [];
-            const fixedBoardsData = [
-                ['A♠','2♥','3♦','4♣','5♠', '6♥','7♦','8♣','9♠','10♥', 'J♦','Q♣','K♠','A♥','2♦'],
-                ['2♠','3♥','4♦','5♣','6♠', '7♥','8♦','9♣','10♠','J♥', 'Q♦','K♣','A♦','2♣','3♠'],
-                ['3♦','4♥','5♠','6♣','7♦', '8♥','9♠','10♣','J♦','Q♥', 'K♠','A♣','2♦','3♣','4♦'],
-                ['4♣','5♦','6♥','7♠','8♣', '9♦','10♥','J♠','Q♣','K♦', 'A♥','2♠','3♣','4♠','5♥'],
-                ['5♠','6♣','7♦','8♥','9♠', '10♣','J♦','Q♥','K♠','A♣', '2♦','3♥','4♠','5♣','6♦'],
-                ['6♥','7♠','8♣','9♦','10♥', 'J♠','Q♣','K♦','A♥','2♠', '3♣','4♦','5♥','6♠','7♣'],
-                ['7♦','8♥','9♠','10♣','J♦', 'Q♥','K♠','A♣','2♦','3♥', '4♠','5♣','6♦','7♥','8♠'],
-                ['8♣','9♦','10♥','J♠','Q♣', 'K♦','A♥','2♠','3♣','4♦', '5♥','6♠','7♣','8♥','9♠'],
-                ['9♠','10♣','J♦','Q♥','K♠', 'A♣','2♦','3♥','4♠','5♣', '6♦','7♥','8♠','9♣','10♦'],
-                ['10♥','J♠','Q♣','K♦','A♥', '2♠','3♣','4♦','5♥','6♠', '7♣','8♥','9♠','10♣','J♦'],
-                ['J♦','Q♥','K♠','A♣','2♦', '3♥','4♠','5♣','6♦','7♥', '8♠','9♣','10♦','J♥','Q♠'],
-                ['Q♣','K♦','A♥','2♠','3♣', '4♦','5♥','6♠','7♣','8♥', '9♠','10♣','J♦','Q♥','K♠'],
-                ['K♠','A♣','2♦','3♥','4♠', '5♣','6♦','7♥','8♠','9♣', '10♦','J♥','Q♠','K♣','A♦']
-            ];
+            const suits = ['♠', '♥', '♦', '♣'];
+            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
             
-            fixedBoardsData.forEach((cards, index) => {
+            // Generar 13 cartones únicos 5x5
+            for (let boardNum = 0; boardNum < 13; boardNum++) {
+                const cards = [];
+                const usedCards = new Set();
+                
+                // Llenar el cartón asegurando que no se repitan cartas
+                while (cards.length < 25) {
+                    const suit = suits[Math.floor(Math.random() * suits.length)];
+                    const value = values[Math.floor(Math.random() * values.length)];
+                    const card = `${value}${suit}`;
+                    
+                    if (!usedCards.has(card)) {
+                        usedCards.add(card);
+                        cards.push(card);
+                    }
+                }
+                
                 boards.push({
-                    id: index + 1,
-                    name: `CARTÓN ${index + 1}`,
+                    id: boardNum + 1,
+                    name: `CARTÓN ${boardNum + 1}`,
                     cards: [...cards],
                     selected: false,
                     locked: false,
-                    marked: Array(15).fill(false),
-                    owner: null
+                    marked: Array(25).fill(false),
+                    owner: null,
+                    ownerName: null
                 });
-            });
+            }
             
             return boards;
         }
@@ -1011,38 +1143,59 @@
         function loadGameState(data) {
             gameState.currentHand = data.currentHand || 1;
             gameState.cardsUsed = data.cardsUsed || [];
+            gameState.currentCard = data.currentCard || null;
             gameState.pots = data.pots || { pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0 };
             gameState.boards = data.boards || generateInitialBoards();
             gameState.history = data.history || [];
             gameState.currentClaim = data.currentClaim || null;
             gameState.claimingPlayer = data.claimingPlayer || null;
+            gameState.claimingBoardId = data.claimingBoardId || null;
+            gameState.handStarted = data.handStarted || false;
+            gameState.handFinished = data.handFinished || false;
+            gameState.dealerId = data.dealerId || null;
+            gameState.isDealer = (gameState.dealerId === gameState.playerId);
             
             updateDisplay();
             
-            // Mostrar modal si hay reclamo pendiente
+            if (gameState.isDealer) {
+                document.getElementById('dealerBadge').style.display = 'inline-block';
+                document.getElementById('dealerControls').style.display = 'block';
+                document.getElementById('becomeDealerBtn').style.display = 'none';
+            } else {
+                document.getElementById('dealerBadge').style.display = 'none';
+                document.getElementById('dealerControls').style.display = 'none';
+                document.getElementById('becomeDealerBtn').style.display = 'block';
+            }
+            
             if (data.currentClaim && !document.getElementById('verificationModal').classList.contains('show')) {
                 showClaimModal(data.currentClaim, data.claimingPlayer, data.claimingBoardId);
             }
+            
+            updateCurrentCardDisplay();
         }
         
         function updatePlayersList(players) {
             const container = document.getElementById('playersList');
             container.innerHTML = '';
             
-            const playerArray = Object.values(players).filter(p => {
-                return p.online && (Date.now() - p.lastSeen < 60000);
-            });
+            const playerArray = Object.entries(players)
+                .filter(([id, p]) => p.online && (Date.now() - p.lastSeen < 60000))
+                .map(([id, p]) => ({ ...p, id }))
+                .sort((a, b) => a.name.localeCompare(b.name));
             
             if (playerArray.length === 0) {
-                container.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando jugadores...</div>';
+                container.innerHTML = '<div style="color:#95a5a6;font-style:italic;text-align:center;">Esperando jugadores...</div>';
                 return;
             }
             
             playerArray.forEach(player => {
-                const badge = document.createElement('div');
-                badge.className = 'player-badge';
-                badge.textContent = player.name;
-                container.appendChild(badge);
+                const playerEl = document.createElement('div');
+                playerEl.className = `player-item ${gameState.dealerId === player.id ? 'dealer' : ''}`;
+                playerEl.innerHTML = `
+                    <span class="player-name">${player.name}</span>
+                    <span class="player-board">${player.boardId ? `Cartón #${player.boardId}` : 'Sin cartón'}</span>
+                `;
+                container.appendChild(playerEl);
             });
         }
         
@@ -1061,7 +1214,11 @@
                 boardEl.className = `board ${isOwner || isSelected ? 'selected' : ''} ${board.locked ? 'locked' : ''}`;
                 
                 if (!board.locked || isOwner) {
-                    boardEl.onclick = () => selectBoard(board.id);
+                    boardEl.onclick = (e) => {
+                        if (!e.target.classList.contains('board-cell')) {
+                            selectBoard(board.id);
+                        }
+                    };
                 }
                 
                 let boardHTML = `<div class="board-title">${board.name}</div>`;
@@ -1071,8 +1228,11 @@
                 boardHTML += `<div class="board-grid">`;
                 
                 board.cards.forEach((card, idx) => {
-                    const isCenter = idx === 7;
-                    const isCorner = idx === 0 || idx === 4 || idx === 10 || idx === 14;
+                    const isCenter = idx === 12; // Centro del 5x5
+                    const isCorner = idx === 0 || idx === 4 || idx === 20 || idx === 24; // 4 esquinas
+                    const isFull = idx >= 5 && idx <= 9; // Segunda línea (índices 5-9)
+                    const isPoker = idx >= 20 && idx <= 24; // Quinta línea (índices 20-24)
+                    
                     let classes = 'board-cell';
                     
                     if (card.includes('♥') || card.includes('♦')) classes += ' heart';
@@ -1080,29 +1240,28 @@
                     
                     if (isCenter) classes += ' center';
                     if (isCorner) classes += ' corner';
+                    if (isFull) classes += ' full';
+                    if (isPoker) classes += ' poker';
                     if (board.marked[idx]) classes += ' marked';
                     
-                    boardHTML += `<div class="${classes}">${card}</div>`;
+                    boardHTML += `<div class="${classes}" onclick="toggleCellMark(${board.id}, ${idx}, event)">${card}</div>`;
                 });
                 
                 boardHTML += `</div>`;
                 
-                // Panel de cantar premios (solo visible si es dueño)
+                // Panel de cantar premios a la derecha (solo visible si es dueño)
                 if (isOwner) {
                     boardHTML += `
                         <div class="claim-panel">
-                            <div class="claim-title">📣 ¡CANTA TU PREMIO!</div>
-                            <div class="claim-btns">
-                                <button class="claim-btn pokino" onclick="event.stopPropagation(); claimPrize('pokino', ${board.id})">POKINO</button>
-                                <button class="claim-btn poker" onclick="event.stopPropagation(); claimPrize('poker', ${board.id})">POKER</button>
-                                <button class="claim-btn full" onclick="event.stopPropagation(); claimPrize('full', ${board.id})">FULL</button>
-                                <button class="claim-btn centro" onclick="event.stopPropagation(); claimPrize('centro', ${board.id})">CENTRO</button>
-                                <button class="claim-btn esquinas" onclick="event.stopPropagation(); claimPrize('esquinas', ${board.id})">ESQUINAS</button>
-                                ${gameState.currentHand % 6 === 0 ? 
-                                    `<button class="claim-btn especial" onclick="event.stopPropagation(); claimPrize('especial', ${board.id})">ESPECIAL</button>` : 
-                                    `<button class="claim-btn especial" disabled>ESPECIAL (Mano 6)</button>`
-                                }
-                            </div>
+                            <button class="claim-btn pokino" onclick="event.stopPropagation(); claimPrize('pokino', ${board.id})" title="Pokino">P</button>
+                            <button class="claim-btn poker" onclick="event.stopPropagation(); claimPrize('poker', ${board.id})" title="Poker">PK</button>
+                            <button class="claim-btn full" onclick="event.stopPropagation(); claimPrize('full', ${board.id})" title="Full">F</button>
+                            <button class="claim-btn centro" onclick="event.stopPropagation(); claimPrize('centro', ${board.id})" title="Centro">C</button>
+                            <button class="claim-btn esquinas" onclick="event.stopPropagation(); claimPrize('esquinas', ${board.id})" title="Esquinas">E</button>
+                            ${gameState.currentHand % 6 === 0 ? 
+                                `<button class="claim-btn especial" onclick="event.stopPropagation(); claimPrize('especial', ${board.id})" title="Especial">ES</button>` : 
+                                `<button class="claim-btn especial" disabled title="Especial (Mano 6)">ES</button>`
+                            }
                         </div>
                     `;
                 }
@@ -1113,36 +1272,51 @@
         }
         
         function selectBoard(boardId) {
-            const board = gameState.boards.find(b => b.id === boardId);
-            
-            if (board.locked && board.owner !== gameState.playerId) {
-                showNotification('❌ Este cartón ya está ocupado por otro jugador');
+            if (gameState.handStarted && !gameState.handFinished) {
+                showNotification('⚠️ La mano ya comenzó. Espera a que termine.', 'warning');
                 return;
             }
             
-            // Si ya es dueño, deseleccionar
+            const board = gameState.boards.find(b => b.id === boardId);
+            
+            if (board.locked && board.owner !== gameState.playerId) {
+                showNotification('❌ Este cartón ya está ocupado', 'error');
+                return;
+            }
+            
             if (board.owner === gameState.playerId) {
                 board.owner = null;
                 board.ownerName = null;
                 board.locked = false;
                 gameState.selectedBoard = null;
+                
+                database.ref(`players/${gameState.playerId}`).update({
+                    boardId: null
+                });
             } else {
-                // Liberar cartón anterior si lo tiene
                 const oldBoard = gameState.boards.find(b => b.owner === gameState.playerId);
                 if (oldBoard) {
                     oldBoard.owner = null;
                     oldBoard.ownerName = null;
                     oldBoard.locked = false;
+                    
+                    database.ref(`gameState/boards/${oldBoard.id - 1}`).update({
+                        owner: null,
+                        ownerName: null,
+                        locked: false
+                    });
                 }
                 
-                // Tomar nuevo cartón
                 board.owner = gameState.playerId;
                 board.ownerName = gameState.playerName;
                 board.locked = true;
                 gameState.selectedBoard = boardId;
+                
+                database.ref(`players/${gameState.playerId}`).update({
+                    boardId: boardId
+                });
             }
             
-            // Guardar en Firebase
             database.ref(`gameState/boards/${boardId - 1}`).update({
                 owner: board.owner,
                 ownerName: board.ownerName,
@@ -1152,67 +1326,185 @@
             renderBoards();
         }
         
-        function generateCardButtons() {
-            const container = document.getElementById('cardReader');
-            container.innerHTML = '';
+        function toggleCellMark(boardId, cellIndex, event) {
+            event.stopPropagation();
             
-            const suits = [
-                { symbol: '♠', name: 'spade', color: 'black' },
-                { symbol: '♥', name: 'heart', color: 'red' },
-                { symbol: '♦', name: 'diamond', color: 'red' },
-                { symbol: '♣', name: 'club', color: 'black' }
-            ];
+            const board = gameState.boards.find(b => b.id === boardId);
+            if (!board || board.owner !== gameState.playerId) return;
+            
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+                clickTimeout = null;
+                board.marked[cellIndex] = false;
+                showNotification('↩️ Casilla desmarcada', 'warning');
+            } else {
+                clickTimeout = setTimeout(() => {
+                    clickTimeout = null;
+                    if (!board.marked[cellIndex]) {
+                        board.marked[cellIndex] = true;
+                        database.ref(`gameState/boards/${boardId - 1}/marked`).set(board.marked);
+                    }
+                }, 300);
+            }
+            
+            renderBoards();
+        }
+        
+        function updateCurrentCardDisplay() {
+            const display = document.getElementById('currentCardDisplay');
+            display.innerHTML = '';
+            
+            if (!gameState.currentCard) {
+                display.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>';
+                return;
+            }
+            
+            const card = gameState.currentCard;
+            const isRed = card.includes('♥') || card.includes('♦');
+            const suitClass = isRed ? 'heart' : 'spade';
+            
+            display.className = `card-display ${suitClass}`;
+            display.innerHTML = `
+                <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
+                <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
+                <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta actual</div>
+            `;
+        }
+        
+        function drawRandomCard() {
+            if (!gameState.handStarted || gameState.handFinished) {
+                showNotification('⚠️ Inicia la mano primero', 'warning');
+                return;
+            }
+            
+            if (gameState.currentClaim) {
+                showNotification('⚠️ Espera a resolver el premio actual', 'warning');
+                return;
+            }
+            
+            const allCards = [];
+            const suits = ['♠', '♥', '♦', '♣'];
             const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
             
             suits.forEach(suit => {
                 values.forEach(value => {
-                    const card = `${value}${suit.symbol}`;
-                    const isUsed = gameState.cardsUsed.includes(card);
-                    
-                    const btn = document.createElement('button');
-                    btn.className = `card-btn ${suit.name} ${isUsed ? 'used' : ''}`;
-                    btn.innerHTML = `${value}<br>${suit.symbol}`;
-                    btn.disabled = isUsed;
-                    btn.onclick = () => selectCard(card);
-                    
-                    container.appendChild(btn);
+                    allCards.push(`${value}${suit}`);
                 });
             });
-        }
-        
-        function selectCard(card) {
-            if (gameState.cardsUsed.includes(card) || gameState.currentClaim) return;
             
-            // Agregar carta a la lista
-            gameState.cardsUsed.push(card);
+            const availableCards = allCards.filter(c => !gameState.cardsUsed.includes(c));
             
-            // Marcar cartas en los cartones
+            if (availableCards.length === 0) {
+                showNotification('🎉 ¡No quedan cartas! Finaliza la mano.', 'success');
+                return;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableCards.length);
+            const newCard = availableCards[randomIndex];
+            
+            gameState.currentCard = newCard;
+            gameState.cardsUsed.push(newCard);
+            
             gameState.boards.forEach(board => {
                 board.cards.forEach((c, idx) => {
-                    if (c === card) {
+                    if (c === newCard) {
                         board.marked[idx] = true;
                     }
                 });
             });
             
-            // Actualizar pozos (cada carta suma $10 a cada pozo)
             Object.keys(gameState.pots).forEach(pot => {
                 gameState.pots[pot] += 10;
             });
             
-            // Guardar en Firebase
             database.ref('gameState').update({
+                currentCard: newCard,
                 cardsUsed: gameState.cardsUsed,
                 pots: gameState.pots,
                 boards: gameState.boards
             });
             
-            showNotification(`🎴 ¡${card} cantada!`);
+            showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
+        }
+        
+        function becomeDealer() {
+            if (gameState.dealerId) {
+                showNotification('⚠️ Ya hay un crupier asignado', 'warning');
+                return;
+            }
+            
+            if (gameState.handStarted && !gameState.handFinished) {
+                showNotification('⚠️ Espera a que termine la mano actual', 'warning');
+                return;
+            }
+            
+            database.ref('gameState/dealerId').set(gameState.playerId);
+            showNotification('👑 ¡Ahora eres el CRUPIER!', 'success');
+        }
+        
+        function initHand() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede iniciar la mano', 'warning');
+                return;
+            }
+            
+            if (gameState.handStarted && !gameState.handFinished) {
+                showNotification('⚠️ La mano ya está en curso', 'warning');
+                return;
+            }
+            
+            const playersWithBoards = Object.values(gameState.boards).filter(b => b.owner).length;
+            if (playersWithBoards === 0) {
+                showNotification('⚠️ Espera a que al menos un jugador seleccione cartón', 'warning');
+                return;
+            }
+            
+            database.ref('gameState').update({
+                handStarted: true,
+                handFinished: false,
+                currentCard: null
+            });
+            
+            document.getElementById('drawBtn').disabled = false;
+            document.getElementById('drawBtn').innerHTML = '<span>🎴 LANZAR CARTA</span>';
+            
+            showNotification('▶️ ¡Mano iniciada! Lanza cartas cuando estén listos', 'success');
+        }
+        
+        function endHand() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede finalizar la mano', 'warning');
+                return;
+            }
+            
+            if (!gameState.handStarted || gameState.handFinished) {
+                showNotification('⚠️ No hay mano activa para finalizar', 'warning');
+                return;
+            }
+            
+            if (gameState.currentClaim) {
+                showNotification('⚠️ Resuelve el premio actual primero', 'warning');
+                return;
+            }
+            
+            database.ref('gameState').update({
+                handFinished: true
+            });
+            
+            document.getElementById('drawBtn').disabled = true;
+            document.getElementById('drawBtn').innerHTML = '<span>✅ MANO FINALIZADA</span>';
+            
+            showNotification('⏹️ ¡Mano finalizada! Prepara la siguiente', 'success');
         }
         
         function claimPrize(prizeType, boardId) {
             if (gameState.currentClaim) {
-                showNotification('⚠️ Espera a que se resuelva el premio actual');
+                showNotification('⚠️ Espera a que se resuelva el premio actual', 'warning');
+                return;
+            }
+            
+            if (!gameState.handStarted || gameState.handFinished) {
+                showNotification('⚠️ La mano no está activa', 'warning');
                 return;
             }
             
@@ -1221,11 +1513,10 @@
             
             const markedCount = board.marked.filter(m => m).length;
             if (markedCount === 0) {
-                showNotification('❌ No tienes cartas marcadas para cantar premio');
+                showNotification('❌ No tienes cartas marcadas', 'error');
                 return;
             }
             
-            // Guardar reclamo en Firebase
             database.ref('gameState').update({
                 currentClaim: prizeType,
                 claimingPlayer: gameState.playerName,
@@ -1243,6 +1534,12 @@
             renderModalCards();
             
             document.getElementById('verificationModal').classList.add('show');
+            
+            if (gameState.isDealer) {
+                document.querySelector('#verificationModal .modal-actions').style.display = 'grid';
+            } else {
+                document.querySelector('#verificationModal .modal-actions').style.display = 'none';
+            }
         }
         
         function renderModalBoard(board) {
@@ -1250,18 +1547,25 @@
             container.innerHTML = '';
             
             board.cards.forEach((card, idx) => {
-                const isCenter = idx === 7;
-                const isCorner = idx === 0 || idx === 4 || idx === 10 || idx === 14;
+                const isCenter = idx === 12;
+                const isCorner = idx === 0 || idx === 4 || idx === 20 || idx === 24;
+                const isFull = idx >= 5 && idx <= 9;
+                const isPoker = idx >= 20 && idx <= 24;
                 const isMarked = board.marked[idx];
                 
                 const cell = document.createElement('div');
                 cell.className = `modal-cell ${isMarked ? 'marked' : ''}`;
+                
                 if (isCenter) cell.style.background = '#f39c12';
                 if (isCorner) cell.style.background = '#9b59b6';
+                if (isFull) cell.style.background = '#3498db';
+                if (isPoker) cell.style.background = '#1abc9c';
                 if (isMarked && isCenter) cell.style.background = '#e67e22';
                 if (isMarked && isCorner) cell.style.background = '#8e44ad';
-                cell.textContent = card;
+                if (isMarked && isFull) cell.style.background = '#2980b9';
+                if (isMarked && isPoker) cell.style.background = '#16a085';
                 
+                cell.textContent = card;
                 container.appendChild(cell);
             });
         }
@@ -1275,7 +1579,7 @@
                 return;
             }
             
-            gameState.cardsUsed.forEach(card => {
+            gameState.cardsUsed.slice(-10).reverse().forEach(card => {
                 const item = document.createElement('div');
                 item.className = `modal-card-item ${card.includes('♥') || card.includes('♦') ? 'heart' : 'spade'}`;
                 item.textContent = card;
@@ -1284,12 +1588,16 @@
         }
         
         function approveClaim() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede aprobar premios', 'warning');
+                return;
+            }
+            
             if (!gameState.currentClaim) return;
             
             const prizeAmount = gameState.pots[gameState.currentClaim];
             const prizeName = gameState.currentClaim.toUpperCase();
             
-            // Guardar en historial
             const newHistory = [...gameState.history];
             newHistory.push({
                 hand: gameState.currentHand,
@@ -1299,10 +1607,8 @@
                 amount: prizeAmount
             });
             
-            // Reiniciar pozo
             gameState.pots[gameState.currentClaim] = 0;
             
-            // Limpiar reclamo
             database.ref('gameState').update({
                 history: newHistory,
                 pots: gameState.pots,
@@ -1311,13 +1617,17 @@
                 claimingBoardId: null
             });
             
-            // Cerrar modal
             document.getElementById('verificationModal').classList.remove('show');
             
-            showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}`);
+            showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}`, 'success');
         }
         
         function denyClaim() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede denegar premios', 'warning');
+                return;
+            }
+            
             database.ref('gameState').update({
                 currentClaim: null,
                 claimingPlayer: null,
@@ -1325,78 +1635,7 @@
             });
             
             document.getElementById('verificationModal').classList.remove('show');
-            showNotification('❌ Premio denegado. Continuamos jugando');
-        }
-        
-        function startNewHand() {
-            if (gameState.cardsUsed.length === 0 && gameState.currentHand > 1) {
-                showNotification('ℹ️ Ya estás en una nueva mano');
-                return;
-            }
-            
-            if (gameState.currentClaim) {
-                showNotification('⚠️ Espera a que se resuelva el premio actual');
-                return;
-            }
-            
-            if (gameState.cardsUsed.length > 0) {
-                if (!confirm('⚠️ ¿Seguro que quieres empezar una nueva mano? Se perderán las cartas cantadas actuales.')) {
-                    return;
-                }
-            }
-            
-            // Desbloquear todos los cartones
-            gameState.boards.forEach(board => {
-                board.locked = false;
-                board.owner = null;
-                board.ownerName = null;
-                board.marked = Array(15).fill(false);
-            });
-            
-            gameState.cardsUsed = [];
-            gameState.currentHand++;
-            gameState.selectedBoard = null;
-            
-            // Guardar en Firebase
-            database.ref('gameState').update({
-                currentHand: gameState.currentHand,
-                cardsUsed: gameState.cardsUsed,
-                boards: gameState.boards
-            });
-            
-            showNotification(`✨ ¡Mano ${gameState.currentHand} iniciada!`);
-        }
-        
-        function resetGame() {
-            if (!confirm('⚠️ ¿Seguro que quieres reiniciar TODO el juego? Se perderá el historial y los pozos acumulados.')) {
-                return;
-            }
-            
-            if (gameState.currentClaim) {
-                showNotification('⚠️ Espera a que se resuelva el premio actual');
-                return;
-            }
-            
-            const initialGameState = {
-                currentHand: 1,
-                cardsUsed: [],
-                pots: {
-                    pokino: 0,
-                    poker: 0,
-                    full: 0,
-                    centro: 0,
-                    esquinas: 0,
-                    especial: 0
-                },
-                boards: generateInitialBoards(),
-                history: [],
-                currentClaim: null,
-                claimingPlayer: null,
-                claimingBoardId: null
-            };
-            
-            database.ref('gameState').set(initialGameState);
-            showNotification('🔄 ¡Juego reiniciado completamente!');
+            showNotification('❌ Premio denegado. Continuamos jugando', 'warning');
         }
         
         function showHistoryModal() {
@@ -1429,6 +1668,50 @@
             document.getElementById('historyModal').classList.add('show');
         }
         
+        function resetGame() {
+            if (!gameState.isDealer && gameState.dealerId) {
+                showNotification('⚠️ Solo el crupier puede reiniciar el juego', 'warning');
+                return;
+            }
+            
+            if (gameState.currentClaim) {
+                showNotification('⚠️ Espera a que se resuelva el premio actual', 'warning');
+                return;
+            }
+            
+            if (!confirm('⚠️ ¿Seguro que quieres reiniciar TODO el juego? Se perderá el historial y los pozos acumulados.')) {
+                return;
+            }
+            
+            const initialGameState = {
+                currentHand: 1,
+                cardsUsed: [],
+                currentCard: null,
+                pots: {
+                    pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
+                },
+                boards: generateInitialBoards(),
+                history: [],
+                currentClaim: null,
+                claimingPlayer: null,
+                claimingBoardId: null,
+                handStarted: false,
+                handFinished: false,
+                dealerId: null
+            };
+            
+            database.ref('gameState').set(initialGameState);
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                Object.keys(players).forEach(playerId => {
+                    database.ref(`players/${playerId}/boardId`).set(null);
+                });
+            });
+            
+            showNotification('🔄 ¡Juego reiniciado completamente!', 'success');
+        }
+        
         function updateDisplay() {
             document.getElementById('handCounter').textContent = gameState.currentHand;
             
@@ -1445,7 +1728,7 @@
             if (gameState.cardsUsed.length === 0) {
                 summary.innerHTML = '<div class="empty-summary">Aún no se han cantado cartas</div>';
             } else {
-                gameState.cardsUsed.forEach(card => {
+                gameState.cardsUsed.slice(-20).reverse().forEach(card => {
                     const div = document.createElement('div');
                     div.className = `card-item ${card.includes('♥') || card.includes('♦') ? 'heart' : 'spade'}`;
                     div.textContent = card;
@@ -1475,12 +1758,17 @@
             }
             
             renderBoards();
-            generateCardButtons();
+            updateCurrentCardDisplay();
+            
+            if (gameState.isDealer) {
+                document.getElementById('drawBtn').disabled = !gameState.handStarted || gameState.handFinished;
+            }
         }
         
-        function showNotification(message) {
+        function showNotification(message, type = 'success') {
             const notif = document.getElementById('notification');
             notif.textContent = message;
+            notif.className = `notification ${type}`;
             notif.classList.remove('show');
             void notif.offsetWidth;
             notif.classList.add('show');
@@ -1490,7 +1778,6 @@
             }, 3000);
         }
         
-        // Iniciar juego cuando cargue la página
         window.onload = initGame;
     </script>
 </body>
