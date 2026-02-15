@@ -1262,7 +1262,7 @@
             playerBalance: 0,
             hasRequested: false,
             requestPending: false,
-            boardSelectedThisRound: false // Para controlar selección única por ronda
+            boardSelectedThisRound: false
         };
         
         let isListening = false;
@@ -1276,24 +1276,19 @@
         // INICIALIZACIÓN
         // ============================================
         function initGame() {
-            // Verificar si hay sesión activa
             database.ref('gameState/dealerDisconnected').once('value', (snapshot) => {
                 const disconnected = snapshot.val();
                 if (disconnected) {
-                    // Limpiar base de datos si el crupier se desconectó
                     cleanDatabase();
                 }
             });
             
-            // SIEMPRE mostrar modal de nombre
             document.getElementById('nameModal').classList.add('show');
             
             startFirebaseListeners();
             
-            // Limpiar jugadores inactivos cada 30 segundos
             cleanupInterval = setInterval(cleanupInactivePlayers, 30000);
             
-            // Detectar cierre de pestaña
             window.addEventListener('beforeunload', handleBeforeUnload);
         }
         
@@ -1302,7 +1297,6 @@
                 database.ref(`players/${gameState.playerId}`).remove();
                 database.ref(`requests/${gameState.playerId}`).remove();
                 
-                // Si es crupier, marcar desconexión
                 if (gameState.isDealer) {
                     database.ref('gameState/dealerDisconnected').set(true);
                 }
@@ -1318,7 +1312,7 @@
         
         function cleanupInactivePlayers() {
             const now = Date.now();
-            const maxInactiveTime = 120000; // 2 minutos
+            const maxInactiveTime = 120000;
             
             database.ref('players').once('value', (snapshot) => {
                 const players = snapshot.val() || {};
@@ -1366,7 +1360,7 @@
                 boardId: null,
                 balance: 0,
                 sessionId: gameState.playerId,
-                approved: false, // Requiere aprobación del crupier
+                approved: false,
                 boardSelectedThisRound: false
             });
             
@@ -1379,12 +1373,10 @@
                 });
             }, 15000);
             
-            // Verificar si hay partida en curso
             database.ref('gameState').once('value', (snapshot) => {
                 const gameStateData = snapshot.val();
                 
                 if (gameStateData && gameStateData.dealerId) {
-                    // Hay partida en curso, solicitar unirse
                     gameState.hasRequested = true;
                     gameState.requestPending = true;
                     
@@ -1402,7 +1394,6 @@
                     
                     requestCheckInterval = setInterval(checkRequestStatus, 2000);
                 } else {
-                    // No hay partida, puede jugar inmediatamente
                     showNotification(`✅ ¡Bienvenido, ${gameState.playerName}!`, 'success');
                 }
             });
@@ -1445,17 +1436,14 @@
             if (isListening) return;
             isListening = true;
             
-            // Escuchar desconexión del crupier
             database.ref('gameState/dealerDisconnected').on('value', (snapshot) => {
                 const disconnected = snapshot.val();
                 if (disconnected && !gameState.dealerDisconnected) {
                     gameState.dealerDisconnected = true;
                     showNotification('👋 El crupier se ha desconectado. Sesión terminada.', 'warning');
                     
-                    // Eliminar este jugador
                     database.ref(`players/${gameState.playerId}`).remove();
                     
-                    // Recargar después de 3 segundos
                     setTimeout(() => {
                         location.reload();
                     }, 3000);
@@ -1488,7 +1476,6 @@
                     });
                 }
                 
-                // Si el jugador desconectado era el crupier
                 if (gameState.dealerId === playerId) {
                     database.ref('gameState/dealerDisconnected').set(true);
                 }
@@ -1569,7 +1556,6 @@
         }
         
         function initializeGameInFirebase() {
-            // Generar ID de sesión único
             const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
             
             const initialGameState = {
@@ -1596,7 +1582,6 @@
             
             database.ref('gameState').set(initialGameState);
             
-            // Mostrar ID de sesión
             document.getElementById('sessionId').textContent = sessionId.substring(0, 8).toUpperCase();
             document.getElementById('sessionBadge').style.display = 'inline-block';
         }
@@ -1605,31 +1590,18 @@
             const boards = [];
             
             const fixedBoardsData = [
-                // Cartón 1 - Poker: Ases
                 ['2♠','3♥','4♦','5♣','6♠', '7♥','8♦','9♣','10♠','J♥', 'Q♦','K♣','A♠','2♥','3♦', 'A♣','A♦','A♥','4♠','5♥', '6♦','7♣','8♠','9♥','10♦'],
-                // Cartón 2 - Poker: Reyes
                 ['3♠','4♥','5♦','6♣','7♠', '8♥','9♦','10♣','J♠','Q♥', 'K♦','A♣','2♠','3♥','4♦', 'K♠','K♣','K♥','5♠','6♥', '7♦','8♣','9♠','10♥','J♦'],
-                // Cartón 3 - Poker: Reinas
                 ['4♠','5♥','6♦','7♣','8♠', '9♥','10♦','J♣','Q♠','K♥', 'A♦','2♣','3♠','4♥','5♦', 'Q♣','Q♥','Q♦','6♠','7♥', '8♦','9♣','10♠','J♥','K♦'],
-                // Cartón 4 - Poker: Jotas
                 ['5♠','6♥','7♦','8♣','9♠', '10♥','J♦','Q♣','K♠','A♥', '2♦','3♣','4♠','5♥','6♦', 'J♠','J♣','J♥','7♠','8♥', '9♦','10♣','Q♠','K♥','A♦'],
-                // Cartón 5 - Poker: 10s
                 ['6♠','7♥','8♦','9♣','10♠', 'J♥','Q♦','K♣','A♠','2♥', '3♦','4♣','5♠','6♥','7♦', '10♥','10♣','10♦','8♠','9♥', 'J♦','Q♣','K♠','A♥','2♦'],
-                // Cartón 6 - Poker: 9s
                 ['7♠','8♥','9♦','10♣','J♠', 'Q♥','K♦','A♣','2♠','3♥', '4♦','5♣','6♠','7♥','8♦', '9♠','9♣','9♥','10♠','J♥', 'Q♦','K♣','A♠','2♥','3♦'],
-                // Cartón 7 - Poker: 8s
                 ['8♠','9♥','10♦','J♣','Q♠', 'K♥','A♦','2♣','3♠','4♥', '5♦','6♣','7♠','8♥','9♦', '8♣','8♥','8♠','10♠','J♥', 'Q♦','K♣','A♠','2♥','3♦'],
-                // Cartón 8 - Poker: 7s
                 ['9♠','10♥','J♦','Q♣','K♠', 'A♥','2♦','3♣','4♠','5♥', '6♦','7♣','8♠','9♥','10♦', '7♠','7♣','7♥','J♠','Q♥', 'K♦','A♣','2♠','3♥','4♦'],
-                // Cartón 9 - Poker: 6s
                 ['10♠','J♥','Q♦','K♣','A♠', '2♥','3♦','4♣','5♠','6♥', '7♦','8♣','9♠','10♥','J♦', '6♠','6♣','6♥','Q♠','K♥', 'A♦','2♣','3♠','4♥','5♦'],
-                // Cartón 10 - Poker: 5s
                 ['J♠','Q♥','K♦','A♣','2♠', '3♥','4♦','5♣','6♠','7♥', '8♦','9♣','10♠','J♥','Q♦', '5♠','5♣','5♥','K♠','A♥', '2♦','3♣','4♠','6♥','7♦'],
-                // Cartón 11 - Poker: 4s
                 ['Q♠','K♥','A♦','2♣','3♠', '4♥','5♦','6♣','7♠','8♥', '9♦','10♣','J♠','Q♥','K♦', '4♠','4♣','4♥','A♠','2♥', '3♦','5♣','6♠','7♥','8♦'],
-                // Cartón 12 - Poker: 3s
                 ['K♠','A♥','2♦','3♣','4♠', '5♥','6♦','7♣','8♠','9♥', '10♦','J♣','Q♠','K♥','A♦', '3♠','3♣','3♥','2♠','4♥', '5♦','6♣','7♠','8♥','9♦'],
-                // Cartón 13 - Poker: 2s
                 ['A♠','2♥','3♦','4♣','5♠', '6♥','7♦','8♣','9♠','10♥', 'J♦','Q♣','K♠','A♥','2♦', '2♠','2♣','2♥','3♠','4♥', '5♦','6♣','7♠','8♥','9♦']
             ];
             
@@ -1669,7 +1641,6 @@
             gameState.dealerDisconnected = data.dealerDisconnected || false;
             gameState.isDealer = (gameState.dealerId === gameState.playerId);
             
-            // Actualizar badge de sesión
             if (gameState.sessionId) {
                 document.getElementById('sessionId').textContent = gameState.sessionId.substring(0, 8).toUpperCase();
                 document.getElementById('sessionBadge').style.display = 'inline-block';
@@ -1682,7 +1653,6 @@
                 document.getElementById('dealerControls').style.display = 'block';
                 document.getElementById('becomeDealerBtn').style.display = 'none';
                 
-                // Configurar onDisconnect para el crupier
                 if (!dealerDisconnectRef) {
                     dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
                     dealerDisconnectRef.onDisconnect().set(true);
@@ -1728,13 +1698,17 @@
                     <span class="player-balance-display">$${player.balance || 0}</span>
                 `;
                 
-                if (gameState.isDealer && (!player.balance || player.balance === 0) && !player.boardSelectedThisRound) {
+                // ✅ CORREGIDO: Botón aparece SIEMPRE que:
+                // - Es el crupier
+                // - La mano NO ha iniciado (fase de preparación)
+                // - El jugador tiene menos de 6 monedas
+                if (gameState.isDealer && !gameState.handStarted && (player.balance || 0) < 6) {
                     const loadBtn = document.createElement('button');
                     loadBtn.className = 'btn-dealer btn-init';
                     loadBtn.style.marginTop = '8px';
                     loadBtn.style.width = '100%';
                     loadBtn.style.padding = '8px';
-                    loadBtn.innerHTML = '<span>💰 Cargar Saldo</span>';
+                    loadBtn.innerHTML = '<span>💰 CARGAR SALDO</span>';
                     loadBtn.onclick = () => openBalanceModal(player.id, player.name);
                     playerEl.appendChild(loadBtn);
                 }
@@ -1766,14 +1740,10 @@
             showNotification(`✅ Saldo cargado exitosamente`, 'success');
         }
         
-        // ============================================
-        // FUNCIONES DEL JUEGO
-        // ============================================
         function renderBoards() {
             const container = document.getElementById('boardsContainer');
             container.innerHTML = '';
             
-            // Verificar si el jugador ya seleccionó cartón en esta ronda
             const playerRef = database.ref(`players/${gameState.playerId}`);
             playerRef.once('value', (snapshot) => {
                 const player = snapshot.val();
@@ -1784,7 +1754,6 @@
                     const isOwner = board.owner === gameState.playerId;
                     const isSelected = gameState.selectedBoard === board.id;
                     
-                    // Bloquear selección si ya se seleccionó cartón esta ronda o si la mano empezó
                     const isLockedForSelection = gameState.boardSelectedThisRound || gameState.handStarted;
                     
                     boardEl.className = `board ${isOwner || isSelected ? 'selected' : ''} ${board.locked || isLockedForSelection ? 'locked' : ''}`;
@@ -1825,7 +1794,6 @@
                     
                     boardHTML += `</div>`;
                     
-                    // Panel de cantar premios ABAJO del cartón
                     if (isOwner) {
                         boardHTML += `
                             <div class="claim-panel">
@@ -1846,7 +1814,6 @@
                     container.appendChild(boardEl);
                 });
                 
-                // Deshabilitar botón de centro si ya se lanzaron 6+ cartas
                 if (gameState.cardsCount >= 6) {
                     document.querySelectorAll('[id^="centroBtn-"]').forEach(btn => {
                         btn.disabled = true;
@@ -1860,7 +1827,6 @@
         }
         
         function selectBoard(boardId) {
-            // Verificar si ya se seleccionó cartón esta ronda
             if (gameState.boardSelectedThisRound) {
                 showNotification('⚠️ Ya seleccionaste cartón para esta ronda. No se puede cambiar hasta la próxima ronda.', 'warning');
                 return;
@@ -1935,7 +1901,6 @@
             const board = gameState.boards.find(b => b.id === boardId);
             if (!board || board.owner !== gameState.playerId) return;
             
-            // Solo permitir marcar si la mano ha comenzado
             if (!gameState.handStarted || gameState.handFinished) {
                 showNotification('⚠️ Espera a que el crupier inicie la mano', 'warning');
                 return;
@@ -2017,9 +1982,6 @@
             gameState.cardsUsed.push(newCard);
             gameState.cardsCount++;
             
-            // NO marcar automáticamente - los jugadores marcan manualmente
-            
-            // Actualizar pozos (cada carta suma $10 a cada pozo)
             Object.keys(gameState.pots).forEach(pot => {
                 gameState.pots[pot] += 10;
             });
@@ -2046,7 +2008,6 @@
             }
             
             database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
-                // Configurar onDisconnect para limpiar sesión al salir
                 dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
                 dealerDisconnectRef.onDisconnect().set(true);
                 
@@ -2076,7 +2037,6 @@
                 return;
             }
             
-            // Verificar saldo suficiente y descontar 6 monedas por jugador (1 por pozo)
             database.ref('players').once('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 let insufficientBalance = [];
@@ -2087,7 +2047,6 @@
                         if (!player.balance || player.balance < 6) {
                             insufficientBalance.push(player.name);
                         } else {
-                            // Descontar 6 monedas
                             playersToUpdate[id] = {
                                 balance: (player.balance || 0) - 6
                             };
@@ -2100,12 +2059,10 @@
                     return;
                 }
                 
-                // Actualizar saldos
                 Object.keys(playersToUpdate).forEach(playerId => {
                     database.ref(`players/${playerId}`).update(playersToUpdate[playerId]);
                 });
                 
-                // Iniciar mano
                 database.ref('gameState').update({
                     handStarted: true,
                     handFinished: false,
@@ -2344,7 +2301,6 @@
         function startNewRound() {
             document.getElementById('endRoundModal').classList.remove('show');
             
-            // Desbloquear todos los cartones
             gameState.boards.forEach(board => {
                 board.locked = false;
                 board.owner = null;
@@ -2355,7 +2311,6 @@
             database.ref('players').once('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 
-                // Resetear selección de cartón para todos los jugadores
                 Object.keys(players).forEach(playerId => {
                     database.ref(`players/${playerId}`).update({
                         boardId: null,
@@ -2382,7 +2337,6 @@
                 document.getElementById('drawBtn').disabled = true;
                 document.getElementById('initHandBtn').disabled = false;
                 
-                // Resetear estado local
                 gameState.boardSelectedThisRound = false;
                 
                 showNotification(`✨ ¡Ronda ${gameState.round + 1} iniciada! Seleccionen nuevos cartones.`, 'success');
@@ -2401,15 +2355,12 @@
             
             document.getElementById('endRoundModal').classList.remove('show');
             
-            // Marcar desconexión del crupier
             database.ref('gameState/dealerDisconnected').set(true);
             
-            // Limpiar base de datos
             cleanDatabase();
             
             showNotification('🔄 ¡Sesión finalizada! La base de datos se ha reiniciado.', 'success');
             
-            // Recargar después de 3 segundos
             setTimeout(() => {
                 location.reload();
             }, 3000);
@@ -2602,7 +2553,6 @@
                 database.ref(`players/${gameState.playerId}`).remove();
                 database.ref(`requests/${gameState.playerId}`).remove();
                 
-                // Si es crupier, marcar desconexión
                 if (gameState.isDealer) {
                     database.ref('gameState/dealerDisconnected').set(true);
                 }
