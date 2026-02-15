@@ -845,6 +845,33 @@
             color: white;
         }
         
+        /* Modal de Espera */
+        .wait-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .wait-modal.show {
+            display: flex;
+        }
+        
+        .wait-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
         /* Historial */
         .history-container {
             margin-top: 25px;
@@ -1167,8 +1194,8 @@
     </div>
     
     <!-- Modal de Espera -->
-    <div class="modal" id="waitModal">
-        <div class="modal-content">
+    <div class="wait-modal" id="waitModal">
+        <div class="wait-content">
             <div class="modal-title">⏳ ESPERANDO APROBACIÓN</div>
             <p style="font-size:1.2em;margin:20px 0;">El crupier debe aprobar tu solicitud para unirte a la partida.</p>
             <p style="color:#7f8c8d;margin-bottom:20px;">Por favor, espera...</p>
@@ -1228,7 +1255,6 @@
             playerId: "",
             isDealer: false,
             playerBalance: 0,
-            connectionRef: null,
             hasRequested: false,
             requestPending: false
         };
@@ -1243,7 +1269,7 @@
         // INICIALIZACIÓN
         // ============================================
         function initGame() {
-            // SIEMPRE mostrar modal de nombre (no usar localStorage)
+            // SIEMPRE mostrar modal de nombre
             document.getElementById('nameModal').classList.add('show');
             
             startFirebaseListeners();
@@ -1256,10 +1282,8 @@
         }
         
         function handleBeforeUnload() {
-            // Eliminar jugador al cerrar pestaña
             if (gameState.playerId) {
                 database.ref(`players/${gameState.playerId}`).remove();
-                // Eliminar solicitud si existe
                 database.ref(`requests/${gameState.playerId}`).remove();
             }
         }
@@ -1298,8 +1322,6 @@
             gameState.playerName = nameInput;
             gameState.playerId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
             
-            // NO guardar en localStorage - siempre pedir nombre
-            
             document.getElementById('playerName').textContent = nameInput;
             document.getElementById('nameModal').classList.remove('show');
             
@@ -1309,26 +1331,24 @@
         function registerPlayer() {
             const playerRef = database.ref(`players/${gameState.playerId}`);
             
-            playerRef.remove().then(() => {
-                playerRef.set({
-                    name: gameState.playerName,
-                    online: true,
-                    lastSeen: Date.now(),
-                    boardId: null,
-                    balance: 0,
-                    sessionId: gameState.playerId,
-                    approved: false
-                });
-                
-                playerRef.onDisconnect().remove();
-                
-                setInterval(() => {
-                    playerRef.update({
-                        lastSeen: Date.now(),
-                        online: true
-                    });
-                }, 15000);
+            playerRef.set({
+                name: gameState.playerName,
+                online: true,
+                lastSeen: Date.now(),
+                boardId: null,
+                balance: 0,
+                sessionId: gameState.playerId,
+                approved: true // Aprobado por defecto
             });
+            
+            playerRef.onDisconnect().remove();
+            
+            setInterval(() => {
+                playerRef.update({
+                    lastSeen: Date.now(),
+                    online: true
+                });
+            }, 15000);
             
             // Verificar si hay partida en curso
             database.ref('gameState/dealerId').once('value', (snapshot) => {
@@ -1347,13 +1367,14 @@
                         status: 'pending'
                     });
                     
-                    // Configurar onDisconnect para eliminar solicitud
                     requestRef.onDisconnect().remove();
                     
                     document.getElementById('waitModal').classList.add('show');
                     
-                    // Verificar si la solicitud fue aprobada/rechazada
                     requestCheckInterval = setInterval(checkRequestStatus, 2000);
+                } else {
+                    // No hay partida, puede jugar inmediatamente
+                    showNotification(`✅ ¡Bienvenido, ${gameState.playerName}!`, 'success');
                 }
             });
         }
@@ -1373,7 +1394,6 @@
                     showNotification('✅ ¡Solicitud aprobada! Bienvenido al juego', 'success');
                     gameState.requestPending = false;
                     
-                    // Marcar jugador como aprobado
                     database.ref(`players/${gameState.playerId}`).update({
                         approved: true
                     });
@@ -1425,7 +1445,6 @@
                 showNotification(`👋 ${player ? player.name : 'Jugador'} se ha desconectado`, 'warning');
             });
             
-            // Escuchar cambios en solicitudes
             database.ref('requests').on('value', (snapshot) => {
                 const requests = snapshot.val() || {};
                 updateRequestsCount(requests);
@@ -1477,12 +1496,10 @@
         }
         
         function approveRequest(playerId) {
-            // Aprobar solicitud
             database.ref(`requests/${playerId}`).update({
                 status: 'approved'
             });
             
-            // Marcar jugador como aprobado
             database.ref(`players/${playerId}`).update({
                 approved: true
             });
@@ -1526,13 +1543,6 @@
         
         function generateFixedBoards() {
             const boards = [];
-            
-            // 13 configuraciones fijas de cartones 5x5
-            // Cada cartón tiene:
-            // - FULL en fila 2 (índices 5-9)
-            // - POKER en fila 4 (índices 15-19) con valor único
-            // - Esquinas en 0, 4, 20, 24
-            // - Centro en 12
             
             const fixedBoardsData = [
                 // Cartón 1 - Poker: Ases
@@ -1624,7 +1634,7 @@
                 .filter(([id, p]) => {
                     const isActive = p.online && p.sessionId === id;
                     const isRecent = (Date.now() - (p.lastSeen || 0)) < 120000;
-                    const isApproved = p.approved !== false; // Aprobados o sin estado
+                    const isApproved = p.approved !== false;
                     return isActive && isRecent && isApproved;
                 })
                 .map(([id, p]) => ({ ...p, id }))
@@ -2295,7 +2305,7 @@
                     database.ref(`players/${playerId}`).update({
                         boardId: null,
                         balance: 0,
-                        approved: false
+                        approved: true
                     });
                 });
             });
