@@ -191,7 +191,7 @@
         }
         
         .card-display .card-symbol {
-            font-size: 10em; /* ✅ AUMENTADO A 10em PARA MÁXIMA VISIBILIDAD */
+            font-size: 8em; /* ✅ AUMENTADO A 8em PARA MEJOR VISIBILIDAD EN MÓVIL */
             margin: 0;
         }
         
@@ -207,22 +207,6 @@
         .card-display.club .card-text,
         .card-display.club .card-symbol {
             color: #2c3e50;
-        }
-        
-        /* Carta actual visible para todos los jugadores */
-        .current-card-section {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            border: 2px solid #3498db;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .current-card-section .section-title {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            margin-bottom: 10px;
         }
         
         .card-actions {
@@ -273,12 +257,6 @@
         
         .btn-init:hover {
             background: linear-gradient(135deg, #2980b9, #2573a7);
-        }
-        
-        .btn-init:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-            transform: none;
         }
         
         .btn-end {
@@ -1044,7 +1022,7 @@
             }
             
             .card-display .card-symbol {
-                font-size: 7em; /* Ajuste para móviles */
+                font-size: 6em; /* Ajuste para móviles */
             }
         }
     </style>
@@ -1095,6 +1073,16 @@
                     </button>
                 </div>
                 
+                <div class="section-title">🃏 CARTA ACTUAL</div>
+                <div class="card-display" id="currentCardDisplay">
+                    <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
+                </div>
+                
+                <div class="section-title">📋 CARTAS CANTADAS (<span id="cardsCount">0</span>)</div>
+                <div class="cards-summary" id="cardsSummary">
+                    <div class="empty-summary">Aún no se han cantado cartas</div>
+                </div>
+                
                 <div class="section-title">💰 POZOS ACUMULADOS</div>
                 <div class="pots-display" id="potsDisplay">
                     <div class="pot-item"><span class="pot-label">Pokino:</span> <strong id="potPokino">$0</strong></div>
@@ -1106,16 +1094,8 @@
                 </div>
             </div>
             
-            <!-- Cartones de Juego - CON CARTA ACTUAL ENCIMA -->
+            <!-- Cartones de Juego -->
             <div>
-                <!-- ✅ NUEVO: Sección de carta actual visible para todos los jugadores -->
-                <div class="current-card-section">
-                    <div class="section-title">🃏 CARTA ACTUAL</div>
-                    <div class="card-display" id="currentCardDisplayTop">
-                        <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
-                    </div>
-                </div>
-                
                 <div class="section-title">🎲 CARTONES (5x5) - Selecciona TU cartón</div>
                 <div class="boards-container" id="boardsContainer"></div>
                 
@@ -1359,9 +1339,20 @@
                 }
             });
             
+            // ✅ NUEVO: Verificar si hay crupier al iniciar
+            database.ref('gameState/dealerId').once('value', (snapshot) => {
+                const dealerId = snapshot.val();
+                if (!dealerId) {
+                    // Primera persona se convierte automáticamente en crupier
+                    document.getElementById('nameModal').classList.add('show');
+                } else {
+                    document.getElementById('nameModal').classList.add('show');
+                }
+            });
+            
             startFirebaseListeners();
             
-            // Tiempo de inactividad más largo para móviles
+            // ✅ NUEVO: Tiempo de inactividad más largo para móviles
             const inactiveTime = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                 ? 300000 // 5 minutos para móviles
                 : 120000; // 2 minutos para escritorio
@@ -1373,9 +1364,11 @@
         
         function handleBeforeUnload() {
             if (gameState.playerId) {
+                // ✅ SOLO eliminar jugador si NO es crupier
                 if (!gameState.isDealer) {
                     database.ref(`players/${gameState.playerId}`).remove();
                 } else {
+                    // Si es crupier, marcar desconexión
                     database.ref('gameState/dealerDisconnected').set(true);
                     showNotification('👋 ¡Has salido de la sesión! Todos los jugadores serán desconectados.', 'warning');
                 }
@@ -1401,6 +1394,7 @@
                 
                 Object.entries(players).forEach(([playerId, player]) => {
                     if (player.lastSeen && (now - player.lastSeen > maxInactiveTime)) {
+                        // ✅ Solo eliminar si NO es el crupier
                         if (gameState.dealerId !== playerId) {
                             database.ref(`players/${playerId}`).remove();
                             
@@ -1448,6 +1442,9 @@
                 boardSelectedThisRound: false
             });
             
+            // ✅ ELIMINADO: playerRef.onDisconnect().remove();
+            // Los jugadores NO se eliminan al desconectar (solo crupier)
+            
             setInterval(() => {
                 playerRef.update({
                     lastSeen: Date.now(),
@@ -1455,25 +1452,24 @@
                 });
             }, 15000);
             
-            // ✅ NUEVO: Verificar si hay crupier y convertirse si es el primero
-            database.ref('gameState/dealerId').once('value', (snapshot) => {
-                const dealerId = snapshot.val();
+            // ✅ NUEVO: Verificar si hay crupier y si es el primero
+            database.ref('gameState').once('value', (snapshot) => {
+                const gameStateData = snapshot.val();
                 
-                if (!dealerId) {
+                if (!gameStateData || !gameStateData.dealerId) {
                     // ✅ Primera persona se convierte automáticamente en crupier
                     database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
-                        showNotification('👑 ¡Te has convertido automáticamente en CRUPIER! Puedes transferir el rol con el botón "🔄 TRANSFERIR ROL DE CRUPIER"', 'success');
+                        showNotification('👑 ¡Te has convertido automáticamente en CRUPIER!', 'success');
                         gameState.isDealer = true;
                         document.getElementById('dealerBadge').style.display = 'inline-block';
                         document.getElementById('dealerControls').style.display = 'block';
                         document.getElementById('becomeDealerBtn').style.display = 'none';
-                        document.getElementById('transferDealerBtn').style.display = 'block';
                         
                         // Configurar onDisconnect para el crupier
                         dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
                         dealerDisconnectRef.onDisconnect().set(true);
                     });
-                } else {
+                } else if (gameStateData.dealerId) {
                     // Hay crupier, solicitar unirse
                     gameState.hasRequested = true;
                     gameState.requestPending = true;
@@ -1491,6 +1487,8 @@
                     document.getElementById('waitModal').classList.add('show');
                     
                     requestCheckInterval = setInterval(checkRequestStatus, 2000);
+                } else {
+                    showNotification(`✅ ¡Bienvenido, ${gameState.playerName}!`, 'success');
                 }
             });
         }
@@ -1639,6 +1637,7 @@
             });
             
             showNotification('✅ Solicitud aprobada', 'success');
+            // ✅ ELIMINADO: updateRequestsList({}) - Se actualiza automáticamente
         }
         
         function rejectRequest(playerId) {
@@ -1647,6 +1646,7 @@
             });
             
             showNotification('❌ Solicitud rechazada', 'warning');
+            // ✅ ELIMINADO: updateRequestsList({}) - Se actualiza automáticamente
         }
         
         function initializeGameInFirebase() {
@@ -1857,7 +1857,7 @@
                 
                 // ✅ NUEVO: Botón para transferir crupier (solo visible para crupier)
                 if (gameState.isDealer && gameState.dealerId === gameState.playerId && !gameState.handStarted && !gameState.roundFinished && gameState.dealerId !== player.id) {
-                    playerHTML += `<button class="transfer-btn" onclick="transferDealer('${player.id}')">Transferir</button>`;
+                    playerHTML += `<button class="transfer-btn" onclick="transferDealer('${player.id}')">.Transferar</button>`;
                 }
                 
                 playerEl.innerHTML = playerHTML;
@@ -2148,30 +2148,24 @@
         }
         
         function updateCurrentCardDisplay() {
-            const displays = ['currentCardDisplay', 'currentCardDisplayTop'];
+            const display = document.getElementById('currentCardDisplay');
+            display.innerHTML = '';
             
-            displays.forEach(id => {
-                const display = document.getElementById(id);
-                if (!display) return;
-                
-                display.innerHTML = '';
-                
-                if (!gameState.currentCard) {
-                    display.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>';
-                    return;
-                }
-                
-                const card = gameState.currentCard;
-                const isRed = card.includes('♥') || card.includes('♦');
-                const suitClass = isRed ? 'heart' : 'spade';
-                
-                display.className = `card-display ${suitClass}`;
-                display.innerHTML = `
-                    <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
-                    <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
-                    <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
-                `;
-            });
+            if (!gameState.currentCard) {
+                display.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>';
+                return;
+            }
+            
+            const card = gameState.currentCard;
+            const isRed = card.includes('♥') || card.includes('♦');
+            const suitClass = isRed ? 'heart' : 'spade';
+            
+            display.className = `card-display ${suitClass}`;
+            display.innerHTML = `
+                <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
+                <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
+                <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
+            `;
         }
         
         function drawRandomCard() {
@@ -2209,10 +2203,14 @@
             gameState.cardsUsed.push(newCard);
             gameState.cardsCount++;
             
+            // ✅ ELIMINADO: El código que aumentaba los pozos aquí
+            // Los pozos solo cambian al iniciar mano o al ganar premio
+            
             database.ref('gameState').update({
                 currentCard: newCard,
                 cardsUsed: gameState.cardsUsed,
                 cardsCount: gameState.cardsCount
+                // ✅ ELIMINADO: pots: gameState.pots
             });
             
             showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
@@ -2307,7 +2305,7 @@
                     }
                 });
                 
-                // Cargar POZOS: 1 moneda por jugador por pozo
+                // ✅ Cargar POZOS: 1 moneda por jugador por pozo
                 const newPots = {
                     pokino: gameState.pots.pokino + playerCount,
                     poker: gameState.pots.poker + playerCount,
@@ -2317,7 +2315,7 @@
                     especial: gameState.pots.especial + playerCount
                 };
                 
-                // Reiniciar TODOS los marcados
+                // ✅ Reiniciar TODOS los marcados
                 const resetBoards = gameState.boards.map(board => ({
                     ...board,
                     marked: Array(25).fill(false)
@@ -2333,7 +2331,6 @@
                     boards: resetBoards
                 });
                 
-                // ✅ DESACTIVAR botón "INICIAR MANO"
                 document.getElementById('drawBtn').disabled = false;
                 document.getElementById('initHandBtn').disabled = true;
                 showNotification(`▶️ ¡Mano iniciada! Cada pozo recibió ${playerCount} monedas.`, 'success');
@@ -2466,7 +2463,12 @@
         }
         
         function approveClaim() {
-            if (!gameState.isDealer || !gameState.currentClaim) return;
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede aprobar premios', 'warning');
+                return;
+            }
+            
+            if (!gameState.currentClaim) return;
             
             const prizeAmount = gameState.pots[gameState.currentClaim];
             const prizeName = gameState.currentClaim.toUpperCase();
@@ -2519,6 +2521,7 @@
                     if (gameState.currentHand < 6) {
                         updates.currentHand = gameState.currentHand + 1;
                     } else {
+                        // ✅ En mano 6, solo Especial termina la ronda
                         if (gameState.currentClaim === 'especial') {
                             updates.roundFinished = true;
                         }
@@ -2531,16 +2534,13 @@
                 
                 if (shouldEndHand) {
                     document.getElementById('drawBtn').disabled = true;
-                    
-                    // ✅ REACTIVAR botón "INICIAR MANO" solo si no es la mano 6
-                    if (gameState.currentHand < 6) {
-                        document.getElementById('initHandBtn').disabled = false;
-                    }
+                    document.getElementById('initHandBtn').disabled = false;
                     
                     if (gameState.currentHand === 6 && gameState.currentClaim === 'especial') {
                         document.getElementById('endRoundBtn').style.display = 'block';
                         showNotification(`🎉 ¡Mano ${gameState.currentHand} terminada! Ronda completada.`, 'success');
                     } else if (gameState.currentHand === 6) {
+                        // Mano 6 terminada pero no con Especial, continuar normalmente
                         showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
                     } else {
                         showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
@@ -2854,6 +2854,7 @@
             if (cleanupInterval) clearInterval(cleanupInterval);
             if (requestCheckInterval) clearInterval(requestCheckInterval);
             if (gameState.playerId) {
+                // ✅ SOLO eliminar jugador si NO es crupier
                 if (!gameState.isDealer) {
                     database.ref(`players/${gameState.playerId}`).remove();
                 } else {
