@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>SABADITO ALEGRE - POKENO</title>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -13,12 +15,25 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+/* ✅ CORRECCIÓN: Permitir scroll en body */
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
 body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
     padding: 15px;
     color: #333;
+    position: relative;
 }
 .container {
     max-width: 1600px;
@@ -27,6 +42,9 @@ body {
     border-radius: 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     padding: 20px;
+    /* ✅ CORRECCIÓN: Sin height fijo para permitir scroll */
+    min-height: auto;
+    height: auto;
 }
 header {
     text-align: center;
@@ -202,10 +220,17 @@ h1 {
     gap: 8px;
     width: 100%;
     margin-bottom: 8px;
+    /* ✅ CORRECCIÓN: Mejor touch en móviles */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 .btn-dealer:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+.btn-dealer:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 .btn-draw {
     background: linear-gradient(135deg, #27ae60, #229954);
@@ -243,6 +268,7 @@ h1 {
 .cards-summary {
     max-height: 250px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     background: white;
     padding: 12px;
     border-radius: 8px;
@@ -306,8 +332,9 @@ h1 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 18px;
-    max-height: 800px;
-    overflow-y: auto;
+    /* ✅ CORRECCIÓN: Max-height más alto para móviles */
+    max-height: none;
+    overflow-y: visible;
     padding: 10px 5px;
     padding-right: 10px;
 }
@@ -381,7 +408,10 @@ h1 {
     cursor: pointer;
     transition: all 0.2s;
     padding: 3px;
+    /* ✅ CORRECCIÓN: Permitir selección en móviles */
+    -webkit-user-select: none;
     user-select: none;
+    touch-action: manipulation;
 }
 .board-cell.heart, .board-cell.diamond { color: #e74c3c; }
 .board-cell.spade, .board-cell.club { color: #2c3e50; }
@@ -450,10 +480,15 @@ h1 {
     font-size: 0.85em;
     font-weight: bold;
     transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 .claim-btn:hover {
     background: linear-gradient(135deg, #2980b9, #2573a7);
     transform: scale(1.05);
+}
+.claim-btn:active {
+    transform: scale(1);
 }
 .claim-btn:disabled {
     background: #bdc3c7;
@@ -479,8 +514,10 @@ h1 {
     flex-direction: column;
     gap: 8px;
     margin-top: 12px;
+    /* ✅ CORRECCIÓN: Scroll en lista de jugadores */
     max-height: 300px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding-right: 5px;
 }
 .player-item {
@@ -534,6 +571,7 @@ h1 {
     font-size: 0.8em;
     margin-left: 8px;
     cursor: pointer;
+    touch-action: manipulation;
 }
 .transfer-btn:hover {
     background: linear-gradient(135deg, #8e44ad, #7d3c98);
@@ -550,6 +588,9 @@ h1 {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(5px);
+    /* ✅ CORRECCIÓN: Permitir scroll dentro del modal */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .modal.show {
     display: flex;
@@ -568,8 +609,10 @@ h1 {
     text-align: center;
     box-shadow: 0 15px 50px rgba(0,0,0,0.4);
     position: relative;
+    /* ✅ CORRECCIÓN: Scroll dentro del contenido del modal */
     max-height: 90vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .modal-title {
     font-size: 1.8em;
@@ -680,6 +723,8 @@ h1 {
     z-index: 2000;
     justify-content: center;
     align-items: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .balance-modal.show {
     display: flex;
@@ -691,6 +736,9 @@ h1 {
     max-width: 500px;
     width: 90%;
     text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .balance-input {
     padding: 12px;
@@ -718,6 +766,8 @@ h1 {
     z-index: 2000;
     justify-content: center;
     align-items: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .request-modal.show {
     display: flex;
@@ -729,10 +779,14 @@ h1 {
     max-width: 500px;
     width: 90%;
     text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .request-list {
     max-height: 300px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     margin: 20px 0;
     padding: 10px;
     background: #f8f9fa;
@@ -761,6 +815,7 @@ h1 {
     cursor: pointer;
     font-weight: bold;
     font-size: 0.9em;
+    touch-action: manipulation;
 }
 .request-btn.accept {
     background: #27ae60;
@@ -781,6 +836,8 @@ h1 {
     z-index: 2000;
     justify-content: center;
     align-items: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .wait-modal.show {
     display: flex;
@@ -792,6 +849,9 @@ h1 {
     max-width: 500px;
     width: 90%;
     text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .history-container {
     margin-top: 25px;
@@ -803,6 +863,7 @@ h1 {
 .history-list {
     max-height: 180px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     margin-top: 12px;
 }
 .history-item {
@@ -843,6 +904,8 @@ h1 {
     z-index: 3000;
     transform: translateX(400px);
     transition: transform 0.4s ease-out;
+    /* ✅ CORRECCIÓN: No bloquear touch en notificaciones */
+    pointer-events: none;
 }
 .notification.show {
     transform: translateX(0);
@@ -856,41 +919,7 @@ h1 {
 .notification.success {
     background: linear-gradient(135deg, #27ae60, #229954);
 }
-.transfer-player-item {
-    padding: 15px;
-    margin: 8px 0;
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-radius: 10px;
-    border: 2px solid #3498db;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-.transfer-player-item:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    border-color: #9b59b6;
-}
-.transfer-player-item .player-info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.transfer-player-item .player-name {
-    font-size: 1.1em;
-    color: #2c3e50;
-}
-.transfer-player-item .player-details {
-    color: #7f8c8d;
-    font-size: 0.9em;
-    margin-top: 5px;
-}
-.transfer-player-item .transfer-action {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-}
+/* ✅ MEDIA QUERIES OPTIMIZADAS PARA MÓVIL Y TABLET */
 @media (max-width: 1200px) {
     .game-container {
         grid-template-columns: 1fr;
@@ -898,13 +927,67 @@ h1 {
     .claim-panel {
         grid-template-columns: repeat(3, 1fr);
     }
+    .boards-container {
+        /* ✅ CORRECCIÓN: Permitir scroll en tablets */
+        max-height: none;
+        overflow-y: visible;
+    }
+}
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    header {
+        padding: 15px;
+    }
+    h1 {
+        font-size: 1.8em;
+    }
+    .subtitle {
+        font-size: 1em;
+    }
+    .player-info, .player-balance, .dealer-badge, .session-badge {
+        display: block;
+        margin: 5px auto;
+        text-align: center;
+    }
+    .game-info {
+        padding: 8px;
+    }
+    .game-info .round, .game-info .hand {
+        font-size: 1em;
+    }
+    .btn-dealer {
+        padding: 12px;
+        font-size: 0.9em;
+    }
+    .card-display .card-symbol {
+        font-size: 6em;
+    }
+    .card-display .card-text {
+        font-size: 2em;
+    }
 }
 @media (max-width: 600px) {
     .boards-container {
         grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    .board {
+        padding: 10px;
+    }
+    .board-grid {
+        gap: 3px;
+    }
+    .board-cell {
+        font-size: 0.65em;
+        padding: 2px;
+    }
+    .board-title {
+        font-size: 1.1em;
     }
     h1 {
-        font-size: 2em;
+        font-size: 1.6em;
     }
     .modal-actions {
         grid-template-columns: 1fr;
@@ -917,9 +1000,45 @@ h1 {
     }
     .modal-content {
         max-width: 95%;
+        padding: 15px;
+    }
+    .modal-title {
+        font-size: 1.4em;
     }
     .card-display .card-symbol {
-        font-size: 6em;
+        font-size: 5em;
+    }
+    .card-display .card-text {
+        font-size: 1.8em;
+    }
+    .history-item {
+        grid-template-columns: 1fr;
+        gap: 5px;
+        text-align: center;
+    }
+    .players-list {
+        max-height: 200px;
+    }
+    .player-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
+    }
+    .notification {
+        left: 10px;
+        right: 10px;
+        text-align: center;
+        font-size: 0.9em;
+        padding: 12px 20px;
+    }
+}
+/* ✅ CORRECCIÓN: Soporte para iPhone con notch */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+        padding-top: max(15px, env(safe-area-inset-top));
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
     }
 }
 </style>
@@ -961,10 +1080,10 @@ h1 {
                 <button class="btn-dealer btn-end" onclick="endRound()" id="endRoundBtn" style="display:none;">
                     <span>🏁 FINALIZAR RONDA</span>
                 </button>
-                <button class="btn-dealer btn-warning" onclick="showRequests()" id="requestsBtn" style="display:none;">
+                <button class="btn-dealer btn-warning" onclick="showRequests()" id="requestsBtn" style="display:none;background:linear-gradient(135deg, #9b59b6, #8e44ad);">
                     <span>📬 VER SOLICITUDES (<span id="requestsCount">0</span>)</span>
                 </button>
-                <button class="btn-dealer btn-warning" onclick="showTransferDealerModal()" id="transferDealerBtn" style="display:none;">
+                <button class="btn-dealer btn-warning" onclick="showTransferDealerModal()" id="transferDealerBtn" style="display:none;background:linear-gradient(135deg, #9b59b6, #8e44ad);">
                     <span>🔄 TRANSFERIR ROL DE CRUPIER</span>
                 </button>
             </div>
@@ -1018,7 +1137,6 @@ h1 {
             <div style="background:white;padding:15px;border-radius:8px;font-size:0.9em;line-height:1.6;">
                 <p><strong>Para JUGADORES:</strong></p>
                 <p>• Inicia sesión con tu nombre</p>
-                <p>• El primer usuario es CRUPIER automático</p>
                 <p>• Espera aprobación del crupier</p>
                 <p>• Selecciona UN cartón por ronda</p>
                 <p>• Marca manualmente tus casillas (click)</p>
@@ -1030,7 +1148,7 @@ h1 {
                 <p>• Inicia mano (se descuentan 6 monedas)</p>
                 <p>• Lanza cartas aleatorias</p>
                 <p>• Verifica y aprueba premios</p>
-                <p>• Puedes transferir el rol a otro jugador</p>
+                <p>• Puedes transferir el rol de crupier</p>
             </div>
         </div>
     </div>
@@ -1296,9 +1414,6 @@ function savePlayerName() {
     registerPlayer();
 }
 
-// ============================================
-// ✅ REGISTRO DE JUGADOR CON ASIGNACIÓN AUTOMÁTICA DE CRUPIER
-// ============================================
 function registerPlayer() {
     const playerRef = database.ref(`players/${gameState.playerId}`);
     playerRef.set({
@@ -1319,68 +1434,35 @@ function registerPlayer() {
         });
     }, 15000);
     
-    const dealerRef = database.ref('gameState/dealerId');
-    dealerRef.transaction((currentDealerId) => {
-        if (currentDealerId === null || currentDealerId === undefined) {
-            console.log('👑 Primer usuario detectado - Asignando como crupier');
-            return gameState.playerId;
-        } else {
-            console.log('👤 Ya existe crupier - Usuario como jugador normal');
-            return currentDealerId;
-        }
-    }, (error, committed, snapshot) => {
-        if (error) {
-            console.error('❌ Error en transacción de crupier:', error);
-            showNotification('⚠️ Error al asignar rol. Recarga la página.', 'error');
-        } else if (committed) {
-            const assignedDealerId = snapshot.val();
-            
-            if (assignedDealerId === gameState.playerId) {
-                console.log('✅ ¡Eres el CRUPIER!');
+    database.ref('gameState').once('value', (snapshot) => {
+        const gameStateData = snapshot.val();
+        if (!gameStateData || !gameStateData.dealerId) {
+            database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
+                showNotification('👑 ¡Te has convertido automáticamente en CRUPIER!', 'success');
                 gameState.isDealer = true;
-                gameState.dealerId = gameState.playerId;
-                
                 document.getElementById('dealerBadge').style.display = 'inline-block';
                 document.getElementById('dealerControls').style.display = 'block';
                 document.getElementById('becomeDealerBtn').style.display = 'none';
-                document.getElementById('transferDealerBtn').style.display = 'block';
-                
                 dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
                 dealerDisconnectRef.onDisconnect().set(true);
-                
-                database.ref('gameState').once('value', (snapshot) => {
-                    if (!snapshot.val()) {
-                        initializeGameInFirebase();
-                    }
-                });
-                
-                showNotification('👑 ¡Eres el PRIMER usuario! Rol de CRUPIER asignado automáticamente.', 'success');
-                playerRef.update({ approved: true });
-                
-            } else {
-                console.log('✅ Usuario como jugador - Solicitando aprobación');
-                gameState.isDealer = false;
-                gameState.dealerId = assignedDealerId;
-                
-                gameState.hasRequested = true;
-                gameState.requestPending = true;
-                
-                const requestRef = database.ref(`requests/${gameState.playerId}`);
-                requestRef.set({
-                    playerId: gameState.playerId,
-                    playerName: gameState.playerName,
-                    timestamp: Date.now(),
-                    status: 'pending'
-                });
-                requestRef.onDisconnect().remove();
-                
-                document.getElementById('waitModal').classList.add('show');
-                requestCheckInterval = setInterval(checkRequestStatus, 2000);
-                
-                showNotification('🎮 ¡Bienvenido! Esperando aprobación del crupier...', 'warning');
-            }
+            });
+        } else if (gameStateData.dealerId) {
+            gameState.hasRequested = true;
+            gameState.requestPending = true;
+            const requestRef = database.ref(`requests/${gameState.playerId}`);
+            requestRef.set({
+                playerId: gameState.playerId,
+                playerName: gameState.playerName,
+                timestamp: Date.now(),
+                status: 'pending'
+            });
+            requestRef.onDisconnect().remove();
+            document.getElementById('waitModal').classList.add('show');
+            requestCheckInterval = setInterval(checkRequestStatus, 2000);
+        } else {
+            showNotification(`✅ ¡Bienvenido, ${gameState.playerName}!`, 'success');
         }
-    }, false);
+    });
 }
 
 function checkRequestStatus() {
@@ -1414,42 +1496,9 @@ function cancelRequest() {
     }
 }
 
-// ============================================
-// ✅ LISTENERS DE FIREBASE
-// ============================================
 function startFirebaseListeners() {
     if (isListening) return;
     isListening = true;
-    
-    database.ref('gameState/dealerId').on('value', (snapshot) => {
-        const newDealerId = snapshot.val();
-        
-        if (newDealerId && newDealerId !== gameState.dealerId) {
-            gameState.dealerId = newDealerId;
-            gameState.isDealer = (newDealerId === gameState.playerId);
-            
-            if (gameState.isDealer) {
-                document.getElementById('dealerBadge').style.display = 'inline-block';
-                document.getElementById('dealerControls').style.display = 'block';
-                document.getElementById('becomeDealerBtn').style.display = 'none';
-                document.getElementById('transferDealerBtn').style.display = 'block';
-                
-                if (!dealerDisconnectRef) {
-                    dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
-                    dealerDisconnectRef.onDisconnect().set(true);
-                }
-                
-                showNotification('👑 ¡Ahora eres el CRUPIER!', 'success');
-            } else {
-                document.getElementById('dealerBadge').style.display = 'none';
-                document.getElementById('dealerControls').style.display = 'none';
-                document.getElementById('becomeDealerBtn').style.display = 'block';
-                document.getElementById('transferDealerBtn').style.display = 'none';
-            }
-            
-            updateDisplay();
-        }
-    });
     
     database.ref('gameState/dealerDisconnected').on('value', (snapshot) => {
         const disconnected = snapshot.val();
@@ -1468,9 +1517,7 @@ function startFirebaseListeners() {
         if (data) {
             loadGameState(data);
         } else {
-            if (gameState.isDealer) {
-                initializeGameInFirebase();
-            }
+            initializeGameInFirebase();
         }
     });
     
@@ -1651,9 +1698,6 @@ function generateFixedBoards() {
     return boards;
 }
 
-// ============================================
-// ✅ CARGA DE ESTADO CON VALIDACIÓN DE CARTONES
-// ============================================
 function loadGameState(data) {
     gameState.sessionId = data.sessionId || null;
     gameState.round = data.round || 1;
@@ -1663,13 +1707,13 @@ function loadGameState(data) {
     gameState.cardsCount = data.cardsCount || 0;
     gameState.pots = data.pots || { pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0 };
     
-    // ✅ VALIDACIÓN CRÍTICA: Verificar que los cartones tengan datos válidos
-    if (data.boards && Array.isArray(data.boards) && data.boards.length > 0 && data.boards[0].cards && Array.isArray(data.boards[0].cards) && data.boards[0].cards.length === 25) {
+    if (data.boards && Array.isArray(data.boards) && data.boards.length === 13 && data.boards[0].cards && Array.isArray(data.boards[0].cards) && data.boards[0].cards.length === 25) {
         gameState.boards = data.boards;
     } else {
-        console.warn('⚠️ Cartones corruptos o vacíos - Regenerando...');
         gameState.boards = generateFixedBoards();
-        database.ref('gameState/boards').set(gameState.boards);
+        if (gameState.isDealer) {
+            database.ref('gameState/boards').set(gameState.boards);
+        }
     }
     
     gameState.history = data.history || [];
@@ -1777,9 +1821,6 @@ function updatePlayersList(players) {
     });
 }
 
-// ============================================
-// ✅ TRANSFERENCIA DE CRUPIER
-// ============================================
 function transferDealer(newDealerId, newDealerName) {
     if (!gameState.isDealer) {
         showNotification('⚠️ Solo el crupier puede transferir el rol', 'warning');
@@ -1867,19 +1908,37 @@ function showTransferDealerModal() {
         } else {
             eligiblePlayers.forEach(player => {
                 const div = document.createElement('div');
-                div.className = 'transfer-player-item';
+                div.style.padding = '15px';
+                div.style.margin = '8px 0';
+                div.style.background = 'linear-gradient(135deg, #f8f9fa, #e9ecef)';
+                div.style.borderRadius = '10px';
+                div.style.border = '2px solid #3498db';
+                div.style.cursor = 'pointer';
+                div.style.transition = 'all 0.3s';
+                div.onmouseover = () => {
+                    div.style.transform = 'scale(1.02)';
+                    div.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                };
+                div.onmouseout = () => {
+                    div.style.transform = 'scale(1)';
+                    div.style.boxShadow = 'none';
+                };
+                
                 div.innerHTML = `
-                    <div class="player-info-row">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
                         <div>
-                            <strong class="player-name">👤 ${player.name}</strong>
-                            <div class="player-details">
+                            <strong style="color:#2c3e50;font-size:1.1em;">👤 ${player.name}</strong>
+                            <div style="color:#7f8c8d;font-size:0.9em;margin-top:5px;">
                                 ${player.boardId ? `🎴 Cartón #${player.boardId}` : '⚠️ Sin cartón'}
                                 ${player.balance !== undefined ? ` • 💰 $${player.balance}` : ''}
                             </div>
                         </div>
-                        <div class="transfer-action">👑 CEDER ROL</div>
+                        <div style="background:linear-gradient(135deg, #9b59b6, #8e44ad);color:white;padding:8px 15px;border-radius:20px;font-weight:bold;">
+                            👑 CEDER ROL
+                        </div>
                     </div>
                 `;
+                
                 div.onclick = () => transferDealer(player.id, player.name);
                 container.appendChild(div);
             });
@@ -1909,19 +1968,15 @@ function saveBalance() {
     showNotification(`✅ Saldo cargado exitosamente`, 'success');
 }
 
-// ============================================
-// ✅ RENDERIZADO DE CARTONES CON VALIDACIÓN
-// ============================================
 function renderBoards() {
     const container = document.getElementById('boardsContainer');
     container.innerHTML = '';
     
-    // ✅ VALIDACIÓN: Si no hay cartones, regenerar
-    if (!gameState.boards || !Array.isArray(gameState.boards) || gameState.boards.length === 0) {
-        console.warn('⚠️ No hay cartones válidos - Regenerando...');
+    if (!gameState.boards || !Array.isArray(gameState.boards) || gameState.boards.length === 0 || !gameState.boards[0].cards || gameState.boards[0].cards.length !== 25) {
         gameState.boards = generateFixedBoards();
-        database.ref('gameState/boards').set(gameState.boards);
-        return;
+        if (gameState.isDealer) {
+            database.ref('gameState/boards').set(gameState.boards);
+        }
     }
     
     const playerRef = database.ref(`players/${gameState.playerId}`);
@@ -1930,9 +1985,7 @@ function renderBoards() {
         gameState.boardSelectedThisRound = player ? player.boardSelectedThisRound : false;
         
         gameState.boards.forEach(board => {
-            // ✅ VALIDACIÓN: Cada cartón debe tener 25 cartas
             if (!board.cards || !Array.isArray(board.cards) || board.cards.length !== 25) {
-                console.warn(`⚠️ Cartón ${board.id} corrupto - Saltando...`);
                 return;
             }
             
@@ -2462,13 +2515,9 @@ function endRound() {
     });
 }
 
-// ============================================
-// ✅ INICIO DE NUEVA RONDA CON CARTONES REGENERADOS
-// ============================================
 function startNewRound() {
     document.getElementById('endRoundModal').classList.remove('show');
     
-    // ✅ REGENERAR CARTONES VÁLIDOS PARA NUEVA RONDA
     const newBoards = generateFixedBoards();
     gameState.boards = newBoards;
     
@@ -2481,7 +2530,6 @@ function startNewRound() {
             });
         });
         
-        // ✅ ENVIAR CARTONES REGENERADOS A FIREBASE
         database.ref('gameState').update({
             round: gameState.round + 1,
             currentHand: 1,
@@ -2678,24 +2726,6 @@ function showNotification(message, type = 'success') {
         notif.classList.remove('show');
     }, 3000);
 }
-
-// ============================================
-// ✅ PREVENIR CLICKS PROBLEMÁTICOS FUERA DEL JUEGO
-// ============================================
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.board') && 
-        !e.target.closest('.modal') && 
-        !e.target.closest('.btn-dealer') &&
-        !e.target.closest('.claim-btn')) {
-        return;
-    }
-});
-
-document.addEventListener('touchstart', (e) => {
-    if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-        e.preventDefault();
-    }
-}, { passive: false });
 
 window.addEventListener('unload', () => {
     if (cleanupInterval) clearInterval(cleanupInterval);
