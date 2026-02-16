@@ -1979,53 +1979,51 @@
         }
         
         function drawRandomCard() {
-            if (!gameState.handStarted || gameState.handFinished) {
-                showNotification('⚠️ Inicia la mano primero', 'warning');
-                return;
-            }
-            
-            if (gameState.currentClaim) {
-                showNotification('⚠️ Espera a resolver el premio actual', 'warning');
-                return;
-            }
-            
-            const allCards = [];
-            const suits = ['♠', '♥', '♦', '♣'];
-            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-            
-            suits.forEach(suit => {
-                values.forEach(value => {
-                    allCards.push(`${value}${suit}`);
-                });
-            });
-            
-            const availableCards = allCards.filter(c => !gameState.cardsUsed.includes(c));
-            
-            if (availableCards.length === 0) {
-                showNotification('🎉 ¡No quedan cartas!', 'success');
-                return;
-            }
-            
-            const randomIndex = Math.floor(Math.random() * availableCards.length);
-            const newCard = availableCards[randomIndex];
-            
-            gameState.currentCard = newCard;
-            gameState.cardsUsed.push(newCard);
-            gameState.cardsCount++;
-            
-            Object.keys(gameState.pots).forEach(pot => {
-                gameState.pots[pot] += 10;
-            });
-            
-            database.ref('gameState').update({
-                currentCard: newCard,
-                cardsUsed: gameState.cardsUsed,
-                cardsCount: gameState.cardsCount,
-                pots: gameState.pots
-            });
-            
-            showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
-        }
+    if (!gameState.handStarted || gameState.handFinished) {
+        showNotification('⚠️ Inicia la mano primero', 'warning');
+        return;
+    }
+    
+    if (gameState.currentClaim) {
+        showNotification('⚠️ Espera a resolver el premio actual', 'warning');
+        return;
+    }
+    
+    const allCards = [];
+    const suits = ['♠', '♥', '♦', '♣'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    
+    suits.forEach(suit => {
+        values.forEach(value => {
+            allCards.push(`${value}${suit}`);
+        });
+    });
+    
+    const availableCards = allCards.filter(c => !gameState.cardsUsed.includes(c));
+    
+    if (availableCards.length === 0) {
+        showNotification('🎉 ¡No quedan cartas!', 'success');
+        return;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * availableCards.length);
+    const newCard = availableCards[randomIndex];
+    
+    gameState.currentCard = newCard;
+    gameState.cardsUsed.push(newCard);
+    gameState.cardsCount++;
+    
+    // ✅ CORREGIDO: SOLO actualizamos la carta y contadores
+    // Los pozos NO cambian al lanzar cartas (ya se cargaron en initHand)
+    database.ref('gameState').update({
+        currentCard: newCard,
+        cardsUsed: gameState.cardsUsed,
+        cardsCount: gameState.cardsCount
+        
+    });
+    
+    showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
+}
         
         function becomeDealer() {
             if (gameState.dealerId) {
