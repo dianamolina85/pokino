@@ -1693,11 +1693,18 @@
                 document.getElementById('becomeDealerBtn').style.display = 'block';
             }
             
-            if (data.currentClaim && !document.getElementById('verificationModal').classList.contains('show')) {
-                showClaimModal(data.currentClaim, data.claimingPlayer, data.claimingBoardId);
-            }
-            
-            updateCurrentCardDisplay();
+            const verificationModal = document.getElementById('verificationModal');
+if (data.currentClaim) {
+    // Solo abrir si no está visible
+    if (!verificationModal.classList.contains('show')) {
+        showClaimModal(data.currentClaim, data.claimingPlayer, data.claimingBoardId);
+    }
+} else {
+    // ✅ CERRAR SIEMPRE que currentClaim sea null (aprobado/denegado)
+    if (verificationModal.classList.contains('show')) {
+        verificationModal.classList.remove('show');
+    }
+}
         }
         
         function updatePlayersList(players) {
