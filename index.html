@@ -17,10 +17,8 @@
     font-family: 'Arial', sans-serif;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
 }
-/* ✅ CORRECCIÓN: Permitir scroll en body */
+/* ✅ SCROLL GENERAL PERMITIDO */
 html, body {
     width: 100%;
     min-height: 100vh;
@@ -42,7 +40,6 @@ body {
     border-radius: 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     padding: 20px;
-    /* ✅ CORRECCIÓN: Sin height fijo para permitir scroll */
     min-height: auto;
     height: auto;
 }
@@ -119,12 +116,20 @@ h1 {
     display: grid;
     grid-template-columns: 320px 1fr 280px;
     gap: 20px;
+    /* ✅ PC: Altura fija para permitir scroll independiente */
+    align-items: start;
 }
 .control-panel {
     background: #f5f9ff;
     padding: 15px;
     border-radius: 10px;
     border: 2px solid #4da6ff;
+    /* ✅ PC: Scroll independiente con altura máxima */
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: sticky;
+    top: 20px;
 }
 .section-title {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -200,12 +205,6 @@ h1 {
 .card-display.club .card-symbol {
     color: #2c3e50;
 }
-.card-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin-bottom: 15px;
-}
 .btn-dealer {
     padding: 15px;
     border: none;
@@ -220,7 +219,6 @@ h1 {
     gap: 8px;
     width: 100%;
     margin-bottom: 8px;
-    /* ✅ CORRECCIÓN: Mejor touch en móviles */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
@@ -266,7 +264,7 @@ h1 {
     background: linear-gradient(135deg, #8e44ad, #7d3c98);
 }
 .cards-summary {
-    max-height: 250px;
+    max-height: 200px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     background: white;
@@ -328,15 +326,22 @@ h1 {
     font-weight: bold;
     color: #2c3e50;
 }
+/* ✅ CENTRO DE JUEGO - SCROLL INDEPENDIENTE PARA CARTONES */
+.center-panel {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    /* ✅ PC: Scroll independiente */
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
 .boards-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 18px;
-    /* ✅ CORRECCIÓN: Max-height más alto para móviles */
-    max-height: none;
-    overflow-y: visible;
+    /* ✅ Sin max-height para permitir scroll natural */
     padding: 10px 5px;
-    padding-right: 10px;
 }
 .board {
     background: white;
@@ -408,8 +413,6 @@ h1 {
     cursor: pointer;
     transition: all 0.2s;
     padding: 3px;
-    /* ✅ CORRECCIÓN: Permitir selección en móviles */
-    -webkit-user-select: none;
     user-select: none;
     touch-action: manipulation;
 }
@@ -514,7 +517,6 @@ h1 {
     flex-direction: column;
     gap: 8px;
     margin-top: 12px;
-    /* ✅ CORRECCIÓN: Scroll en lista de jugadores */
     max-height: 300px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -576,6 +578,108 @@ h1 {
 .transfer-btn:hover {
     background: linear-gradient(135deg, #8e44ad, #7d3c98);
 }
+.history-container {
+    margin-top: 25px;
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    border: 2px solid #3498db;
+}
+.history-list {
+    max-height: 180px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 12px;
+}
+.history-item {
+    padding: 10px;
+    border-bottom: 1px solid #ecf0f1;
+    display: grid;
+    grid-template-columns: 100px 110px 1fr 100px;
+    font-size: 0.95em;
+    align-items: center;
+}
+.history-item:last-child {
+    border-bottom: none;
+}
+.history-item strong {
+    color: #27ae60;
+}
+.history-hand { color: #3498db; font-weight: bold; }
+.history-date { color: #7f8c8d; }
+.history-winner { color: #e67e22; font-weight: bold; }
+.history-prize { color: #27ae60; font-weight: bold; }
+.empty-history {
+    text-align: center;
+    color: #95a5a6;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* ============================================
+   ✅ BARRA FLOTANTE DE CARTA ACTUAL (MÓVIL/TABLET)
+   ============================================ */
+.floating-card-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+.floating-card-bar.show {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+.floating-card-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+.floating-card-display {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 20px;
+    min-width: 100px;
+    text-align: center;
+    color: #333;
+}
+.floating-card-display .card-text {
+    font-size: 1.8em;
+    font-weight: bold;
+}
+.floating-card-display .card-symbol {
+    font-size: 2.5em;
+    line-height: 1;
+}
+.floating-card-display.heart .card-text,
+.floating-card-display.heart .card-symbol,
+.floating-card-display.diamond .card-text,
+.floating-card-display.diamond .card-symbol {
+    color: #e74c3c;
+}
+.floating-card-count {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+.floating-card-label {
+    font-size: 0.85em;
+    opacity: 0.8;
+    margin-bottom: 3px;
+}
+
 .modal {
     display: none;
     position: fixed;
@@ -588,7 +692,6 @@ h1 {
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(5px);
-    /* ✅ CORRECCIÓN: Permitir scroll dentro del modal */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -609,7 +712,6 @@ h1 {
     text-align: center;
     box-shadow: 0 15px 50px rgba(0,0,0,0.4);
     position: relative;
-    /* ✅ CORRECCIÓN: Scroll dentro del contenido del modal */
     max-height: 90vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -853,43 +955,6 @@ h1 {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
-.history-container {
-    margin-top: 25px;
-    background: white;
-    padding: 18px;
-    border-radius: 12px;
-    border: 2px solid #3498db;
-}
-.history-list {
-    max-height: 180px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-top: 12px;
-}
-.history-item {
-    padding: 10px;
-    border-bottom: 1px solid #ecf0f1;
-    display: grid;
-    grid-template-columns: 100px 110px 1fr 100px;
-    font-size: 0.95em;
-    align-items: center;
-}
-.history-item:last-child {
-    border-bottom: none;
-}
-.history-item strong {
-    color: #27ae60;
-}
-.history-hand { color: #3498db; font-weight: bold; }
-.history-date { color: #7f8c8d; }
-.history-winner { color: #e67e22; font-weight: bold; }
-.history-prize { color: #27ae60; font-weight: bold; }
-.empty-history {
-    text-align: center;
-    color: #95a5a6;
-    font-style: italic;
-    padding: 20px;
-}
 .notification {
     position: fixed;
     top: 20px;
@@ -904,7 +969,6 @@ h1 {
     z-index: 3000;
     transform: translateX(400px);
     transition: transform 0.4s ease-out;
-    /* ✅ CORRECCIÓN: No bloquear touch en notificaciones */
     pointer-events: none;
 }
 .notification.show {
@@ -919,20 +983,28 @@ h1 {
 .notification.success {
     background: linear-gradient(135deg, #27ae60, #229954);
 }
-/* ✅ MEDIA QUERIES OPTIMIZADAS PARA MÓVIL Y TABLET */
+
+/* ============================================
+   ✅ MEDIA QUERIES OPTIMIZADAS
+   ============================================ */
 @media (max-width: 1200px) {
     .game-container {
         grid-template-columns: 1fr;
     }
+    .control-panel {
+        /* ✅ Tablet: Scroll independiente pero más alto */
+        max-height: none;
+        position: static;
+    }
+    .center-panel {
+        max-height: none;
+        position: static;
+    }
     .claim-panel {
         grid-template-columns: repeat(3, 1fr);
     }
-    .boards-container {
-        /* ✅ CORRECCIÓN: Permitir scroll en tablets */
-        max-height: none;
-        overflow-y: visible;
-    }
 }
+
 @media (max-width: 768px) {
     .container {
         padding: 10px;
@@ -967,7 +1039,20 @@ h1 {
     .card-display .card-text {
         font-size: 2em;
     }
+    /* ✅ MÓVIL: Mostrar barra flotante de carta actual */
+    .floating-card-bar {
+        display: block;
+    }
+    /* ✅ MÓVIL: Ocultar carta actual en panel superior (ya está en barra flotante) */
+    .card-display {
+        display: none;
+    }
+    /* ✅ MÓVIL: Ajustar padding inferior para la barra flotante */
+    body {
+        padding-bottom: 100px;
+    }
 }
+
 @media (max-width: 600px) {
     .boards-container {
         grid-template-columns: 1fr;
@@ -1031,14 +1116,25 @@ h1 {
         font-size: 0.9em;
         padding: 12px 20px;
     }
+    .floating-card-display {
+        min-width: 80px;
+        padding: 8px 15px;
+    }
+    .floating-card-display .card-text {
+        font-size: 1.5em;
+    }
+    .floating-card-display .card-symbol {
+        font-size: 2em;
+    }
 }
-/* ✅ CORRECCIÓN: Soporte para iPhone con notch */
+
+/* ✅ Soporte para iPhone con notch */
 @supports (padding: max(0px)) {
     body {
         padding-left: max(15px, env(safe-area-inset-left));
         padding-right: max(15px, env(safe-area-inset-right));
         padding-top: max(15px, env(safe-area-inset-top));
-        padding-bottom: max(15px, env(safe-area-inset-bottom));
+        padding-bottom: max(100px, env(safe-area-inset-bottom));
     }
 }
 </style>
@@ -1063,6 +1159,7 @@ h1 {
     </div>
     
     <div class="game-container">
+        <!-- Panel Izquierdo - Controles del Crupier -->
         <div class="control-panel">
             <div class="game-info">
                 <div class="round">Ronda: <span id="roundNumber">1</span></div>
@@ -1088,6 +1185,7 @@ h1 {
                 </button>
             </div>
             
+            <!-- ✅ Carta actual (visible en PC, oculta en móvil) -->
             <div class="section-title">🃏 CARTA ACTUAL</div>
             <div class="card-display" id="currentCardDisplay">
                 <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
@@ -1109,7 +1207,8 @@ h1 {
             </div>
         </div>
         
-        <div>
+        <!-- Panel Central - Cartones (con scroll independiente en PC) -->
+        <div class="center-panel">
             <div class="section-title">🎲 CARTONES (5x5) - Selecciona TU cartón</div>
             <div class="boards-container" id="boardsContainer"></div>
             <div class="history-container">
@@ -1120,6 +1219,7 @@ h1 {
             </div>
         </div>
         
+        <!-- Panel Derecho - Acciones -->
         <div class="control-panel">
             <div class="section-title">🎮 ACCIONES</div>
             <div class="actions" style="margin-top:0;">
@@ -1150,6 +1250,21 @@ h1 {
                 <p>• Verifica y aprueba premios</p>
                 <p>• Puedes transferir el rol de crupier</p>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ BARRA FLOTANTE DE CARTA ACTUAL (Solo Móvil/Tablet) -->
+<div class="floating-card-bar" id="floatingCardBar">
+    <div class="floating-card-info">
+        <div class="floating-card-display" id="floatingCardDisplay">
+            <div class="floating-card-label">Última Carta</div>
+            <div class="card-text" id="floatingCardText">-</div>
+            <div class="card-symbol" id="floatingCardSymbol">🃏</div>
+        </div>
+        <div>
+            <div class="floating-card-label">Cartas cantadas</div>
+            <div class="floating-card-count" id="floatingCardCount">0</div>
         </div>
     </div>
 </div>
@@ -1768,6 +1883,7 @@ function loadGameState(data) {
     }
     
     updateCurrentCardDisplay();
+    updateFloatingCardDisplay();
 }
 
 function updatePlayersList(players) {
@@ -2145,6 +2261,9 @@ function toggleCellMark(boardId, cellIndex, event) {
     renderBoards();
 }
 
+// ============================================
+// ✅ ACTUALIZAR CARTA ACTUAL (PC)
+// ============================================
 function updateCurrentCardDisplay() {
     const display = document.getElementById('currentCardDisplay');
     display.innerHTML = '';
@@ -2161,6 +2280,38 @@ function updateCurrentCardDisplay() {
         <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
         <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
     `;
+}
+
+// ============================================
+// ✅ ACTUALIZAR BARRA FLOTANTE (MÓVIL/TABLET)
+// ============================================
+function updateFloatingCardDisplay() {
+    const bar = document.getElementById('floatingCardBar');
+    const cardDisplay = document.getElementById('floatingCardDisplay');
+    const cardText = document.getElementById('floatingCardText');
+    const cardSymbol = document.getElementById('floatingCardSymbol');
+    const cardCount = document.getElementById('floatingCardCount');
+    
+    if (!gameState.currentCard) {
+        bar.classList.remove('show');
+        return;
+    }
+    
+    const card = gameState.currentCard;
+    const isRed = card.includes('♥') || card.includes('♦');
+    
+    bar.classList.add('show');
+    cardText.textContent = card.replace(/[♠♥♦♣]/, '');
+    cardSymbol.textContent = card.match(/[♠♥♦♣]/)[0];
+    cardCount.textContent = gameState.cardsCount;
+    
+    if (isRed) {
+        cardDisplay.classList.add('heart');
+        cardDisplay.classList.remove('spade');
+    } else {
+        cardDisplay.classList.add('spade');
+        cardDisplay.classList.remove('heart');
+    }
 }
 
 function drawRandomCard() {
@@ -2702,6 +2853,7 @@ function updateDisplay() {
     }
     renderBoards();
     updateCurrentCardDisplay();
+    updateFloatingCardDisplay();
     if (gameState.isDealer) {
         document.getElementById('drawBtn').disabled = !gameState.handStarted || gameState.handFinished;
     }
