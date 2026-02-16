@@ -116,6 +116,7 @@
             gap: 20px;
         }
         
+        /* Panel de Control - Lector de Cartas */
         .control-panel {
             background: #f5f9ff;
             padding: 15px;
@@ -190,7 +191,7 @@
         }
         
         .card-display .card-symbol {
-            font-size: 4em;
+            font-size: 10em; /* ✅ AUMENTADO A 10em PARA MÁXIMA VISIBILIDAD */
             margin: 0;
         }
         
@@ -206,6 +207,22 @@
         .card-display.club .card-text,
         .card-display.club .card-symbol {
             color: #2c3e50;
+        }
+        
+        /* Carta actual visible para todos los jugadores */
+        .current-card-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 2px solid #3498db;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .current-card-section .section-title {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            margin-bottom: 10px;
         }
         
         .card-actions {
@@ -256,6 +273,12 @@
         
         .btn-init:hover {
             background: linear-gradient(135deg, #2980b9, #2573a7);
+        }
+        
+        .btn-init:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .btn-end {
@@ -339,6 +362,7 @@
             color: #2c3e50;
         }
         
+        /* Cartones de Juego */
         .boards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -484,6 +508,7 @@
             background: rgba(0, 0, 0, 0.65);
         }
         
+        /* Panel de Canto - Abajo del cartón */
         .claim-panel {
             display: none;
             flex-direction: column;
@@ -529,6 +554,7 @@
         .claim-btn.esquinas { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
         .claim-btn.especial { background: linear-gradient(135deg, #e74c3c, #c0392b); }
         
+        /* Lista de Jugadores */
         .players-online {
             text-align: center;
             padding: 15px;
@@ -595,6 +621,22 @@
             background: #f39c12;
         }
         
+        .transfer-btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 0.8em;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        
+        .transfer-btn:hover {
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+        }
+        
+        /* Modal de Verificación */
         .modal {
             display: none;
             position: fixed;
@@ -746,6 +788,7 @@
             border-top: 2px solid #ecf0f1;
         }
         
+        /* Modal de Saldo */
         .balance-modal {
             display: none;
             position: fixed;
@@ -789,6 +832,7 @@
             margin-top: 20px;
         }
         
+        /* Modal de Solicitud */
         .request-modal {
             display: none;
             position: fixed;
@@ -861,6 +905,7 @@
             color: white;
         }
         
+        /* Modal de Espera */
         .wait-modal {
             display: none;
             position: fixed;
@@ -887,6 +932,7 @@
             text-align: center;
         }
         
+        /* Historial */
         .history-container {
             margin-top: 25px;
             background: white;
@@ -996,6 +1042,10 @@
             .modal-content {
                 max-width: 95%;
             }
+            
+            .card-display .card-symbol {
+                font-size: 7em; /* Ajuste para móviles */
+            }
         }
     </style>
 </head>
@@ -1019,6 +1069,7 @@
         </div>
         
         <div class="game-container">
+            <!-- Panel de Control - Lector de Cartas -->
             <div class="control-panel">
                 <div class="game-info">
                     <div class="round">Ronda: <span id="roundNumber">1</span></div>
@@ -1039,16 +1090,9 @@
                     <button class="btn-dealer btn-warning" onclick="showRequests()" id="requestsBtn" style="display:none;background:linear-gradient(135deg, #9b59b6, #8e44ad);">
                         <span>📬 VER SOLICITUDES (<span id="requestsCount">0</span>)</span>
                     </button>
-                </div>
-                
-                <div class="section-title">🃏 CARTA ACTUAL</div>
-                <div class="card-display" id="currentCardDisplay">
-                    <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
-                </div>
-                
-                <div class="section-title">📋 CARTAS CANTADAS (<span id="cardsCount">0</span>)</div>
-                <div class="cards-summary" id="cardsSummary">
-                    <div class="empty-summary">Aún no se han cantado cartas</div>
+                    <button class="btn-dealer btn-warning" onclick="showTransferDealerModal()" id="transferDealerBtn" style="display:none;background:linear-gradient(135deg, #9b59b6, #8e44ad);">
+                        <span>🔄 TRANSFERIR ROL DE CRUPIER</span>
+                    </button>
                 </div>
                 
                 <div class="section-title">💰 POZOS ACUMULADOS</div>
@@ -1062,7 +1106,16 @@
                 </div>
             </div>
             
+            <!-- Cartones de Juego - CON CARTA ACTUAL ENCIMA -->
             <div>
+                <!-- ✅ NUEVO: Sección de carta actual visible para todos los jugadores -->
+                <div class="current-card-section">
+                    <div class="section-title">🃏 CARTA ACTUAL</div>
+                    <div class="card-display" id="currentCardDisplayTop">
+                        <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
+                    </div>
+                </div>
+                
                 <div class="section-title">🎲 CARTONES (5x5) - Selecciona TU cartón</div>
                 <div class="boards-container" id="boardsContainer"></div>
                 
@@ -1074,6 +1127,7 @@
                 </div>
             </div>
             
+            <!-- Panel Derecha - Acciones Extra -->
             <div class="control-panel">
                 <div class="section-title">🎮 ACCIONES</div>
                 <div class="actions" style="margin-top:0;">
@@ -1103,11 +1157,13 @@
                     <p>• Inicia mano (se descuentan 6 monedas)</p>
                     <p>• Lanza cartas aleatorias</p>
                     <p>• Verifica y aprueba premios</p>
+                    <p>• Puedes transferir el rol de crupier</p>
                 </div>
             </div>
         </div>
     </div>
     
+    <!-- Modal de Verificación -->
     <div class="modal" id="verificationModal">
         <div class="modal-content">
             <div class="modal-title">🔔 ¡ALGUIEN CANTA PREMIO!</div>
@@ -1133,6 +1189,7 @@
         </div>
     </div>
     
+    <!-- Modal de Historial -->
     <div class="modal" id="historyModal">
         <div class="modal-content">
             <div class="modal-title">📊 HISTORIAL DE PARTIDAS</div>
@@ -1146,6 +1203,7 @@
         </div>
     </div>
     
+    <!-- Modal de Nombre de Jugador -->
     <div class="modal" id="nameModal">
         <div class="modal-content">
             <div class="modal-title">👤 ¡Bienvenido a SABADITO ALEGRE!</div>
@@ -1157,6 +1215,7 @@
         </div>
     </div>
     
+    <!-- Modal de Carga de Saldo -->
     <div class="balance-modal" id="balanceModal">
         <div class="balance-content">
             <div class="modal-title">💰 Cargar Saldo a Jugador</div>
@@ -1169,6 +1228,7 @@
         </div>
     </div>
     
+    <!-- Modal de Fin de Ronda -->
     <div class="modal" id="endRoundModal">
         <div class="modal-content">
             <div class="modal-title">🏁 ¡Ronda Finalizada!</div>
@@ -1185,6 +1245,7 @@
         </div>
     </div>
     
+    <!-- Modal de Solicitudes -->
     <div class="request-modal" id="requestModal">
         <div class="request-content">
             <div class="modal-title">📬 SOLICITUDES PARA UNIRSE</div>
@@ -1197,6 +1258,7 @@
         </div>
     </div>
     
+    <!-- Modal de Espera -->
     <div class="wait-modal" id="waitModal">
         <div class="wait-content">
             <div class="modal-title">⏳ ESPERANDO APROBACIÓN</div>
@@ -1206,9 +1268,27 @@
         </div>
     </div>
     
+    <!-- Modal de Transferencia de Crupier -->
+    <div class="modal" id="transferDealerModal">
+        <div class="modal-content">
+            <div class="modal-title">🔄 TRANSFERIR ROL DE CRUPIER</div>
+            <p style="margin:20px 0;font-size:1.1em;">Selecciona el jugador al que deseas transferir el rol de crupier:</p>
+            <div id="transferDealerList" style="max-height:300px;overflow-y:auto;margin:20px 0;">
+                <div style="color:#95a5a6;text-align:center;">Cargando jugadores...</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-dealer btn-init" onclick="document.getElementById('transferDealerModal').classList.remove('show')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notificación -->
     <div class="notification" id="notification">¡Carta cantada!</div>
     
     <script>
+        // ============================================
+        // 🔥 CONFIGURACIÓN DE FIREBASE
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBHBM1weX8-v_dk88QluRgFSXRD4NrNLmQ",
             authDomain: "pokino-4383c.firebaseapp.com",
@@ -1219,9 +1299,13 @@
             appId: "1:607174478777:web:0b16906bd16ed568d60468"
         };
         
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
+        // ============================================
+        // ESTADO DEL JUEGO
+        // ============================================
         let gameState = {
             sessionId: null,
             round: 1,
@@ -1264,6 +1348,9 @@
         let requestCheckInterval = null;
         let dealerDisconnectRef = null;
         
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
         function initGame() {
             database.ref('gameState/dealerDisconnected').once('value', (snapshot) => {
                 const disconnected = snapshot.val();
@@ -1272,23 +1359,27 @@
                 }
             });
             
-            document.getElementById('nameModal').classList.add('show');
-            
             startFirebaseListeners();
             
-            cleanupInterval = setInterval(cleanupInactivePlayers, 30000);
+            // Tiempo de inactividad más largo para móviles
+            const inactiveTime = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                ? 300000 // 5 minutos para móviles
+                : 120000; // 2 minutos para escritorio
+            
+            cleanupInterval = setInterval(cleanupInactivePlayers, inactiveTime);
             
             window.addEventListener('beforeunload', handleBeforeUnload);
         }
         
         function handleBeforeUnload() {
             if (gameState.playerId) {
-                database.ref(`players/${gameState.playerId}`).remove();
-                database.ref(`requests/${gameState.playerId}`).remove();
-                
-                if (gameState.isDealer) {
+                if (!gameState.isDealer) {
+                    database.ref(`players/${gameState.playerId}`).remove();
+                } else {
                     database.ref('gameState/dealerDisconnected').set(true);
+                    showNotification('👋 ¡Has salido de la sesión! Todos los jugadores serán desconectados.', 'warning');
                 }
+                database.ref(`requests/${gameState.playerId}`).remove();
             }
         }
         
@@ -1301,21 +1392,25 @@
         
         function cleanupInactivePlayers() {
             const now = Date.now();
-            const maxInactiveTime = 120000;
+            const maxInactiveTime = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                ? 300000 // 5 minutos para móviles
+                : 120000; // 2 minutos para escritorio
             
             database.ref('players').once('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 
                 Object.entries(players).forEach(([playerId, player]) => {
                     if (player.lastSeen && (now - player.lastSeen > maxInactiveTime)) {
-                        database.ref(`players/${playerId}`).remove();
-                        
-                        if (player.boardId) {
-                            database.ref(`gameState/boards/${player.boardId - 1}`).update({
-                                owner: null,
-                                ownerName: null,
-                                locked: false
-                            });
+                        if (gameState.dealerId !== playerId) {
+                            database.ref(`players/${playerId}`).remove();
+                            
+                            if (player.boardId) {
+                                database.ref(`gameState/boards/${player.boardId - 1}`).update({
+                                    owner: null,
+                                    ownerName: null,
+                                    locked: false
+                                });
+                            }
                         }
                     }
                 });
@@ -1353,8 +1448,6 @@
                 boardSelectedThisRound: false
             });
             
-            playerRef.onDisconnect().remove();
-            
             setInterval(() => {
                 playerRef.update({
                     lastSeen: Date.now(),
@@ -1362,10 +1455,26 @@
                 });
             }, 15000);
             
-            database.ref('gameState').once('value', (snapshot) => {
-                const gameStateData = snapshot.val();
+            // ✅ NUEVO: Verificar si hay crupier y convertirse si es el primero
+            database.ref('gameState/dealerId').once('value', (snapshot) => {
+                const dealerId = snapshot.val();
                 
-                if (gameStateData && gameStateData.dealerId) {
+                if (!dealerId) {
+                    // ✅ Primera persona se convierte automáticamente en crupier
+                    database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
+                        showNotification('👑 ¡Te has convertido automáticamente en CRUPIER! Puedes transferir el rol con el botón "🔄 TRANSFERIR ROL DE CRUPIER"', 'success');
+                        gameState.isDealer = true;
+                        document.getElementById('dealerBadge').style.display = 'inline-block';
+                        document.getElementById('dealerControls').style.display = 'block';
+                        document.getElementById('becomeDealerBtn').style.display = 'none';
+                        document.getElementById('transferDealerBtn').style.display = 'block';
+                        
+                        // Configurar onDisconnect para el crupier
+                        dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
+                        dealerDisconnectRef.onDisconnect().set(true);
+                    });
+                } else {
+                    // Hay crupier, solicitar unirse
                     gameState.hasRequested = true;
                     gameState.requestPending = true;
                     
@@ -1382,8 +1491,6 @@
                     document.getElementById('waitModal').classList.add('show');
                     
                     requestCheckInterval = setInterval(checkRequestStatus, 2000);
-                } else {
-                    showNotification(`✅ ¡Bienvenido, ${gameState.playerName}!`, 'success');
                 }
             });
         }
@@ -1532,7 +1639,6 @@
             });
             
             showNotification('✅ Solicitud aprobada', 'success');
-            updateRequestsList({});
         }
         
         function rejectRequest(playerId) {
@@ -1541,7 +1647,6 @@
             });
             
             showNotification('❌ Solicitud rechazada', 'warning');
-            updateRequestsList({});
         }
         
         function initializeGameInFirebase() {
@@ -1682,6 +1787,7 @@
                 document.getElementById('dealerBadge').style.display = 'inline-block';
                 document.getElementById('dealerControls').style.display = 'block';
                 document.getElementById('becomeDealerBtn').style.display = 'none';
+                document.getElementById('transferDealerBtn').style.display = 'block';
                 
                 if (!dealerDisconnectRef) {
                     dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
@@ -1691,20 +1797,29 @@
                 document.getElementById('dealerBadge').style.display = 'none';
                 document.getElementById('dealerControls').style.display = 'none';
                 document.getElementById('becomeDealerBtn').style.display = 'block';
+                document.getElementById('transferDealerBtn').style.display = 'none';
             }
             
+            // ✅ NUEVO: Cerrar modal si currentClaim es null
             const verificationModal = document.getElementById('verificationModal');
-if (data.currentClaim) {
-    // Solo abrir si no está visible
-    if (!verificationModal.classList.contains('show')) {
-        showClaimModal(data.currentClaim, data.claimingPlayer, data.claimingBoardId);
-    }
-} else {
-    // ✅ CERRAR SIEMPRE que currentClaim sea null (aprobado/denegado)
-    if (verificationModal.classList.contains('show')) {
-        verificationModal.classList.remove('show');
-    }
-}
+            if (data.currentClaim) {
+                if (!verificationModal.classList.contains('show')) {
+                    showClaimModal(data.currentClaim, data.claimingPlayer, data.claimingBoardId);
+                }
+            } else {
+                if (verificationModal.classList.contains('show')) {
+                    verificationModal.classList.remove('show');
+                }
+            }
+            
+            // ✅ NUEVO: Notificación para jugadores cuando se lanza carta
+            if (!gameState.isDealer && data.currentCard && data.currentCard !== gameState.currentCard) {
+                if (gameState.handStarted && !gameState.handFinished) {
+                    showNotification(`🎴 ¡Carta lanzada: ${data.currentCard}!`, 'success');
+                }
+            }
+            
+            updateCurrentCardDisplay();
         }
         
         function updatePlayersList(players) {
@@ -1714,7 +1829,7 @@ if (data.currentClaim) {
             const playerArray = Object.entries(players)
                 .filter(([id, p]) => {
                     const isActive = p.online && p.sessionId === id;
-                    const isRecent = (Date.now() - (p.lastSeen || 0)) < 120000;
+                    const isRecent = (Date.now() - (p.lastSeen || 0)) < (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 300000 : 120000);
                     
                     if (gameState.dealerId === id) {
                         return isActive && isRecent;
@@ -1734,12 +1849,20 @@ if (data.currentClaim) {
             playerArray.forEach(player => {
                 const playerEl = document.createElement('div');
                 playerEl.className = `player-item ${gameState.dealerId === player.id ? 'dealer' : ''}`;
-                playerEl.innerHTML = `
+                let playerHTML = `
                     <span class="player-name">${player.name}</span>
                     ${player.boardId ? `<span class="player-board">Cartón #${player.boardId}</span>` : '<span class="player-board">Sin cartón</span>'}
                     <span class="player-balance-display">$${player.balance || 0}</span>
                 `;
                 
+                // ✅ NUEVO: Botón para transferir crupier (solo visible para crupier)
+                if (gameState.isDealer && gameState.dealerId === gameState.playerId && !gameState.handStarted && !gameState.roundFinished && gameState.dealerId !== player.id) {
+                    playerHTML += `<button class="transfer-btn" onclick="transferDealer('${player.id}')">Transferir</button>`;
+                }
+                
+                playerEl.innerHTML = playerHTML;
+                
+                // ✅ CORREGIDO: Botón de carga de saldo solo si es crupier, mano no iniciada, y saldo < 6
                 if (gameState.isDealer && !gameState.handStarted && (player.balance || 0) < 6) {
                     const loadBtn = document.createElement('button');
                     loadBtn.className = 'btn-dealer btn-init';
@@ -1752,6 +1875,66 @@ if (data.currentClaim) {
                 }
                 
                 container.appendChild(playerEl);
+            });
+        }
+        
+        function transferDealer(newDealerId) {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede transferir el rol', 'warning');
+                return;
+            }
+            
+            if (gameState.handStarted || gameState.roundFinished) {
+                showNotification('⚠️ No se puede transferir el rol durante una mano o ronda finalizada', 'warning');
+                return;
+            }
+            
+            database.ref('gameState/dealerId').set(newDealerId).then(() => {
+                // Eliminar rol de crupier del actual
+                database.ref(`players/${gameState.playerId}`).update({
+                    approved: true // Mantener aprobado pero ya no es crupier
+                });
+                
+                // Dar rol de crupier al nuevo
+                database.ref(`players/${newDealerId}`).update({
+                    approved: true
+                });
+                
+                showNotification('🔄 ¡Rol de crupier transferido exitosamente!', 'success');
+                document.getElementById('transferDealerModal').classList.remove('show');
+            });
+        }
+        
+        function showTransferDealerModal() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede transferir el rol', 'warning');
+                return;
+            }
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                const container = document.getElementById('transferDealerList');
+                container.innerHTML = '';
+                
+                Object.entries(players)
+                    .filter(([id, p]) => p.approved && p.online && id !== gameState.playerId)
+                    .forEach(([id, player]) => {
+                        const div = document.createElement('div');
+                        div.style.padding = '10px';
+                        div.style.margin = '5px 0';
+                        div.style.background = '#f8f9fa';
+                        div.style.borderRadius = '8px';
+                        div.style.cursor = 'pointer';
+                        div.innerHTML = `<strong>${player.name}</strong> - Cartón #${player.boardId || 'N/A'}`;
+                        div.onclick = () => transferDealer(id);
+                        container.appendChild(div);
+                    });
+                
+                if (container.innerHTML.trim() === '') {
+                    container.innerHTML = '<div style="color:#95a5a6;text-align:center;">No hay jugadores disponibles para transferir el rol</div>';
+                }
+                
+                document.getElementById('transferDealerModal').classList.add('show');
             });
         }
         
@@ -1965,72 +2148,75 @@ if (data.currentClaim) {
         }
         
         function updateCurrentCardDisplay() {
-            const display = document.getElementById('currentCardDisplay');
-            display.innerHTML = '';
+            const displays = ['currentCardDisplay', 'currentCardDisplayTop'];
             
-            if (!gameState.currentCard) {
-                display.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>';
-                return;
-            }
-            
-            const card = gameState.currentCard;
-            const isRed = card.includes('♥') || card.includes('♦');
-            const suitClass = isRed ? 'heart' : 'spade';
-            
-            display.className = `card-display ${suitClass}`;
-            display.innerHTML = `
-                <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
-                <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
-                <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
-            `;
+            displays.forEach(id => {
+                const display = document.getElementById(id);
+                if (!display) return;
+                
+                display.innerHTML = '';
+                
+                if (!gameState.currentCard) {
+                    display.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>';
+                    return;
+                }
+                
+                const card = gameState.currentCard;
+                const isRed = card.includes('♥') || card.includes('♦');
+                const suitClass = isRed ? 'heart' : 'spade';
+                
+                display.className = `card-display ${suitClass}`;
+                display.innerHTML = `
+                    <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
+                    <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
+                    <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
+                `;
+            });
         }
         
         function drawRandomCard() {
-    if (!gameState.handStarted || gameState.handFinished) {
-        showNotification('⚠️ Inicia la mano primero', 'warning');
-        return;
-    }
-    
-    if (gameState.currentClaim) {
-        showNotification('⚠️ Espera a resolver el premio actual', 'warning');
-        return;
-    }
-    
-    const allCards = [];
-    const suits = ['♠', '♥', '♦', '♣'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    
-    suits.forEach(suit => {
-        values.forEach(value => {
-            allCards.push(`${value}${suit}`);
-        });
-    });
-    
-    const availableCards = allCards.filter(c => !gameState.cardsUsed.includes(c));
-    
-    if (availableCards.length === 0) {
-        showNotification('🎉 ¡No quedan cartas!', 'success');
-        return;
-    }
-    
-    const randomIndex = Math.floor(Math.random() * availableCards.length);
-    const newCard = availableCards[randomIndex];
-    
-    gameState.currentCard = newCard;
-    gameState.cardsUsed.push(newCard);
-    gameState.cardsCount++;
-    
-    // ✅ CORREGIDO: SOLO actualizamos la carta y contadores
-    // Los pozos NO cambian al lanzar cartas (ya se cargaron en initHand)
-    database.ref('gameState').update({
-        currentCard: newCard,
-        cardsUsed: gameState.cardsUsed,
-        cardsCount: gameState.cardsCount
-        
-    });
-    
-    showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
-}
+            if (!gameState.handStarted || gameState.handFinished) {
+                showNotification('⚠️ Inicia la mano primero', 'warning');
+                return;
+            }
+            
+            if (gameState.currentClaim) {
+                showNotification('⚠️ Espera a resolver el premio actual', 'warning');
+                return;
+            }
+            
+            const allCards = [];
+            const suits = ['♠', '♥', '♦', '♣'];
+            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            
+            suits.forEach(suit => {
+                values.forEach(value => {
+                    allCards.push(`${value}${suit}`);
+                });
+            });
+            
+            const availableCards = allCards.filter(c => !gameState.cardsUsed.includes(c));
+            
+            if (availableCards.length === 0) {
+                showNotification('🎉 ¡No quedan cartas!', 'success');
+                return;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableCards.length);
+            const newCard = availableCards[randomIndex];
+            
+            gameState.currentCard = newCard;
+            gameState.cardsUsed.push(newCard);
+            gameState.cardsCount++;
+            
+            database.ref('gameState').update({
+                currentCard: newCard,
+                cardsUsed: gameState.cardsUsed,
+                cardsCount: gameState.cardsCount
+            });
+            
+            showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
+        }
         
         function becomeDealer() {
             if (gameState.dealerId) {
@@ -2067,14 +2253,34 @@ if (data.currentClaim) {
                 return;
             }
             
-            const playersWithBoards = gameState.boards.filter(b => b.owner).length;
-            if (playersWithBoards === 0) {
-                showNotification('⚠️ Espera a que al menos un jugador seleccione cartón', 'warning');
-                return;
-            }
-            
+            // ✅ NUEVO: Verificar que TODOS los jugadores con saldo tengan cartón
             database.ref('players').once('value', (snapshot) => {
                 const players = snapshot.val() || {};
+                let playersWithBalance = 0;
+                let playersWithBoard = 0;
+                let missingBoards = [];
+                
+                Object.entries(players).forEach(([id, player]) => {
+                    if (player.approved && player.balance >= 6) {
+                        playersWithBalance++;
+                        if (player.boardId) {
+                            playersWithBoard++;
+                        } else {
+                            missingBoards.push(player.name);
+                        }
+                    }
+                });
+                
+                if (missingBoards.length > 0) {
+                    showNotification(`⚠️ Jugadores sin cartón: ${missingBoards.join(', ')}. Todos deben seleccionar cartón para iniciar.`, 'warning');
+                    return;
+                }
+                
+                if (playersWithBoard === 0) {
+                    showNotification('⚠️ Espera a que al menos un jugador seleccione cartón', 'warning');
+                    return;
+                }
+                
                 let insufficientBalance = [];
                 let playerCount = 0;
                 
@@ -2092,6 +2298,7 @@ if (data.currentClaim) {
                     return;
                 }
                 
+                // Actualizar saldos
                 Object.entries(players).forEach(([id, player]) => {
                     if (player.boardId && player.balance >= 6) {
                         database.ref(`players/${id}`).update({
@@ -2100,6 +2307,7 @@ if (data.currentClaim) {
                     }
                 });
                 
+                // Cargar POZOS: 1 moneda por jugador por pozo
                 const newPots = {
                     pokino: gameState.pots.pokino + playerCount,
                     poker: gameState.pots.poker + playerCount,
@@ -2109,6 +2317,7 @@ if (data.currentClaim) {
                     especial: gameState.pots.especial + playerCount
                 };
                 
+                // Reiniciar TODOS los marcados
                 const resetBoards = gameState.boards.map(board => ({
                     ...board,
                     marked: Array(25).fill(false)
@@ -2124,6 +2333,7 @@ if (data.currentClaim) {
                     boards: resetBoards
                 });
                 
+                // ✅ DESACTIVAR botón "INICIAR MANO"
                 document.getElementById('drawBtn').disabled = false;
                 document.getElementById('initHandBtn').disabled = true;
                 showNotification(`▶️ ¡Mano iniciada! Cada pozo recibió ${playerCount} monedas.`, 'success');
@@ -2256,12 +2466,7 @@ if (data.currentClaim) {
         }
         
         function approveClaim() {
-            if (!gameState.isDealer) {
-                showNotification('⚠️ Solo el crupier puede aprobar premios', 'warning');
-                return;
-            }
-            
-            if (!gameState.currentClaim) return;
+            if (!gameState.isDealer || !gameState.currentClaim) return;
             
             const prizeAmount = gameState.pots[gameState.currentClaim];
             const prizeName = gameState.currentClaim.toUpperCase();
@@ -2291,10 +2496,13 @@ if (data.currentClaim) {
                     amount: prizeAmount
                 });
                 
+                // ✅ Reiniciar SOLO el pozo ganado
                 const newPots = { ...gameState.pots };
                 newPots[gameState.currentClaim] = 0;
                 
-                const shouldEndHand = (gameState.currentClaim === 'pokino');
+                // ✅ CORREGIDO: En mano 6, solo "Especial" termina la ronda
+                const shouldEndHand = (gameState.currentClaim === 'pokino' && gameState.currentHand < 6) || 
+                                     (gameState.currentClaim === 'especial' && gameState.currentHand === 6);
                 
                 const updates = {
                     history: newHistory,
@@ -2311,7 +2519,9 @@ if (data.currentClaim) {
                     if (gameState.currentHand < 6) {
                         updates.currentHand = gameState.currentHand + 1;
                     } else {
-                        updates.roundFinished = true;
+                        if (gameState.currentClaim === 'especial') {
+                            updates.roundFinished = true;
+                        }
                     }
                 }
                 
@@ -2321,11 +2531,17 @@ if (data.currentClaim) {
                 
                 if (shouldEndHand) {
                     document.getElementById('drawBtn').disabled = true;
-                    document.getElementById('initHandBtn').disabled = false;
                     
-                    if (gameState.currentHand === 6) {
+                    // ✅ REACTIVAR botón "INICIAR MANO" solo si no es la mano 6
+                    if (gameState.currentHand < 6) {
+                        document.getElementById('initHandBtn').disabled = false;
+                    }
+                    
+                    if (gameState.currentHand === 6 && gameState.currentClaim === 'especial') {
                         document.getElementById('endRoundBtn').style.display = 'block';
                         showNotification(`🎉 ¡Mano ${gameState.currentHand} terminada! Ronda completada.`, 'success');
+                    } else if (gameState.currentHand === 6) {
+                        showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
                     } else {
                         showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
                     }
@@ -2341,12 +2557,14 @@ if (data.currentClaim) {
                 return;
             }
             
+            // ✅ CIERRA MODAL PARA TODOS
             database.ref('gameState').update({
                 currentClaim: null,
                 claimingPlayer: null,
                 claimingBoardId: null
             });
             
+            // ✅ Cerrar modal localmente
             document.getElementById('verificationModal').classList.remove('show');
             showNotification('❌ Premio denegado. Continuamos jugando', 'warning');
         }
@@ -2636,12 +2854,12 @@ if (data.currentClaim) {
             if (cleanupInterval) clearInterval(cleanupInterval);
             if (requestCheckInterval) clearInterval(requestCheckInterval);
             if (gameState.playerId) {
-                database.ref(`players/${gameState.playerId}`).remove();
-                database.ref(`requests/${gameState.playerId}`).remove();
-                
-                if (gameState.isDealer) {
+                if (!gameState.isDealer) {
+                    database.ref(`players/${gameState.playerId}`).remove();
+                } else {
                     database.ref('gameState/dealerDisconnected').set(true);
                 }
+                database.ref(`requests/${gameState.playerId}`).remove();
             }
         });
         
