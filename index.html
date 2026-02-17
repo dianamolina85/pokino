@@ -1,1701 +1,2870 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<title>SABADITO ALEGRE - POKENO</title>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
-    -webkit-tap-highlight-color: transparent;
-}
-html, body {
-    width: 100%;
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-}
-body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 15px;
-    color: #333;
-    position: relative;
-}
-.container {
-    max-width: 1600px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    padding: 20px;
-}
-header {
-    text-align: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
-.subtitle {
-    font-size: 1.2em;
-    opacity: 0.9;
-    margin-top: 5px;
-}
-.zoom-note {
-    background: rgba(255,255,255,0.2);
-    padding: 8px;
-    border-radius: 20px;
-    display: inline-block;
-    margin-top: 10px;
-    font-size: 0.9em;
-}
-.player-info {
-    background: white;
-    padding: 12px;
-    border-radius: 20px;
-    display: inline-block;
-    margin-top: 10px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-right: 10px;
-}
-.player-balance {
-    background: linear-gradient(135deg, #27ae60, #229954);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 25px;
-    display: inline-block;
-    margin-top: 10px;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-.dealer-badge {
-    background: linear-gradient(135deg, #f39c12, #e67e22);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 25px;
-    display: inline-block;
-    margin-top: 10px;
-    font-weight: bold;
-    font-size: 1.1em;
-}
-.session-badge {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 20px;
-    display: inline-block;
-    margin-top: 10px;
-    font-weight: bold;
-    font-size: 1em;
-}
-.game-container {
-    display: grid;
-    grid-template-columns: 320px 1fr 280px;
-    gap: 20px;
-}
-.control-panel {
-    background: #f5f9ff;
-    padding: 15px;
-    border-radius: 10px;
-    border: 2px solid #4da6ff;
-}
-.section-title {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-weight: bold;
-    font-size: 1.1em;
-    text-align: center;
-}
-.dealer-controls {
-    background: linear-gradient(135deg, #f39c12, #e67e22);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    text-align: center;
-}
-.game-info {
-    background: #e8f4fc;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    border-left: 4px solid #3498db;
-    text-align: center;
-}
-.game-info .round {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #2980b9;
-}
-.game-info .hand {
-    font-size: 1.1em;
-    color: #e67e22;
-    font-weight: bold;
-}
-.card-display {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    border: 3px solid #3498db;
-    text-align: center;
-    margin-bottom: 15px;
-    min-height: 100px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-.card-display .card-text {
-    font-size: 2.5em;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-.card-display .card-symbol {
-    font-size: 8em;
-    margin: 0;
-}
-.card-display.heart .card-text,
-.card-display.heart .card-symbol,
-.card-display.diamond .card-text,
-.card-display.diamond .card-symbol {
-    color: #e74c3c;
-}
-.card-display.spade .card-text,
-.card-display.spade .card-symbol,
-.card-display.club .card-text,
-.card-display.club .card-symbol {
-    color: #2c3e50;
-}
-.btn-dealer {
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1em;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    margin-bottom: 8px;
-    touch-action: manipulation;
-}
-.btn-dealer:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-}
-.btn-draw {
-    background: linear-gradient(135deg, #27ae60, #229954);
-    color: white;
-}
-.btn-draw:disabled {
-    background: #bdc3c7;
-    cursor: not-allowed;
-    transform: none;
-}
-.btn-init {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-}
-.btn-end {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    color: white;
-}
-.btn-warning {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-    color: white;
-}
-.cards-summary {
-    max-height: 250px;
-    overflow-y: auto;
-    background: white;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 0.95em;
-    margin-bottom: 15px;
-}
-.cards-summary .card-item {
-    padding: 6px 10px;
-    border-bottom: 1px dashed #eee;
-    display: inline-block;
-    margin: 3px;
-    background: #f8f9fa;
-    border-radius: 15px;
-    min-width: 50px;
-    text-align: center;
-}
-.cards-summary .card-item.heart,
-.cards-summary .card-item.diamond {
-    color: #e74c3c;
-    font-weight: bold;
-}
-.cards-summary .card-item.spade,
-.cards-summary .card-item.club {
-    color: #2c3e50;
-    font-weight: bold;
-}
-.pots-display {
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-    border: 3px solid #ffd700;
-    margin-top: 10px;
-}
-.pot-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    margin-bottom: 8px;
-    background: #fff9e6;
-    border-radius: 6px;
-    border-left: 4px solid #f39c12;
-}
-.pot-item strong {
-    color: #e67e22;
-    font-size: 1.1em;
-}
-.boards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 18px;
-    max-height: 800px;
-    overflow-y: auto;
-    padding: 10px 5px;
-}
-.board {
-    background: white;
-    border: 3px solid #bdc3c7;
-    border-radius: 12px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-}
-.board.selected {
-    border-color: #27ae60;
-    box-shadow: 0 0 25px rgba(39, 174, 96, 0.4);
-    transform: scale(1.02);
-}
-.board.locked {
-    border-color: #3498db;
-    opacity: 0.85;
-    cursor: not-allowed;
-}
-.board-title {
-    font-weight: bold;
-    font-size: 1.3em;
-    margin-bottom: 12px;
-    color: #2c3e50;
-}
-.board-owner {
-    font-size: 0.85em;
-    color: #3498db;
-    margin-top: 5px;
-    font-weight: bold;
-    background: #e3f2fd;
-    padding: 3px 8px;
-    border-radius: 15px;
-    display: inline-block;
-}
-.board-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    margin-bottom: 15px;
-}
-.board-cell {
-    aspect-ratio: 1;
-    background: #f8f9fa;
-    border: 2px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75em;
-    font-weight: bold;
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 3px;
-    user-select: none;
-}
-.board-cell.heart, .board-cell.diamond { color: #e74c3c; }
-.board-cell.spade, .board-cell.club { color: #2c3e50; }
-.board-cell.marked {
-    background: rgba(0, 0, 0, 0.65);
-    color: white !important;
-}
-.claim-panel {
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 2px dashed #ecf0f1;
-}
-.board.selected .claim-panel {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-}
-.claim-btn {
-    padding: 10px;
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.85em;
-    font-weight: bold;
-}
-.claim-btn:disabled {
-    background: #bdc3c7;
-    cursor: not-allowed;
-}
-.claim-btn.pokino { background: linear-gradient(135deg, #27ae60, #229954); }
-.claim-btn.poker { background: linear-gradient(135deg, #1abc9c, #16a085); }
-.claim-btn.full { background: linear-gradient(135deg, #3498db, #2980b9); }
-.claim-btn.centro { background: linear-gradient(135deg, #f39c12, #e67e22); }
-.claim-btn.esquinas { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
-.claim-btn.especial { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-.players-online {
-    text-align: center;
-    padding: 15px;
-    background: #e8f8f5;
-    border-radius: 10px;
-    margin: 15px 0;
-    border: 2px solid #1abc9c;
-}
-.players-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-.player-item {
-    background: white;
-    padding: 10px;
-    border-radius: 8px;
-    border-left: 4px solid #1abc9c;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-.player-item.dealer {
-    border-left-color: #f39c12;
-    background: #fef9e7;
-}
-.player-name { color: #2c3e50; }
-.player-board {
-    background: #3498db;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 15px;
-    font-size: 0.9em;
-}
-.player-balance-display {
-    background: #27ae60;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 15px;
-    font-size: 0.9em;
-}
-.transfer-btn {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 4px 8px;
-    font-size: 0.8em;
-    cursor: pointer;
-}
-.history-container {
-    margin-top: 25px;
-    background: white;
-    padding: 18px;
-    border-radius: 12px;
-    border: 2px solid #3498db;
-}
-.history-list {
-    max-height: 180px;
-    overflow-y: auto;
-    margin-top: 12px;
-}
-.history-item {
-    padding: 10px;
-    border-bottom: 1px solid #ecf0f1;
-    display: grid;
-    grid-template-columns: 100px 110px 1fr 100px;
-    font-size: 0.95em;
-}
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: linear-gradient(135deg, #27ae60, #229954);
-    color: white;
-    padding: 15px 25px;
-    border-radius: 50px;
-    font-weight: bold;
-    z-index: 3000;
-    transform: translateX(400px);
-    transition: transform 0.4s ease-out;
-}
-.notification.show {
-    transform: translateX(0);
-}
-.notification.error { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-.notification.warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
-
-/* ============================================
-   ✅ BARRA FLOTANTE DE CARTA ACTUAL
-   ============================================ */
-.floating-card-bar {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    padding: 15px;
-    z-index: 1000;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
-}
-.floating-card-bar.show {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-}
-.floating-card-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-}
-.floating-card-display {
-    background: white;
-    border-radius: 10px;
-    padding: 10px 20px;
-    min-width: 100px;
-    text-align: center;
-    color: #333;
-}
-.floating-card-display .card-text {
-    font-size: 1.8em;
-    font-weight: bold;
-}
-.floating-card-display .card-symbol {
-    font-size: 2.5em;
-    line-height: 1;
-}
-.floating-card-display.heart .card-text,
-.floating-card-display.heart .card-symbol,
-.floating-card-display.diamond .card-text,
-.floating-card-display.diamond .card-symbol {
-    color: #e74c3c;
-}
-.floating-card-count {
-    font-size: 0.9em;
-    opacity: 0.9;
-}
-.floating-card-label {
-    font-size: 0.85em;
-    opacity: 0.8;
-    margin-bottom: 3px;
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-}
-.modal.show { display: flex; }
-.modal-content {
-    background: white;
-    padding: 25px;
-    border-radius: 20px;
-    max-width: 700px;
-    width: 95%;
-    text-align: center;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-.modal-title {
-    font-size: 1.8em;
-    margin-bottom: 20px;
-    color: #2c3e50;
-}
-.modal-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 25px;
-}
-.balance-modal, .request-modal, .wait-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.85);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-}
-.balance-modal.show, .request-modal.show, .wait-modal.show { display: flex; }
-.balance-content, .request-content, .wait-content {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 500px;
-    width: 90%;
-    text-align: center;
-}
-.balance-input {
-    padding: 12px;
-    font-size: 1.2em;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    margin: 15px 0;
-    width: 80%;
-    text-align: center;
-}
-.balance-actions, .request-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
-}
-.request-list {
-    max-height: 300px;
-    overflow-y: auto;
-    margin: 20px 0;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
-.request-item {
-    padding: 12px;
-    margin: 8px 0;
-    background: white;
-    border-radius: 8px;
-    border-left: 4px solid #9b59b6;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.request-btn {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-.request-btn.accept { background: #27ae60; color: white; }
-.request-btn.reject { background: #e74c3c; color: white; }
-
-/* ============================================
-   ✅ MEDIA QUERIES CORREGIDOS
-   ============================================ */
-/* PC: > 992px - MOSTRAR carta en panel, OCULTAR barra flotante */
-@media (min-width: 993px) {
-    .floating-card-bar {
-        display: none !important;
-    }
-    .card-display {
-        display: flex !important;
-    }
-    body {
-        padding-bottom: 0 !important;
-    }
-}
-
-/* TABLET: 768px - 992px - OCULTAR carta en panel, MOSTRAR barra flotante */
-@media (max-width: 992px) and (min-width: 768px) {
-    .game-container {
-        grid-template-columns: 1fr;
-    }
-    .floating-card-bar {
-        display: block !important;
-    }
-    .card-display {
-        display: none !important;
-    }
-    body {
-        padding-bottom: 100px !important;
-    }
-}
-
-/* MÓVIL: < 768px - OCULTAR carta en panel, MOSTRAR barra flotante */
-@media (max-width: 767px) {
-    .game-container {
-        grid-template-columns: 1fr;
-    }
-    .floating-card-bar {
-        display: block !important;
-    }
-    .card-display {
-        display: none !important;
-    }
-    body {
-        padding-bottom: 100px !important;
-    }
-    .container {
-        padding: 10px;
-    }
-    h1 {
-        font-size: 1.8em;
-    }
-    .boards-container {
-        grid-template-columns: 1fr;
-    }
-    .modal-actions, .balance-actions, .request-actions {
-        grid-template-columns: 1fr;
-    }
-    .claim-panel {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@supports (padding: max(0px)) {
-    body {
-        padding-bottom: max(100px, env(safe-area-inset-bottom));
-    }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABADITO ALEGRE - POKENO</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .zoom-note {
+            background: rgba(255,255,255,0.2);
+            padding: 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .player-info {
+            background: white;
+            padding: 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-right: 10px;
+        }
+        
+        .player-balance {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .dealer-badge {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .session-badge {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        
+        .game-container {
+            display: grid;
+            grid-template-columns: 320px 1fr 280px;
+            gap: 20px;
+        }
+        
+        /* Panel de Control - Lector de Cartas */
+        .control-panel {
+            background: #f5f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #4da6ff;
+        }
+        
+        .section-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .dealer-controls {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .dealer-controls .section-title {
+            background: rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        }
+        
+        .game-info {
+            background: #e8f4fc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            text-align: center;
+        }
+        
+        .game-info .round {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2980b9;
+        }
+        
+        .game-info .hand {
+            font-size: 1.1em;
+            color: #e67e22;
+            font-weight: bold;
+        }
+        
+        .card-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 3px solid #3498db;
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .card-display .card-text {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .card-display .card-symbol {
+            font-size: 8em; /* ✅ AUMENTADO A 8em PARA MEJOR VISIBILIDAD EN MÓVIL */
+            margin: 0;
+        }
+        
+        .card-display.heart .card-text,
+        .card-display.heart .card-symbol,
+        .card-display.diamond .card-text,
+        .card-display.diamond .card-symbol {
+            color: #e74c3c;
+        }
+        
+        .card-display.spade .card-text,
+        .card-display.spade .card-symbol,
+        .card-display.club .card-text,
+        .card-display.club .card-symbol {
+            color: #2c3e50;
+        }
+        
+        .card-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn-dealer {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-dealer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .btn-draw {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+        
+        .btn-draw:hover {
+            background: linear-gradient(135deg, #229954, #1e8449);
+        }
+        
+        .btn-draw:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-init {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-init:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+        }
+        
+        .btn-end {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .btn-end:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+        }
+        
+        .cards-summary {
+            max-height: 250px;
+            overflow-y: auto;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+        
+        .cards-summary .card-item {
+            padding: 6px 10px;
+            border-bottom: 1px dashed #eee;
+            display: inline-block;
+            margin: 3px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .cards-summary .card-item.heart,
+        .cards-summary .card-item.diamond {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .cards-summary .card-item.spade,
+        .cards-summary .card-item.club {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .empty-summary {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 15px;
+        }
+        
+        .pots-display {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 3px solid #ffd700;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .pot-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #fff9e6;
+            border-radius: 6px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .pot-item:last-child { margin-bottom: 0; }
+        
+        .pot-item strong {
+            color: #e67e22;
+            font-size: 1.1em;
+        }
+        
+        .pot-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        /* Cartones de Juego */
+        .boards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
+            max-height: 800px;
+            overflow-y: auto;
+            padding: 10px 5px;
+            padding-right: 10px;
+        }
+        
+        .board {
+            background: white;
+            border: 3px solid #bdc3c7;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .board:hover:not(.selected):not(.locked) {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .board.selected {
+            border-color: #27ae60;
+            box-shadow: 0 0 25px rgba(39, 174, 96, 0.4);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+        
+        .board.locked {
+            border-color: #3498db;
+            opacity: 0.85;
+            cursor: not-allowed;
+        }
+        
+        .board.locked .board-title::after {
+            content: " 🔒";
+        }
+        
+        .board-title {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .board-owner {
+            font-size: 0.85em;
+            color: #3498db;
+            margin-top: 5px;
+            font-weight: bold;
+            background: #e3f2fd;
+            padding: 3px 8px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+        
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        
+        .board-cell {
+            aspect-ratio: 1;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 3px;
+            user-select: none;
+        }
+        
+        .board-cell.heart, .board-cell.diamond { color: #e74c3c; }
+        .board-cell.spade, .board-cell.club { color: #2c3e50; }
+        
+        .board-cell.marked {
+            background: rgba(0, 0, 0, 0.65);
+            color: white !important;
+            border-color: #000;
+            transform: scale(1.05);
+        }
+        
+        .board-cell.center {
+            background: #f39c12;
+            color: white !important;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .board-cell.center.marked {
+            background: rgba(0, 0, 0, 0.65);
+        }
+        
+        .board-cell.corner {
+            background: #9b59b6;
+            color: white !important;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .board-cell.corner.marked {
+            background: rgba(0, 0, 0, 0.65);
+        }
+        
+        .board-cell.full {
+            background: #3498db;
+            color: white !important;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .board-cell.full.marked {
+            background: rgba(0, 0, 0, 0.65);
+        }
+        
+        .board-cell.poker {
+            background: #1abc9c;
+            color: white !important;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .board-cell.poker.marked {
+            background: rgba(0, 0, 0, 0.65);
+        }
+        
+        /* Panel de Canto - Abajo del cartón */
+        .claim-panel {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #ecf0f1;
+        }
+        
+        .board.selected .claim-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .claim-btn {
+            padding: 10px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .claim-btn:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: scale(1.05);
+        }
+        
+        .claim-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .claim-btn.pokino { background: linear-gradient(135deg, #27ae60, #229954); }
+        .claim-btn.poker { background: linear-gradient(135deg, #1abc9c, #16a085); }
+        .claim-btn.full { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .claim-btn.centro { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .claim-btn.esquinas { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .claim-btn.especial { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        
+        /* Lista de Jugadores */
+        .players-online {
+            text-align: center;
+            padding: 15px;
+            background: #e8f8f5;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #1abc9c;
+        }
+        
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .player-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #1abc9c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        
+        .player-item.dealer {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+        
+        .player-item.pending {
+            border-left-color: #9b59b6;
+            background: #f5f9ff;
+            opacity: 0.7;
+        }
+        
+        .player-name {
+            color: #2c3e50;
+        }
+        
+        .player-board {
+            background: #3498db;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin-left: 8px;
+        }
+        
+        .player-balance-display {
+            background: #27ae60;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        
+        .player-item.dealer .player-board {
+            background: #f39c12;
+        }
+        
+        .transfer-btn {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 0.8em;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        
+        .transfer-btn:hover {
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
+        }
+        
+        /* Modal de Verificación */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 95%;
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .modal-subtitle {
+            font-size: 1.3em;
+            color: #e67e22;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .modal-player {
+            font-size: 1.1em;
+            color: #3498db;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .modal-board {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 3px solid #ddd;
+            display: inline-block;
+        }
+        
+        .modal-board-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-top: 10px;
+        }
+        
+        .modal-cell {
+            width: 35px;
+            height: 35px;
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65em;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        
+        .modal-cell.marked {
+            background: rgba(0, 0, 0, 0.65);
+            color: white;
+        }
+        
+        .modal-cards {
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .modal-cards-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2em;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+        }
+        
+        .suit-section {
+            margin-bottom: 15px;
+        }
+        
+        .suit-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .suit-title.spade { color: #2c3e50; }
+        .suit-title.heart { color: #e74c3c; }
+        .suit-title.diamond { color: #e74c3c; }
+        .suit-title.club { color: #2c3e50; }
+        
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .modal-card-item {
+            padding: 5px 10px;
+            background: white;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .modal-card-item.heart, .modal-card-item.diamond { color: #e74c3c; background: #fadbd8; }
+        .modal-card-item.spade, .modal-card-item.club { color: #2c3e50; background: #ebf5fb; }
+        
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px solid #ecf0f1;
+        }
+        
+        /* Modal de Saldo */
+        .balance-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .balance-modal.show {
+            display: flex;
+        }
+        
+        .balance-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .balance-input {
+            padding: 12px;
+            font-size: 1.2em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 15px 0;
+            width: 80%;
+            text-align: center;
+        }
+        
+        .balance-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        /* Modal de Solicitud */
+        .request-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .request-modal.show {
+            display: flex;
+        }
+        
+        .request-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .request-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .request-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #9b59b6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .request-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .request-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .request-btn.accept {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .request-btn.reject {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        /* Modal de Espera */
+        .wait-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .wait-modal.show {
+            display: flex;
+        }
+        
+        .wait-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        /* Historial */
+        .history-container {
+            margin-top: 25px;
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            border: 2px solid #3498db;
+        }
+        
+        .history-list {
+            max-height: 180px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #ecf0f1;
+            display: grid;
+            grid-template-columns: 100px 110px 1fr 100px;
+            font-size: 0.95em;
+            align-items: center;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-item strong {
+            color: #27ae60;
+        }
+        
+        .history-hand { color: #3498db; font-weight: bold; }
+        .history-date { color: #7f8c8d; }
+        .history-winner { color: #e67e22; font-weight: bold; }
+        .history-prize { color: #27ae60; font-weight: bold; }
+        
+        .empty-history {
+            text-align: center;
+            color: #95a5a6;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 3000;
+            transform: translateX(400px);
+            transition: transform 0.4s ease-out;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .notification.warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        
+        .notification.success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        @media (max-width: 1200px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .claim-panel {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .boards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .modal-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .balance-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .claim-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-content {
+                max-width: 95%;
+            }
+            
+            .card-display .card-symbol {
+                font-size: 6em; /* Ajuste para móviles */
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>🎉 SABADITO ALEGRE 🎉</h1>
-        <p class="subtitle">¡Tu tradición familiar de POKENO ahora online!</p>
-        <div class="zoom-note">📹 Conéctate por Zoom o Meet para ver a tu familia</div>
-        <div class="player-info">👤 Jugador: <span id="playerName">Esperando...</span></div>
-        <div class="player-balance" id="playerBalance" style="display:none;">💰 Saldo: $<span id="balanceAmount">0</span></div>
-        <div id="dealerBadge" class="dealer-badge" style="display:none;">👑 ¡Eres el CRUPIER!</div>
-        <div id="sessionBadge" class="session-badge" style="display:none;">🆔 Sesión: <span id="sessionId">-</span></div>
-    </header>
-    
-    <div class="players-online">
-        <strong>👥 Jugadores conectados:</strong>
-        <div class="players-list" id="playersList">
-            <div style="color:#95a5a6;font-style:italic;text-align:center;">Cargando...</div>
-        </div>
-    </div>
-    
-    <div class="game-container">
-        <div class="control-panel">
-            <div class="game-info">
-                <div class="round">Ronda: <span id="roundNumber">1</span></div>
-                <div class="hand">Mano: <span id="handNumber">1</span> de 6</div>
-            </div>
-            
-            <div class="dealer-controls" id="dealerControls" style="display:none;">
-                <div class="section-title">👑 CONTROLES DEL CRUPIER</div>
-                <button class="btn-dealer btn-init" onclick="initHand()" id="initHandBtn">
-                    <span>▶️ INICIAR MANO</span>
-                </button>
-                <button class="btn-dealer btn-draw" onclick="drawRandomCard()" disabled id="drawBtn">
-                    <span>🎴 LANZAR CARTA</span>
-                </button>
-                <button class="btn-dealer btn-end" onclick="endRound()" id="endRoundBtn" style="display:none;">
-                    <span>🏁 FINALIZAR RONDA</span>
-                </button>
-                <button class="btn-dealer btn-warning" onclick="showRequests()" id="requestsBtn" style="display:none;">
-                    <span>📬 SOLICITUDES (<span id="requestsCount">0</span>)</span>
-                </button>
-                <button class="btn-dealer btn-warning" onclick="showTransferDealerModal()" id="transferDealerBtn" style="display:none;">
-                    <span>🔄 TRANSFERIR CRUPIER</span>
-                </button>
-            </div>
-            
-            <!-- ✅ Carta actual (visible SOLO en PC) -->
-            <div class="section-title">🃏 CARTA ACTUAL</div>
-            <div class="card-display" id="currentCardDisplay">
-                <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
-            </div>
-            
-            <div class="section-title">📋 CARTAS CANTADAS (<span id="cardsCount">0</span>)</div>
-            <div class="cards-summary" id="cardsSummary">
-                <div class="empty-summary">Aún no se han cantado cartas</div>
-            </div>
-            
-            <div class="section-title">💰 POZOS ACUMULADOS</div>
-            <div class="pots-display" id="potsDisplay">
-                <div class="pot-item"><span>Pokino:</span> <strong id="potPokino">$0</strong></div>
-                <div class="pot-item"><span>Poker:</span> <strong id="potPoker">$0</strong></div>
-                <div class="pot-item"><span>Full:</span> <strong id="potFull">$0</strong></div>
-                <div class="pot-item"><span>Centro:</span> <strong id="potCentro">$0</strong></div>
-                <div class="pot-item"><span>Esquinas:</span> <strong id="potEsquinas">$0</strong></div>
-                <div class="pot-item"><span>Especial:</span> <strong id="potEspecial">$0</strong></div>
+    <div class="container">
+        <header>
+            <h1>🎉 SABADITO ALEGRE 🎉</h1>
+            <p class="subtitle">¡Tu tradición familiar de POKENO ahora online!</p>
+            <div class="zoom-note">📹 Conéctate por Zoom o Meet para ver a tu familia</div>
+            <div class="player-info">👤 Jugador: <span id="playerName">Esperando...</span></div>
+            <div class="player-balance" id="playerBalance" style="display:none;">💰 Saldo: $<span id="balanceAmount">0</span></div>
+            <div id="dealerBadge" class="dealer-badge" style="display:none;">👑 ¡Eres el CRUPIER!</div>
+            <div id="sessionBadge" class="session-badge" style="display:none;">🆔 Sesión: <span id="sessionId">-</span></div>
+        </header>
+        
+        <div class="players-online">
+            <strong>👥 Jugadores conectados:</strong>
+            <div class="players-list" id="playersList">
+                <div style="color:#95a5a6;font-style:italic;text-align:center;">Cargando...</div>
             </div>
         </div>
         
-        <div>
-            <div class="section-title">🎲 CARTONES - Selecciona TU cartón</div>
-            <div class="boards-container" id="boardsContainer"></div>
-            <div class="history-container">
-                <div class="section-title">🏆 ÚLTIMAS VICTORIAS</div>
-                <div class="history-list" id="historyList">
-                    <div style="text-align:center;color:#95a5a6;padding:20px;">Aún no hay partidas</div>
+        <div class="game-container">
+            <!-- Panel de Control - Lector de Cartas -->
+            <div class="control-panel">
+                <div class="game-info">
+                    <div class="round">Ronda: <span id="roundNumber">1</span></div>
+                    <div class="hand">Mano: <span id="handNumber">1</span> de 6</div>
+                </div>
+                
+                <div class="dealer-controls" id="dealerControls" style="display:none;">
+                    <div class="section-title">👑 CONTROLES DEL CRUPIER</div>
+                    <button class="btn-dealer btn-init" onclick="initHand()" id="initHandBtn">
+                        <span>▶️ INICIAR MANO</span>
+                    </button>
+                    <button class="btn-dealer btn-draw" onclick="drawRandomCard()" disabled id="drawBtn">
+                        <span>🎴 LANZAR CARTA</span>
+                    </button>
+                    <button class="btn-dealer btn-end" onclick="endRound()" id="endRoundBtn" style="display:none;">
+                        <span>🏁 FINALIZAR RONDA</span>
+                    </button>
+                    <button class="btn-dealer btn-warning" onclick="showRequests()" id="requestsBtn" style="display:none;background:linear-gradient(135deg, #9b59b6, #8e44ad);">
+                        <span>📬 VER SOLICITUDES (<span id="requestsCount">0</span>)</span>
+                    </button>
+                    <button class="btn-dealer btn-warning" onclick="showTransferDealerModal()" id="transferDealerBtn" style="display:none;background:linear-gradient(135deg, #9b59b6, #8e44ad);">
+                        <span>🔄 TRANSFERIR ROL DE CRUPIER</span>
+                    </button>
+                </div>
+                
+                <div class="section-title">🃏 CARTA ACTUAL</div>
+                <div class="card-display" id="currentCardDisplay">
+                    <div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>
+                </div>
+                
+                <div class="section-title">📋 CARTAS CANTADAS (<span id="cardsCount">0</span>)</div>
+                <div class="cards-summary" id="cardsSummary">
+                    <div class="empty-summary">Aún no se han cantado cartas</div>
+                </div>
+                
+                <div class="section-title">💰 POZOS ACUMULADOS</div>
+                <div class="pots-display" id="potsDisplay">
+                    <div class="pot-item"><span class="pot-label">Pokino:</span> <strong id="potPokino">$0</strong></div>
+                    <div class="pot-item"><span class="pot-label">Poker:</span> <strong id="potPoker">$0</strong></div>
+                    <div class="pot-item"><span class="pot-label">Full:</span> <strong id="potFull">$0</strong></div>
+                    <div class="pot-item"><span class="pot-label">Centro:</span> <strong id="potCentro">$0</strong></div>
+                    <div class="pot-item"><span class="pot-label">Esquinas:</span> <strong id="potEsquinas">$0</strong></div>
+                    <div class="pot-item"><span class="pot-label">Especial:</span> <strong id="potEspecial">$0</strong></div>
+                </div>
+            </div>
+            
+            <!-- Cartones de Juego -->
+            <div>
+                <div class="section-title">🎲 CARTONES (5x5) - Selecciona TU cartón</div>
+                <div class="boards-container" id="boardsContainer"></div>
+                
+                <div class="history-container">
+                    <div class="section-title">🏆 ÚLTIMAS VICTORIAS</div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-history">Aún no hay partidas jugadas</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel Derecha - Acciones Extra -->
+            <div class="control-panel">
+                <div class="section-title">🎮 ACCIONES</div>
+                <div class="actions" style="margin-top:0;">
+                    <button class="btn-dealer btn-init" onclick="becomeDealer()" id="becomeDealerBtn">
+                        <span>👑 SER CRUPIER</span>
+                    </button>
+                    <button class="btn-dealer btn-end" onclick="showHistoryModal()">
+                        <span>📊 HISTORIAL</span>
+                    </button>
+                    <button class="btn-dealer btn-warning" onclick="resetAllBalances()" style="background:linear-gradient(135deg, #f39c12, #e67e22);">
+                        <span>🔄 REINICIAR SALDOS</span>
+                    </button>
+                </div>
+                
+                <div class="section-title" style="margin-top:20px;">ℹ️ INSTRUCCIONES</div>
+                <div style="background:white;padding:15px;border-radius:8px;font-size:0.9em;line-height:1.6;">
+                    <p><strong>Para JUGADORES:</strong></p>
+                    <p>• Inicia sesión con tu nombre</p>
+                    <p>• Espera aprobación del crupier</p>
+                    <p>• Selecciona UN cartón por ronda</p>
+                    <p>• Marca manualmente tus casillas (click)</p>
+                    <p>• Canta premio cuando lo tengas</p>
+                    <br>
+                    <p><strong>Para CRUPIER:</strong></p>
+                    <p>• Acepta solicitudes de jugadores</p>
+                    <p>• Carga saldo inicial a jugadores</p>
+                    <p>• Inicia mano (se descuentan 6 monedas)</p>
+                    <p>• Lanza cartas aleatorias</p>
+                    <p>• Verifica y aprueba premios</p>
+                    <p>• Puedes transferir el rol de crupier</p>
                 </div>
             </div>
         </div>
-        
-        <div class="control-panel">
-            <div class="section-title">🎮 ACCIONES</div>
-            <button class="btn-dealer btn-init" onclick="becomeDealer()" id="becomeDealerBtn">
-                <span>👑 SER CRUPIER</span>
-            </button>
-            <button class="btn-dealer btn-end" onclick="showHistoryModal()">
-                <span>📊 HISTORIAL</span>
-            </button>
-            <button class="btn-dealer btn-warning" onclick="resetAllBalances()">
-                <span>🔄 REINICIAR SALDOS</span>
-            </button>
-            <div class="section-title" style="margin-top:20px;">ℹ️ INSTRUCCIONES</div>
-            <div style="background:white;padding:15px;border-radius:8px;font-size:0.9em;line-height:1.6;">
-                <p><strong>JUGADORES:</strong></p>
-                <p>• Espera aprobación del crupier</p>
-                <p>• Selecciona UN cartón</p>
-                <p>• Marca casillas manualmente</p>
-                <p>• Canta premio cuando lo tengas</p>
+    </div>
+    
+    <!-- Modal de Verificación -->
+    <div class="modal" id="verificationModal">
+        <div class="modal-content">
+            <div class="modal-title">🔔 ¡ALGUIEN CANTA PREMIO!</div>
+            <div class="modal-subtitle" id="modalClaimType">POKINO</div>
+            <div class="modal-player" id="modalPlayer">Jugador 1</div>
+            
+            <div class="modal-board">
+                <div>Cartón:</div>
+                <div class="modal-board-grid" id="modalBoardPreview"></div>
+            </div>
+            
+            <div class="modal-cards">
+                <div class="modal-cards-title">🃏 CARTAS CANTADAS POR PINTA</div>
+                <div id="modalCardsList">
+                    <div style="color:#95a5a6;text-align:center;width:100%;">No hay cartas cantadas aún</div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-dealer btn-init" onclick="approveClaim()">✅ ¡APROBAR! - Pagar pozo</button>
+                <button class="btn-dealer btn-end" onclick="denyClaim()">❌ DENEGAR - Continuar juego</button>
             </div>
         </div>
     </div>
-</div>
-
-<!-- ✅ BARRA FLOTANTE (Solo Móvil + Tablet) -->
-<div class="floating-card-bar" id="floatingCardBar">
-    <div class="floating-card-info">
-        <div class="floating-card-display" id="floatingCardDisplay">
-            <div class="floating-card-label">Última Carta</div>
-            <div class="card-text" id="floatingCardText">-</div>
-            <div class="card-symbol" id="floatingCardSymbol">🃏</div>
-        </div>
-        <div>
-            <div class="floating-card-label">Cartas cantadas</div>
-            <div class="floating-card-count" id="floatingCardCount">0</div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Verificación -->
-<div class="modal" id="verificationModal">
-    <div class="modal-content">
-        <div class="modal-title">🔔 ¡ALGUIEN CANTA PREMIO!</div>
-        <div class="modal-subtitle" id="modalClaimType">POKINO</div>
-        <div class="modal-player" id="modalPlayer">Jugador</div>
-        <div class="modal-board">
-            <div>Cartón:</div>
-            <div class="board-grid" id="modalBoardPreview" style="margin-top:10px;"></div>
-        </div>
-        <div class="modal-actions">
-            <button class="btn-dealer btn-init" onclick="approveClaim()">✅ APROBAR</button>
-            <button class="btn-dealer btn-end" onclick="denyClaim()">❌ DENEGAR</button>
+    
+    <!-- Modal de Historial -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-title">📊 HISTORIAL DE PARTIDAS</div>
+            <div id="fullHistoryList" style="max-height:60vh;overflow-y:auto;text-align:left;padding:15px;">
+                <div class="empty-history" id="emptyHistory">Aún no hay partidas jugadas</div>
+                <div id="historyContent"></div>
+            </div>
+            <div style="margin-top:20px;">
+                <button class="btn-dealer btn-init" onclick="document.getElementById('historyModal').classList.remove('show')">Cerrar</button>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Modal de Nombre -->
-<div class="modal" id="nameModal">
-    <div class="modal-content">
-        <div class="modal-title">👤 ¡Bienvenido!</div>
-        <p style="margin:20px 0;">Ingresa tu nombre:</p>
-        <input type="text" id="playerNameInput" placeholder="Tu nombre" style="padding:12px;width:80%;font-size:1.1em;border:2px solid #ddd;border-radius:8px;text-align:center;">
-        <div style="margin-top:20px;">
-            <button class="btn-dealer btn-init" onclick="savePlayerName()">✅ ENTRAR</button>
+    
+    <!-- Modal de Nombre de Jugador -->
+    <div class="modal" id="nameModal">
+        <div class="modal-content">
+            <div class="modal-title">👤 ¡Bienvenido a SABADITO ALEGRE!</div>
+            <p style="margin:20px 0;font-size:1.1em;">Por favor, ingresa tu nombre para jugar:</p>
+            <input type="text" id="playerNameInput" placeholder="Tu nombre" style="padding:12px;width:80%;font-size:1.1em;border:2px solid #ddd;border-radius:8px;text-align:center;">
+            <div style="margin-top:20px;">
+                <button class="btn-dealer btn-init" onclick="savePlayerName()">✅ ¡Entrar al juego!</button>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Modal de Saldo -->
-<div class="balance-modal" id="balanceModal">
-    <div class="balance-content">
-        <div class="modal-title">💰 Cargar Saldo</div>
-        <p id="balancePlayerName" style="font-size:1.2em;margin:15px 0;font-weight:bold;">Jugador</p>
-        <input type="number" id="balanceAmountInput" class="balance-input" placeholder="Monto" min="0">
-        <div class="balance-actions">
-            <button class="btn-dealer btn-init" onclick="saveBalance()">✅ CARGAR</button>
-            <button class="btn-dealer btn-end" onclick="document.getElementById('balanceModal').classList.remove('show')">❌ CANCELAR</button>
+    
+    <!-- Modal de Carga de Saldo -->
+    <div class="balance-modal" id="balanceModal">
+        <div class="balance-content">
+            <div class="modal-title">💰 Cargar Saldo a Jugador</div>
+            <p id="balancePlayerName" style="font-size:1.2em;margin:15px 0;font-weight:bold;">Jugador</p>
+            <input type="number" id="balanceAmountInput" class="balance-input" placeholder="Monto en monedas" min="0">
+            <div class="balance-actions">
+                <button class="btn-dealer btn-init" onclick="saveBalance()">✅ CARGAR SALDO</button>
+                <button class="btn-dealer btn-end" onclick="document.getElementById('balanceModal').classList.remove('show')">❌ CANCELAR</button>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Modal de Solicitudes -->
-<div class="request-modal" id="requestModal">
-    <div class="request-content">
-        <div class="modal-title">📬 SOLICITUDES</div>
-        <div class="request-list" id="requestList">
-            <div style="color:#95a5a6;text-align:center;padding:20px;">No hay solicitudes</div>
-        </div>
-        <div style="margin-top:20px;">
-            <button class="btn-dealer btn-init" onclick="document.getElementById('requestModal').classList.remove('show')">Cerrar</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Espera -->
-<div class="wait-modal" id="waitModal">
-    <div class="wait-content">
-        <div class="modal-title">⏳ ESPERANDO APROBACIÓN</div>
-        <p style="margin:20px 0;">El crupier debe aprobar tu solicitud.</p>
-        <button class="btn-dealer btn-end" onclick="cancelRequest()">❌ CANCELAR</button>
-    </div>
-</div>
-
-<!-- Modal de Transferencia -->
-<div class="modal" id="transferDealerModal">
-    <div class="modal-content">
-        <div class="modal-title">🔄 TRANSFERIR CRUPIER</div>
-        <p style="margin:20px 0;">Selecciona un jugador:</p>
-        <div id="transferDealerList" style="max-height:300px;overflow-y:auto;margin:20px 0;"></div>
-        <button class="btn-dealer btn-init" onclick="document.getElementById('transferDealerModal').classList.remove('show')">Cancelar</button>
-    </div>
-</div>
-
-<!-- Modal de Historial -->
-<div class="modal" id="historyModal">
-    <div class="modal-content">
-        <div class="modal-title">📊 HISTORIAL</div>
-        <div id="historyContent" style="max-height:60vh;overflow-y:auto;text-align:left;padding:15px;"></div>
-        <button class="btn-dealer btn-init" onclick="document.getElementById('historyModal').classList.remove('show')" style="margin-top:20px;">Cerrar</button>
-    </div>
-</div>
-
-<!-- Modal de Fin de Ronda -->
-<div class="modal" id="endRoundModal">
-    <div class="modal-content">
-        <div class="modal-title">🏁 ¡Ronda Finalizada!</div>
-        <div id="finalBalancesList" style="margin:20px 0;"></div>
-        <div class="modal-actions">
-            <button class="btn-dealer btn-init" onclick="startNewRound()">✅ CONTINUAR</button>
-            <button class="btn-dealer btn-end" onclick="endSession()">❌ FINALIZAR</button>
+    
+    <!-- Modal de Fin de Ronda -->
+    <div class="modal" id="endRoundModal">
+        <div class="modal-content">
+            <div class="modal-title">🏁 ¡Ronda Finalizada!</div>
+            <p style="font-size:1.2em;margin:20px 0;">Se han completado las 6 manos.</p>
+            <div style="background:#f8f9fa;padding:15px;border-radius:10px;margin:20px 0;">
+                <h3 style="color:#2c3e50;margin-bottom:10px;">💰 Saldos Actuales:</h3>
+                <div id="finalBalancesList"></div>
+            </div>
+            <p style="margin:20px 0;font-weight:bold;">¿Desean continuar con otra ronda?</p>
+            <div class="modal-actions">
+                <button class="btn-dealer btn-init" onclick="startNewRound()">✅ SÍ, CONTINUAR</button>
+                <button class="btn-dealer btn-end" onclick="endSession()">❌ NO, FINALIZAR SESIÓN</button>
+            </div>
         </div>
     </div>
-</div>
-
-<!-- Notificación -->
-<div class="notification" id="notification">¡Carta cantada!</div>
-
-<script>
-// ============================================
-// 🔥 FIREBASE CONFIG
-// ============================================
-const firebaseConfig = {
-    apiKey: "AIzaSyBHBM1weX8-v_dk88QluRgFSXRD4NrNLmQ",
-    authDomain: "pokino-4383c.firebaseapp.com",
-    databaseURL: "https://pokino-4383c-default-rtdb.firebaseio.com",
-    projectId: "pokino-4383c",
-    storageBucket: "pokino-4383c.firebasestorage.app",
-    messagingSenderId: "607174478777",
-    appId: "1:607174478777:web:0b16906bd16ed568d60468"
-};
-
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
-// ============================================
-// ESTADO DEL JUEGO
-// ============================================
-let gameState = {
-    sessionId: null,
-    round: 1,
-    currentHand: 1,
-    cardsUsed: [],
-    currentCard: null,
-    cardsCount: 0,
-    pots: { pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0 },
-    boards: [],
-    selectedBoard: null,
-    history: [],
-    currentClaim: null,
-    claimingPlayer: null,
-    claimingBoardId: null,
-    handStarted: false,
-    handFinished: false,
-    roundFinished: false,
-    dealerId: null,
-    dealerDisconnected: false,
-    playerName: "",
-    playerId: "",
-    isDealer: false,
-    playerBalance: 0,
-    hasRequested: false,
-    requestPending: false,
-    boardSelectedThisRound: false
-};
-
-let isListening = false;
-let clickTimeout = null;
-let selectedPlayerForBalance = null;
-let cleanupInterval = null;
-let requestCheckInterval = null;
-let dealerDisconnectRef = null;
-
-// ============================================
-// INICIALIZACIÓN
-// ============================================
-function initGame() {
-    document.getElementById('nameModal').classList.add('show');
-    startFirebaseListeners();
-    cleanupInterval = setInterval(cleanupInactivePlayers, 120000);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-}
-
-function handleBeforeUnload() {
-    if (gameState.playerId) {
-        if (!gameState.isDealer) {
-            database.ref(`players/${gameState.playerId}`).remove();
-        } else {
-            database.ref('gameState/dealerDisconnected').set(true);
+    
+    <!-- Modal de Solicitudes -->
+    <div class="request-modal" id="requestModal">
+        <div class="request-content">
+            <div class="modal-title">📬 SOLICITUDES PARA UNIRSE</div>
+            <div class="request-list" id="requestList">
+                <div style="color:#95a5a6;text-align:center;padding:20px;">No hay solicitudes pendientes</div>
+            </div>
+            <div style="margin-top:20px;">
+                <button class="btn-dealer btn-init" onclick="document.getElementById('requestModal').classList.remove('show')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Espera -->
+    <div class="wait-modal" id="waitModal">
+        <div class="wait-content">
+            <div class="modal-title">⏳ ESPERANDO APROBACIÓN</div>
+            <p style="font-size:1.2em;margin:20px 0;">El crupier debe aprobar tu solicitud para unirte a la partida.</p>
+            <p style="color:#7f8c8d;margin-bottom:20px;">Por favor, espera...</p>
+            <button class="btn-dealer btn-end" onclick="cancelRequest()">❌ CANCELAR SOLICITUD</button>
+        </div>
+    </div>
+    
+    <!-- Modal de Transferencia de Crupier -->
+    <div class="modal" id="transferDealerModal">
+        <div class="modal-content">
+            <div class="modal-title">🔄 TRANSFERIR ROL DE CRUPIER</div>
+            <p style="margin:20px 0;font-size:1.1em;">Selecciona el jugador al que deseas transferir el rol de crupier:</p>
+            <div id="transferDealerList" style="max-height:300px;overflow-y:auto;margin:20px 0;">
+                <div style="color:#95a5a6;text-align:center;">Cargando jugadores...</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-dealer btn-init" onclick="document.getElementById('transferDealerModal').classList.remove('show')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notificación -->
+    <div class="notification" id="notification">¡Carta cantada!</div>
+    
+    <script>
+        // ============================================
+        // 🔥 CONFIGURACIÓN DE FIREBASE
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBHBM1weX8-v_dk88QluRgFSXRD4NrNLmQ",
+            authDomain: "pokino-4383c.firebaseapp.com",
+            databaseURL: "https://pokino-4383c-default-rtdb.firebaseio.com",
+            projectId: "pokino-4383c",
+            storageBucket: "pokino-4383c.firebasestorage.app",
+            messagingSenderId: "607174478777",
+            appId: "1:607174478777:web:0b16906bd16ed568d60468"
+        };
+        
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // ============================================
+        // ESTADO DEL JUEGO
+        // ============================================
+        let gameState = {
+            sessionId: null,
+            round: 1,
+            currentHand: 1,
+            cardsUsed: [],
+            currentCard: null,
+            cardsCount: 0,
+            pots: {
+                pokino: 0,
+                poker: 0,
+                full: 0,
+                centro: 0,
+                esquinas: 0,
+                especial: 0
+            },
+            boards: [],
+            selectedBoard: null,
+            history: [],
+            currentClaim: null,
+            claimingPlayer: null,
+            claimingBoardId: null,
+            handStarted: false,
+            handFinished: false,
+            roundFinished: false,
+            dealerId: null,
+            dealerDisconnected: false,
+            playerName: "",
+            playerId: "",
+            isDealer: false,
+            playerBalance: 0,
+            hasRequested: false,
+            requestPending: false,
+            boardSelectedThisRound: false
+        };
+        
+        let isListening = false;
+        let clickTimeout = null;
+        let selectedPlayerForBalance = null;
+        let cleanupInterval = null;
+        let requestCheckInterval = null;
+        let dealerDisconnectRef = null;
+        
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        function initGame() {
+            database.ref('gameState/dealerDisconnected').once('value', (snapshot) => {
+                const disconnected = snapshot.val();
+                if (disconnected) {
+                    cleanDatabase();
+                }
+            });
+            
+            // ✅ NUEVO: Verificar si hay crupier al iniciar
+            database.ref('gameState/dealerId').once('value', (snapshot) => {
+                const dealerId = snapshot.val();
+                if (!dealerId) {
+                    // Primera persona se convierte automáticamente en crupier
+                    document.getElementById('nameModal').classList.add('show');
+                } else {
+                    document.getElementById('nameModal').classList.add('show');
+                }
+            });
+            
+            startFirebaseListeners();
+            
+            // ✅ NUEVO: Tiempo de inactividad más largo para móviles
+            const inactiveTime = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                ? 300000 // 5 minutos para móviles
+                : 120000; // 2 minutos para escritorio
+            
+            cleanupInterval = setInterval(cleanupInactivePlayers, inactiveTime);
+            
+            window.addEventListener('beforeunload', handleBeforeUnload);
         }
-        database.ref(`requests/${gameState.playerId}`).remove();
-    }
-}
-
-function savePlayerName() {
-    const nameInput = document.getElementById('playerNameInput').value.trim();
-    if (!nameInput || nameInput.length < 2) {
-        alert('Ingresa un nombre válido (mínimo 2 caracteres)');
-        return;
-    }
-    gameState.playerName = nameInput;
-    gameState.playerId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-    document.getElementById('playerName').textContent = nameInput;
-    document.getElementById('nameModal').classList.remove('show');
-    registerPlayer();
-}
-
-function registerPlayer() {
-    const playerRef = database.ref(`players/${gameState.playerId}`);
-    playerRef.set({
-        name: gameState.playerName,
-        online: true,
-        lastSeen: Date.now(),
-        boardId: null,
-        balance: 0,
-        sessionId: gameState.playerId,
-        approved: false,
-        boardSelectedThisRound: false
-    });
-    
-    setInterval(() => {
-        playerRef.update({ lastSeen: Date.now(), online: true });
-    }, 15000);
-    
-    database.ref('gameState').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data || !data.dealerId) {
-            database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
-                showNotification('👑 ¡Eres el CRUPIER!', 'success');
-                gameState.isDealer = true;
+        
+        function handleBeforeUnload() {
+            if (gameState.playerId) {
+                // ✅ SOLO eliminar jugador si NO es crupier
+                if (!gameState.isDealer) {
+                    database.ref(`players/${gameState.playerId}`).remove();
+                } else {
+                    // Si es crupier, marcar desconexión
+                    database.ref('gameState/dealerDisconnected').set(true);
+                    showNotification('👋 ¡Has salido de la sesión! Todos los jugadores serán desconectados.', 'warning');
+                }
+                database.ref(`requests/${gameState.playerId}`).remove();
+            }
+        }
+        
+        function cleanDatabase() {
+            database.ref('gameState').remove();
+            database.ref('players').remove();
+            database.ref('requests').remove();
+            console.log('✅ Base de datos limpiada');
+        }
+        
+        function cleanupInactivePlayers() {
+            const now = Date.now();
+            const maxInactiveTime = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                ? 300000 // 5 minutos para móviles
+                : 120000; // 2 minutos para escritorio
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                
+                Object.entries(players).forEach(([playerId, player]) => {
+                    if (player.lastSeen && (now - player.lastSeen > maxInactiveTime)) {
+                        // ✅ Solo eliminar si NO es el crupier
+                        if (gameState.dealerId !== playerId) {
+                            database.ref(`players/${playerId}`).remove();
+                            
+                            if (player.boardId) {
+                                database.ref(`gameState/boards/${player.boardId - 1}`).update({
+                                    owner: null,
+                                    ownerName: null,
+                                    locked: false
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+        }
+        
+        function savePlayerName() {
+            const nameInput = document.getElementById('playerNameInput').value.trim();
+            
+            if (!nameInput || nameInput.length < 2) {
+                alert('Por favor ingresa un nombre válido (mínimo 2 caracteres)');
+                return;
+            }
+            
+            gameState.playerName = nameInput;
+            gameState.playerId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+            
+            document.getElementById('playerName').textContent = nameInput;
+            document.getElementById('nameModal').classList.remove('show');
+            
+            registerPlayer();
+        }
+        
+        function registerPlayer() {
+            const playerRef = database.ref(`players/${gameState.playerId}`);
+            
+            playerRef.set({
+                name: gameState.playerName,
+                online: true,
+                lastSeen: Date.now(),
+                boardId: null,
+                balance: 0,
+                sessionId: gameState.playerId,
+                approved: false,
+                boardSelectedThisRound: false
+            });
+            
+            // ✅ ELIMINADO: playerRef.onDisconnect().remove();
+            // Los jugadores NO se eliminan al desconectar (solo crupier)
+            
+            setInterval(() => {
+                playerRef.update({
+                    lastSeen: Date.now(),
+                    online: true
+                });
+            }, 15000);
+            
+            // ✅ NUEVO: Verificar si hay crupier y si es el primero
+            database.ref('gameState').once('value', (snapshot) => {
+                const gameStateData = snapshot.val();
+                
+                if (!gameStateData || !gameStateData.dealerId) {
+                    // ✅ Primera persona se convierte automáticamente en crupier
+                    database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
+                        showNotification('👑 ¡Te has convertido automáticamente en CRUPIER!', 'success');
+                        gameState.isDealer = true;
+                        document.getElementById('dealerBadge').style.display = 'inline-block';
+                        document.getElementById('dealerControls').style.display = 'block';
+                        document.getElementById('becomeDealerBtn').style.display = 'none';
+                        
+                        // Configurar onDisconnect para el crupier
+                        dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
+                        dealerDisconnectRef.onDisconnect().set(true);
+                    });
+                } else if (gameStateData.dealerId) {
+                    // Hay crupier, solicitar unirse
+                    gameState.hasRequested = true;
+                    gameState.requestPending = true;
+                    
+                    const requestRef = database.ref(`requests/${gameState.playerId}`);
+                    requestRef.set({
+                        playerId: gameState.playerId,
+                        playerName: gameState.playerName,
+                        timestamp: Date.now(),
+                        status: 'pending'
+                    });
+                    
+                    requestRef.onDisconnect().remove();
+                    
+                    document.getElementById('waitModal').classList.add('show');
+                    
+                    requestCheckInterval = setInterval(checkRequestStatus, 2000);
+                } else {
+                    showNotification(`✅ ¡Bienvenido, ${gameState.playerName}!`, 'success');
+                }
+            });
+        }
+        
+        function checkRequestStatus() {
+            database.ref(`requests/${gameState.playerId}`).once('value', (snapshot) => {
+                const request = snapshot.val();
+                
+                if (!request || request.status === 'rejected') {
+                    clearInterval(requestCheckInterval);
+                    document.getElementById('waitModal').classList.remove('show');
+                    showNotification('❌ Tu solicitud fue rechazada', 'error');
+                    gameState.requestPending = false;
+                } else if (request.status === 'approved') {
+                    clearInterval(requestCheckInterval);
+                    document.getElementById('waitModal').classList.remove('show');
+                    showNotification('✅ ¡Solicitud aprobada! Bienvenido al juego', 'success');
+                    gameState.requestPending = false;
+                    
+                    database.ref(`players/${gameState.playerId}`).update({
+                        approved: true
+                    });
+                }
+            });
+        }
+        
+        function cancelRequest() {
+            if (gameState.requestPending) {
+                database.ref(`requests/${gameState.playerId}`).remove();
+                clearInterval(requestCheckInterval);
+                document.getElementById('waitModal').classList.remove('show');
+                showNotification('⚠️ Solicitud cancelada', 'warning');
+                gameState.requestPending = false;
+                gameState.hasRequested = false;
+            }
+        }
+        
+        function startFirebaseListeners() {
+            if (isListening) return;
+            isListening = true;
+            
+            database.ref('gameState/dealerDisconnected').on('value', (snapshot) => {
+                const disconnected = snapshot.val();
+                if (disconnected && !gameState.dealerDisconnected) {
+                    gameState.dealerDisconnected = true;
+                    showNotification('👋 El crupier se ha desconectado. Sesión terminada.', 'warning');
+                    
+                    database.ref(`players/${gameState.playerId}`).remove();
+                    
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                }
+            });
+            
+            database.ref('gameState').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    loadGameState(data);
+                } else {
+                    initializeGameInFirebase();
+                }
+            });
+            
+            database.ref('players').on('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                updatePlayersList(players);
+            });
+            
+            database.ref('players').on('child_removed', (snapshot) => {
+                const playerId = snapshot.key;
+                const player = snapshot.val();
+                
+                if (player && player.boardId) {
+                    database.ref(`gameState/boards/${player.boardId - 1}`).update({
+                        owner: null,
+                        ownerName: null,
+                        locked: false
+                    });
+                }
+                
+                if (gameState.dealerId === playerId) {
+                    database.ref('gameState/dealerDisconnected').set(true);
+                }
+                
+                showNotification(`👋 ${player ? player.name : 'Jugador'} se ha desconectado`, 'warning');
+            });
+            
+            database.ref('requests').on('value', (snapshot) => {
+                const requests = snapshot.val() || {};
+                updateRequestsCount(requests);
+                
+                if (gameState.isDealer) {
+                    updateRequestsList(requests);
+                }
+            });
+        }
+        
+        function updateRequestsCount(requests) {
+            const pendingCount = Object.values(requests).filter(r => r.status === 'pending').length;
+            document.getElementById('requestsCount').textContent = pendingCount;
+            
+            if (pendingCount > 0 && gameState.isDealer) {
+                document.getElementById('requestsBtn').style.display = 'block';
+            } else {
+                document.getElementById('requestsBtn').style.display = 'none';
+            }
+        }
+        
+        function updateRequestsList(requests) {
+            const container = document.getElementById('requestList');
+            container.innerHTML = '';
+            
+            const pendingRequests = Object.values(requests).filter(r => r.status === 'pending');
+            
+            if (pendingRequests.length === 0) {
+                container.innerHTML = '<div style="color:#95a5a6;text-align:center;padding:20px;">No hay solicitudes pendientes</div>';
+                return;
+            }
+            
+            pendingRequests.forEach(request => {
+                const div = document.createElement('div');
+                div.className = 'request-item';
+                div.innerHTML = `
+                    <span style="font-weight:bold;color:#2c3e50;">${request.playerName}</span>
+                    <div class="request-actions">
+                        <button class="request-btn accept" onclick="approveRequest('${request.playerId}')">✅</button>
+                        <button class="request-btn reject" onclick="rejectRequest('${request.playerId}')">❌</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function showRequests() {
+            document.getElementById('requestModal').classList.add('show');
+        }
+        
+        function approveRequest(playerId) {
+            database.ref(`requests/${playerId}`).update({
+                status: 'approved'
+            });
+            
+            database.ref(`players/${playerId}`).update({
+                approved: true
+            });
+            
+            showNotification('✅ Solicitud aprobada', 'success');
+            // ✅ ELIMINADO: updateRequestsList({}) - Se actualiza automáticamente
+        }
+        
+        function rejectRequest(playerId) {
+            database.ref(`requests/${playerId}`).update({
+                status: 'rejected'
+            });
+            
+            showNotification('❌ Solicitud rechazada', 'warning');
+            // ✅ ELIMINADO: updateRequestsList({}) - Se actualiza automáticamente
+        }
+        
+        function initializeGameInFirebase() {
+            const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+            
+            const initialGameState = {
+                sessionId: sessionId,
+                round: 1,
+                currentHand: 1,
+                cardsUsed: [],
+                currentCard: null,
+                cardsCount: 0,
+                pots: {
+                    pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
+                },
+                boards: generateFixedBoards(),
+                history: [],
+                currentClaim: null,
+                claimingPlayer: null,
+                claimingBoardId: null,
+                handStarted: false,
+                handFinished: false,
+                roundFinished: false,
+                dealerId: null,
+                dealerDisconnected: false
+            };
+            
+            database.ref('gameState').set(initialGameState);
+            
+            document.getElementById('sessionId').textContent = sessionId.substring(0, 8).toUpperCase();
+            document.getElementById('sessionBadge').style.display = 'inline-block';
+        }
+        
+        function generateFixedBoards() {
+            const boards = [];
+            const suits = ['♠', '♥', '♦', '♣'];
+            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const allCards = [];
+            
+            for (let v of values) {
+                for (let s of suits) {
+                    allCards.push(`${v}${s}`);
+                }
+            }
+            
+            const boardConfigs = [
+                { pokerValue: 'A', fullThreeValue: 'K', fullPairValue: 'Q' },
+                { pokerValue: '2', fullThreeValue: 'A', fullPairValue: 'K' },
+                { pokerValue: '3', fullThreeValue: '2', fullPairValue: 'A' },
+                { pokerValue: '4', fullThreeValue: '3', fullPairValue: '2' },
+                { pokerValue: '5', fullThreeValue: '4', fullPairValue: '3' },
+                { pokerValue: '6', fullThreeValue: '5', fullPairValue: '4' },
+                { pokerValue: '7', fullThreeValue: '6', fullPairValue: '5' },
+                { pokerValue: '8', fullThreeValue: '7', fullPairValue: '6' },
+                { pokerValue: '9', fullThreeValue: '8', fullPairValue: '7' },
+                { pokerValue: '10', fullThreeValue: '9', fullPairValue: '8' },
+                { pokerValue: 'J', fullThreeValue: '10', fullPairValue: '9' },
+                { pokerValue: 'Q', fullThreeValue: 'J', fullPairValue: '10' },
+                { pokerValue: 'K', fullThreeValue: 'Q', fullPairValue: 'J' }
+            ];
+            
+            boardConfigs.forEach((config, boardIndex) => {
+                const boardCards = new Array(25).fill(null);
+                const usedCards = new Set();
+                
+                for (let i = 0; i < 4; i++) {
+                    const card = `${config.pokerValue}${suits[i]}`;
+                    boardCards[15 + i] = card;
+                    usedCards.add(card);
+                }
+                
+                for (let i = 0; i < 3; i++) {
+                    const card = `${config.fullThreeValue}${suits[i]}`;
+                    boardCards[5 + i] = card;
+                    usedCards.add(card);
+                }
+                
+                for (let i = 0; i < 2; i++) {
+                    const card = `${config.fullPairValue}${suits[i]}`;
+                    boardCards[8 + i] = card;
+                    usedCards.add(card);
+                }
+                
+                const availableCards = allCards.filter(card => !usedCards.has(card));
+                const shuffled = [...availableCards].sort(() => Math.random() - 0.5);
+                
+                let idx = 0;
+                for (let i = 0; i < 25; i++) {
+                    if (boardCards[i] === null) {
+                        boardCards[i] = shuffled[idx];
+                        idx++;
+                    }
+                }
+                
+                boards.push({
+                    id: boardIndex + 1,
+                    name: `CARTÓN ${boardIndex + 1}`,
+                    cards: boardCards,
+                    selected: false,
+                    locked: false,
+                    marked: Array(25).fill(false),
+                    owner: null,
+                    ownerName: null
+                });
+            });
+            
+            return boards;
+        }
+        
+        function loadGameState(data) {
+            gameState.sessionId = data.sessionId || null;
+            gameState.round = data.round || 1;
+            gameState.currentHand = data.currentHand || 1;
+            gameState.cardsUsed = data.cardsUsed || [];
+            gameState.currentCard = data.currentCard || null;
+            gameState.cardsCount = data.cardsCount || 0;
+            gameState.pots = data.pots || { pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0 };
+            gameState.boards = data.boards || generateFixedBoards();
+            gameState.history = data.history || [];
+            gameState.currentClaim = data.currentClaim || null;
+            gameState.claimingPlayer = data.claimingPlayer || null;
+            gameState.claimingBoardId = data.claimingBoardId || null;
+            gameState.handStarted = data.handStarted || false;
+            gameState.handFinished = data.handFinished || false;
+            gameState.roundFinished = data.roundFinished || false;
+            gameState.dealerId = data.dealerId || null;
+            gameState.dealerDisconnected = data.dealerDisconnected || false;
+            gameState.isDealer = (gameState.dealerId === gameState.playerId);
+            
+            if (gameState.sessionId) {
+                document.getElementById('sessionId').textContent = gameState.sessionId.substring(0, 8).toUpperCase();
+                document.getElementById('sessionBadge').style.display = 'inline-block';
+            }
+            
+            updateDisplay();
+            
+            if (gameState.isDealer) {
                 document.getElementById('dealerBadge').style.display = 'inline-block';
                 document.getElementById('dealerControls').style.display = 'block';
                 document.getElementById('becomeDealerBtn').style.display = 'none';
+                document.getElementById('transferDealerBtn').style.display = 'block';
+                
+                if (!dealerDisconnectRef) {
+                    dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
+                    dealerDisconnectRef.onDisconnect().set(true);
+                }
+            } else {
+                document.getElementById('dealerBadge').style.display = 'none';
+                document.getElementById('dealerControls').style.display = 'none';
+                document.getElementById('becomeDealerBtn').style.display = 'block';
+                document.getElementById('transferDealerBtn').style.display = 'none';
+            }
+            
+            // ✅ NUEVO: Cerrar modal si currentClaim es null
+            const verificationModal = document.getElementById('verificationModal');
+            if (data.currentClaim) {
+                if (!verificationModal.classList.contains('show')) {
+                    showClaimModal(data.currentClaim, data.claimingPlayer, data.claimingBoardId);
+                }
+            } else {
+                if (verificationModal.classList.contains('show')) {
+                    verificationModal.classList.remove('show');
+                }
+            }
+            
+            // ✅ NUEVO: Notificación para jugadores cuando se lanza carta
+            if (!gameState.isDealer && data.currentCard && data.currentCard !== gameState.currentCard) {
+                if (gameState.handStarted && !gameState.handFinished) {
+                    showNotification(`🎴 ¡Carta lanzada: ${data.currentCard}!`, 'success');
+                }
+            }
+            
+            updateCurrentCardDisplay();
+        }
+        
+        function updatePlayersList(players) {
+            const container = document.getElementById('playersList');
+            container.innerHTML = '';
+            
+            const playerArray = Object.entries(players)
+                .filter(([id, p]) => {
+                    const isActive = p.online && p.sessionId === id;
+                    const isRecent = (Date.now() - (p.lastSeen || 0)) < (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 300000 : 120000);
+                    
+                    if (gameState.dealerId === id) {
+                        return isActive && isRecent;
+                    }
+                    
+                    const isApproved = p.approved === true;
+                    return isActive && isRecent && isApproved;
+                })
+                .map(([id, p]) => ({ ...p, id }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+            
+            if (playerArray.length === 0) {
+                container.innerHTML = '<div style="color:#95a5a6;font-style:italic;text-align:center;">Esperando jugadores...</div>';
+                return;
+            }
+            
+            playerArray.forEach(player => {
+                const playerEl = document.createElement('div');
+                playerEl.className = `player-item ${gameState.dealerId === player.id ? 'dealer' : ''}`;
+                let playerHTML = `
+                    <span class="player-name">${player.name}</span>
+                    ${player.boardId ? `<span class="player-board">Cartón #${player.boardId}</span>` : '<span class="player-board">Sin cartón</span>'}
+                    <span class="player-balance-display">$${player.balance || 0}</span>
+                `;
+                
+                // ✅ NUEVO: Botón para transferir crupier (solo visible para crupier)
+                if (gameState.isDealer && gameState.dealerId === gameState.playerId && !gameState.handStarted && !gameState.roundFinished && gameState.dealerId !== player.id) {
+                    playerHTML += `<button class="transfer-btn" onclick="transferDealer('${player.id}')">.Transferar</button>`;
+                }
+                
+                playerEl.innerHTML = playerHTML;
+                
+                // ✅ CORREGIDO: Botón de carga de saldo solo si es crupier, mano no iniciada, y saldo < 6
+                if (gameState.isDealer && !gameState.handStarted && (player.balance || 0) < 6) {
+                    const loadBtn = document.createElement('button');
+                    loadBtn.className = 'btn-dealer btn-init';
+                    loadBtn.style.marginTop = '8px';
+                    loadBtn.style.width = '100%';
+                    loadBtn.style.padding = '8px';
+                    loadBtn.innerHTML = '<span>💰 CARGAR SALDO</span>';
+                    loadBtn.onclick = () => openBalanceModal(player.id, player.name);
+                    playerEl.appendChild(loadBtn);
+                }
+                
+                container.appendChild(playerEl);
+            });
+        }
+        
+        function transferDealer(newDealerId) {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede transferir el rol', 'warning');
+                return;
+            }
+            
+            if (gameState.handStarted || gameState.roundFinished) {
+                showNotification('⚠️ No se puede transferir el rol durante una mano o ronda finalizada', 'warning');
+                return;
+            }
+            
+            database.ref('gameState/dealerId').set(newDealerId).then(() => {
+                // Eliminar rol de crupier del actual
+                database.ref(`players/${gameState.playerId}`).update({
+                    approved: true // Mantener aprobado pero ya no es crupier
+                });
+                
+                // Dar rol de crupier al nuevo
+                database.ref(`players/${newDealerId}`).update({
+                    approved: true
+                });
+                
+                showNotification('🔄 ¡Rol de crupier transferido exitosamente!', 'success');
+                document.getElementById('transferDealerModal').classList.remove('show');
+            });
+        }
+        
+        function showTransferDealerModal() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede transferir el rol', 'warning');
+                return;
+            }
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                const container = document.getElementById('transferDealerList');
+                container.innerHTML = '';
+                
+                Object.entries(players)
+                    .filter(([id, p]) => p.approved && p.online && id !== gameState.playerId)
+                    .forEach(([id, player]) => {
+                        const div = document.createElement('div');
+                        div.style.padding = '10px';
+                        div.style.margin = '5px 0';
+                        div.style.background = '#f8f9fa';
+                        div.style.borderRadius = '8px';
+                        div.style.cursor = 'pointer';
+                        div.innerHTML = `<strong>${player.name}</strong> - Cartón #${player.boardId || 'N/A'}`;
+                        div.onclick = () => transferDealer(id);
+                        container.appendChild(div);
+                    });
+                
+                if (container.innerHTML.trim() === '') {
+                    container.innerHTML = '<div style="color:#95a5a6;text-align:center;">No hay jugadores disponibles para transferir el rol</div>';
+                }
+                
+                document.getElementById('transferDealerModal').classList.add('show');
+            });
+        }
+        
+        function openBalanceModal(playerId, playerName) {
+            selectedPlayerForBalance = playerId;
+            document.getElementById('balancePlayerName').textContent = playerName;
+            document.getElementById('balanceAmountInput').value = '';
+            document.getElementById('balanceModal').classList.add('show');
+        }
+        
+        function saveBalance() {
+            const amount = parseInt(document.getElementById('balanceAmountInput').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                showNotification('⚠️ Ingresa un monto válido', 'warning');
+                return;
+            }
+            
+            database.ref(`players/${selectedPlayerForBalance}`).update({
+                balance: amount
+            });
+            
+            document.getElementById('balanceModal').classList.remove('show');
+            showNotification(`✅ Saldo cargado exitosamente`, 'success');
+        }
+        
+        function renderBoards() {
+            const container = document.getElementById('boardsContainer');
+            container.innerHTML = '';
+            
+            const playerRef = database.ref(`players/${gameState.playerId}`);
+            playerRef.once('value', (snapshot) => {
+                const player = snapshot.val();
+                gameState.boardSelectedThisRound = player ? player.boardSelectedThisRound : false;
+                
+                gameState.boards.forEach(board => {
+                    const boardEl = document.createElement('div');
+                    const isOwner = board.owner === gameState.playerId;
+                    const isSelected = gameState.selectedBoard === board.id;
+                    
+                    const isLockedForSelection = gameState.boardSelectedThisRound || gameState.handStarted;
+                    
+                    boardEl.className = `board ${isOwner || isSelected ? 'selected' : ''} ${board.locked || isLockedForSelection ? 'locked' : ''}`;
+                    
+                    if ((!board.locked && !isLockedForSelection) || isOwner) {
+                        boardEl.onclick = (e) => {
+                            if (!e.target.classList.contains('board-cell')) {
+                                selectBoard(board.id);
+                            }
+                        };
+                    }
+                    
+                    let boardHTML = `<div class="board-title">${board.name}</div>`;
+                    if (board.ownerName) {
+                        boardHTML += `<div class="board-owner">👤 ${board.ownerName}</div>`;
+                    }
+                    boardHTML += `<div class="board-grid">`;
+                    
+                    board.cards.forEach((card, idx) => {
+                        const isCenter = idx === 12;
+                        const isCorner = idx === 0 || idx === 4 || idx === 20 || idx === 24;
+                        const isFull = idx >= 5 && idx <= 9;
+                        const isPoker = idx >= 15 && idx <= 19;
+                        
+                        let classes = 'board-cell';
+                        
+                        if (card.includes('♥') || card.includes('♦')) classes += ' heart';
+                        else classes += ' spade';
+                        
+                        if (isCenter) classes += ' center';
+                        if (isCorner) classes += ' corner';
+                        if (isFull) classes += ' full';
+                        if (isPoker) classes += ' poker';
+                        if (board.marked[idx]) classes += ' marked';
+                        
+                        boardHTML += `<div class="${classes}" onclick="toggleCellMark(${board.id}, ${idx}, event)">${card}</div>`;
+                    });
+                    
+                    boardHTML += `</div>`;
+                    
+                    if (isOwner) {
+                        boardHTML += `
+                            <div class="claim-panel">
+                                <button class="claim-btn pokino" onclick="event.stopPropagation(); claimPrize('pokino', ${board.id})" title="Pokino">POKINO</button>
+                                <button class="claim-btn poker" onclick="event.stopPropagation(); claimPrize('poker', ${board.id})" title="Poker">POKER</button>
+                                <button class="claim-btn full" onclick="event.stopPropagation(); claimPrize('full', ${board.id})" title="Full">FULL</button>
+                                <button class="claim-btn centro" onclick="event.stopPropagation(); claimPrize('centro', ${board.id})" id="centroBtn-${board.id}" title="Centro">CENTRO</button>
+                                <button class="claim-btn esquinas" onclick="event.stopPropagation(); claimPrize('esquinas', ${board.id})" title="Esquinas">ESQUINAS</button>
+                                ${gameState.currentHand === 6 ? 
+                                    `<button class="claim-btn especial" onclick="event.stopPropagation(); claimPrize('especial', ${board.id})" title="Especial">ESPECIAL</button>` : 
+                                    `<button class="claim-btn especial" disabled title="Especial (Mano 6)">ESPECIAL</button>`
+                                }
+                            </div>
+                        `;
+                    }
+                    
+                    boardEl.innerHTML = boardHTML;
+                    container.appendChild(boardEl);
+                });
+                
+                if (gameState.cardsCount >= 6) {
+                    document.querySelectorAll('[id^="centroBtn-"]').forEach(btn => {
+                        btn.disabled = true;
+                    });
+                } else {
+                    document.querySelectorAll('[id^="centroBtn-"]').forEach(btn => {
+                        btn.disabled = false;
+                    });
+                }
+            });
+        }
+        
+        function selectBoard(boardId) {
+            if (gameState.boardSelectedThisRound) {
+                showNotification('⚠️ Ya seleccionaste cartón para esta ronda. No se puede cambiar hasta la próxima ronda.', 'warning');
+                return;
+            }
+            
+            if (gameState.handStarted && !gameState.handFinished) {
+                showNotification('⚠️ La mano ya comenzó. Espera a que termine.', 'warning');
+                return;
+            }
+            
+            if (gameState.roundFinished) {
+                showNotification('⚠️ La ronda terminó. Espera a que se reinicie.', 'warning');
+                return;
+            }
+            
+            const board = gameState.boards.find(b => b.id === boardId);
+            
+            if (board.locked && board.owner !== gameState.playerId) {
+                showNotification('❌ Este cartón ya está ocupado', 'error');
+                return;
+            }
+            
+            if (board.owner === gameState.playerId) {
+                board.owner = null;
+                board.ownerName = null;
+                board.locked = false;
+                gameState.selectedBoard = null;
+                
+                database.ref(`players/${gameState.playerId}`).update({
+                    boardId: null,
+                    boardSelectedThisRound: false
+                });
+            } else {
+                const oldBoard = gameState.boards.find(b => b.owner === gameState.playerId);
+                if (oldBoard) {
+                    oldBoard.owner = null;
+                    oldBoard.ownerName = null;
+                    oldBoard.locked = false;
+                    
+                    database.ref(`gameState/boards/${oldBoard.id - 1}`).update({
+                        owner: null,
+                        ownerName: null,
+                        locked: false
+                    });
+                }
+                
+                board.owner = gameState.playerId;
+                board.ownerName = gameState.playerName;
+                board.locked = true;
+                gameState.selectedBoard = boardId;
+                
+                database.ref(`players/${gameState.playerId}`).update({
+                    boardId: boardId,
+                    boardSelectedThisRound: true
+                });
+                
+                gameState.boardSelectedThisRound = true;
+            }
+            
+            database.ref(`gameState/boards/${boardId - 1}`).update({
+                owner: board.owner,
+                ownerName: board.ownerName,
+                locked: board.locked
+            });
+            
+            renderBoards();
+        }
+        
+        function toggleCellMark(boardId, cellIndex, event) {
+            event.stopPropagation();
+            
+            const board = gameState.boards.find(b => b.id === boardId);
+            if (!board || board.owner !== gameState.playerId) return;
+            
+            if (!gameState.handStarted || gameState.handFinished) {
+                showNotification('⚠️ Espera a que el crupier inicie la mano', 'warning');
+                return;
+            }
+            
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+                clickTimeout = null;
+                board.marked[cellIndex] = false;
+                showNotification('↩️ Casilla desmarcada', 'warning');
+            } else {
+                clickTimeout = setTimeout(() => {
+                    clickTimeout = null;
+                    board.marked[cellIndex] = !board.marked[cellIndex];
+                    database.ref(`gameState/boards/${boardId - 1}/marked`).set(board.marked);
+                    
+                    if (board.marked[cellIndex]) {
+                        showNotification('✅ Casilla marcada', 'success');
+                    }
+                }, 300);
+            }
+            
+            renderBoards();
+        }
+        
+        function updateCurrentCardDisplay() {
+            const display = document.getElementById('currentCardDisplay');
+            display.innerHTML = '';
+            
+            if (!gameState.currentCard) {
+                display.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>';
+                return;
+            }
+            
+            const card = gameState.currentCard;
+            const isRed = card.includes('♥') || card.includes('♦');
+            const suitClass = isRed ? 'heart' : 'spade';
+            
+            display.className = `card-display ${suitClass}`;
+            display.innerHTML = `
+                <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
+                <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
+                <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
+            `;
+        }
+        
+        function drawRandomCard() {
+            if (!gameState.handStarted || gameState.handFinished) {
+                showNotification('⚠️ Inicia la mano primero', 'warning');
+                return;
+            }
+            
+            if (gameState.currentClaim) {
+                showNotification('⚠️ Espera a resolver el premio actual', 'warning');
+                return;
+            }
+            
+            const allCards = [];
+            const suits = ['♠', '♥', '♦', '♣'];
+            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            
+            suits.forEach(suit => {
+                values.forEach(value => {
+                    allCards.push(`${value}${suit}`);
+                });
+            });
+            
+            const availableCards = allCards.filter(c => !gameState.cardsUsed.includes(c));
+            
+            if (availableCards.length === 0) {
+                showNotification('🎉 ¡No quedan cartas!', 'success');
+                return;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableCards.length);
+            const newCard = availableCards[randomIndex];
+            
+            gameState.currentCard = newCard;
+            gameState.cardsUsed.push(newCard);
+            gameState.cardsCount++;
+            
+            // ✅ ELIMINADO: El código que aumentaba los pozos aquí
+            // Los pozos solo cambian al iniciar mano o al ganar premio
+            
+            database.ref('gameState').update({
+                currentCard: newCard,
+                cardsUsed: gameState.cardsUsed,
+                cardsCount: gameState.cardsCount
+                // ✅ ELIMINADO: pots: gameState.pots
+            });
+            
+            showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
+        }
+        
+        function becomeDealer() {
+            if (gameState.dealerId) {
+                showNotification('⚠️ Ya hay un crupier asignado', 'warning');
+                return;
+            }
+            
+            if (gameState.handStarted && !gameState.handFinished) {
+                showNotification('⚠️ Espera a que termine la mano actual', 'warning');
+                return;
+            }
+            
+            database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
                 dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
                 dealerDisconnectRef.onDisconnect().set(true);
+                
+                showNotification('👑 ¡Ahora eres el CRUPIER!', 'success');
             });
-        } else {
-            gameState.requestPending = true;
-            const requestRef = database.ref(`requests/${gameState.playerId}`);
-            requestRef.set({
-                playerId: gameState.playerId,
-                playerName: gameState.playerName,
-                timestamp: Date.now(),
-                status: 'pending'
-            });
-            requestRef.onDisconnect().remove();
-            document.getElementById('waitModal').classList.add('show');
-            requestCheckInterval = setInterval(checkRequestStatus, 2000);
         }
-    });
-}
-
-function checkRequestStatus() {
-    database.ref(`requests/${gameState.playerId}`).once('value', (snapshot) => {
-        const request = snapshot.val();
-        if (!request || request.status === 'rejected') {
-            clearInterval(requestCheckInterval);
-            document.getElementById('waitModal').classList.remove('show');
-            showNotification('❌ Solicitud rechazada', 'error');
-        } else if (request.status === 'approved') {
-            clearInterval(requestCheckInterval);
-            document.getElementById('waitModal').classList.remove('show');
-            showNotification('✅ ¡Aprobado!', 'success');
-            database.ref(`players/${gameState.playerId}`).update({ approved: true });
-        }
-    });
-}
-
-function cancelRequest() {
-    if (gameState.requestPending) {
-        database.ref(`requests/${gameState.playerId}`).remove();
-        clearInterval(requestCheckInterval);
-        document.getElementById('waitModal').classList.remove('show');
-        gameState.requestPending = false;
-    }
-}
-
-function startFirebaseListeners() {
-    if (isListening) return;
-    isListening = true;
-    
-    database.ref('gameState').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) loadGameState(data);
-    });
-    
-    database.ref('players').on('value', (snapshot) => {
-        updatePlayersList(snapshot.val() || {});
-    });
-    
-    database.ref('requests').on('value', (snapshot) => {
-        const requests = snapshot.val() || {};
-        updateRequestsCount(requests);
-        if (gameState.isDealer) updateRequestsList(requests);
-    });
-}
-
-function loadGameState(data) {
-    gameState.sessionId = data.sessionId || null;
-    gameState.round = data.round || 1;
-    gameState.currentHand = data.currentHand || 1;
-    gameState.cardsUsed = data.cardsUsed || [];
-    gameState.currentCard = data.currentCard || null;
-    gameState.cardsCount = data.cardsCount || 0;
-    gameState.pots = data.pots || { pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0 };
-    gameState.boards = data.boards || generateFixedBoards();
-    gameState.history = data.history || [];
-    gameState.currentClaim = data.currentClaim || null;
-    gameState.claimingPlayer = data.claimingPlayer || null;
-    gameState.claimingBoardId = data.claimingBoardId || null;
-    gameState.handStarted = data.handStarted || false;
-    gameState.handFinished = data.handFinished || false;
-    gameState.roundFinished = data.roundFinished || false;
-    gameState.dealerId = data.dealerId || null;
-    gameState.isDealer = (gameState.dealerId === gameState.playerId);
-    
-    if (gameState.sessionId) {
-        document.getElementById('sessionId').textContent = gameState.sessionId.substring(0, 8).toUpperCase();
-        document.getElementById('sessionBadge').style.display = 'inline-block';
-    }
-    
-    updateDisplay();
-    
-    if (gameState.isDealer) {
-        document.getElementById('dealerBadge').style.display = 'inline-block';
-        document.getElementById('dealerControls').style.display = 'block';
-        document.getElementById('becomeDealerBtn').style.display = 'none';
-        document.getElementById('transferDealerBtn').style.display = 'block';
-    } else {
-        document.getElementById('dealerBadge').style.display = 'none';
-        document.getElementById('dealerControls').style.display = 'none';
-        document.getElementById('becomeDealerBtn').style.display = 'block';
-        document.getElementById('transferDealerBtn').style.display = 'none';
-    }
-    
-    const modal = document.getElementById('verificationModal');
-    if (data.currentClaim && !modal.classList.contains('show')) {
-        showClaimModal(data.currentClaim, data.claimingPlayer, data.claimingBoardId);
-    } else if (!data.currentClaim && modal.classList.contains('show')) {
-        modal.classList.remove('show');
-    }
-    
-    updateCurrentCardDisplay();
-    updateFloatingCardDisplay();
-}
-
-function updateRequestsCount(requests) {
-    const count = Object.values(requests).filter(r => r.status === 'pending').length;
-    document.getElementById('requestsCount').textContent = count;
-    document.getElementById('requestsBtn').style.display = (count > 0 && gameState.isDealer) ? 'block' : 'none';
-}
-
-function updateRequestsList(requests) {
-    const container = document.getElementById('requestList');
-    container.innerHTML = '';
-    const pending = Object.values(requests).filter(r => r.status === 'pending');
-    if (pending.length === 0) {
-        container.innerHTML = '<div style="color:#95a5a6;text-align:center;padding:20px;">No hay solicitudes</div>';
-        return;
-    }
-    pending.forEach(req => {
-        const div = document.createElement('div');
-        div.className = 'request-item';
-        div.innerHTML = `
-            <span style="font-weight:bold;">${req.playerName}</span>
-            <div class="request-actions">
-                <button class="request-btn accept" onclick="approveRequest('${req.playerId}')">✅</button>
-                <button class="request-btn reject" onclick="rejectRequest('${req.playerId}')">❌</button>
-            </div>
-        `;
-        container.appendChild(div);
-    });
-}
-
-function showRequests() {
-    document.getElementById('requestModal').classList.add('show');
-}
-
-function approveRequest(playerId) {
-    database.ref(`requests/${playerId}`).update({ status: 'approved' });
-    database.ref(`players/${playerId}`).update({ approved: true });
-    showNotification('✅ Aprobado', 'success');
-}
-
-function rejectRequest(playerId) {
-    database.ref(`requests/${playerId}`).update({ status: 'rejected' });
-    showNotification('❌ Rechazado', 'warning');
-}
-
-function generateFixedBoards() {
-    const boards = [];
-    const suits = ['♠', '♥', '♦', '♣'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    const allCards = [];
-    values.forEach(v => suits.forEach(s => allCards.push(`${v}${s}`)));
-    
-    const configs = [
-        { poker: 'A', full3: 'K', full2: 'Q' }, { poker: '2', full3: 'A', full2: 'K' },
-        { poker: '3', full3: '2', full2: 'A' }, { poker: '4', full3: '3', full2: '2' },
-        { poker: '5', full3: '4', full2: '3' }, { poker: '6', full3: '5', full2: '4' },
-        { poker: '7', full3: '6', full2: '5' }, { poker: '8', full3: '7', full2: '6' },
-        { poker: '9', full3: '8', full2: '7' }, { poker: '10', full3: '9', full2: '8' },
-        { poker: 'J', full3: '10', full2: '9' }, { poker: 'Q', full3: 'J', full2: '10' },
-        { poker: 'K', full3: 'Q', full2: 'J' }
-    ];
-    
-    configs.forEach((cfg, idx) => {
-        const cards = new Array(25).fill(null);
-        const used = new Set();
-        for (let i = 0; i < 4; i++) { cards[15 + i] = `${cfg.poker}${suits[i]}`; used.add(cards[15 + i]); }
-        for (let i = 0; i < 3; i++) { cards[5 + i] = `${cfg.full3}${suits[i]}`; used.add(cards[5 + i]); }
-        for (let i = 0; i < 2; i++) { cards[8 + i] = `${cfg.full2}${suits[i]}`; used.add(cards[8 + i]); }
         
-        const available = allCards.filter(c => !used.has(c)).sort(() => Math.random() - 0.5);
-        let j = 0;
-        for (let i = 0; i < 25; i++) if (!cards[i]) cards[i] = available[j++];
-        
-        boards.push({
-            id: idx + 1,
-            name: `CARTÓN ${idx + 1}`,
-            cards: cards,
-            locked: false,
-            marked: Array(25).fill(false),
-            owner: null,
-            ownerName: null
-        });
-    });
-    return boards;
-}
-
-function updatePlayersList(players) {
-    const container = document.getElementById('playersList');
-    container.innerHTML = '';
-    const list = Object.entries(players)
-        .filter(([id, p]) => p.approved && p.online)
-        .map(([id, p]) => ({ id, ...p }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-    
-    if (list.length === 0) {
-        container.innerHTML = '<div style="color:#95a5a6;text-align:center;">Esperando jugadores...</div>';
-        return;
-    }
-    
-    list.forEach(p => {
-        const el = document.createElement('div');
-        el.className = `player-item ${gameState.dealerId === p.id ? 'dealer' : ''}`;
-        el.innerHTML = `
-            <span class="player-name">${p.name}</span>
-            <span class="player-board">${p.boardId ? `Cartón #${p.boardId}` : 'Sin cartón'}</span>
-            <span class="player-balance-display">$${p.balance || 0}</span>
-        `;
-        container.appendChild(el);
-    });
-}
-
-function showTransferDealerModal() {
-    if (!gameState.isDealer) return;
-    database.ref('players').once('value', (snapshot) => {
-        const players = snapshot.val() || {};
-        const container = document.getElementById('transferDealerList');
-        container.innerHTML = '';
-        Object.entries(players)
-            .filter(([id, p]) => p.approved && id !== gameState.playerId)
-            .forEach(([id, p]) => {
-                const div = document.createElement('div');
-                div.style.padding = '10px';
-                div.style.margin = '5px 0';
-                div.style.background = '#f8f9fa';
-                div.style.borderRadius = '8px';
-                div.style.cursor = 'pointer';
-                div.innerHTML = `<strong>${p.name}</strong>`;
-                div.onclick = () => transferDealer(id);
-                container.appendChild(div);
+        function initHand() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede iniciar la mano', 'warning');
+                return;
+            }
+            
+            if (gameState.handStarted && !gameState.handFinished) {
+                showNotification('⚠️ La mano ya está en curso', 'warning');
+                return;
+            }
+            
+            if (gameState.roundFinished) {
+                showNotification('⚠️ La ronda terminó. Reinicia para continuar.', 'warning');
+                return;
+            }
+            
+            // ✅ NUEVO: Verificar que TODOS los jugadores con saldo tengan cartón
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                let playersWithBalance = 0;
+                let playersWithBoard = 0;
+                let missingBoards = [];
+                
+                Object.entries(players).forEach(([id, player]) => {
+                    if (player.approved && player.balance >= 6) {
+                        playersWithBalance++;
+                        if (player.boardId) {
+                            playersWithBoard++;
+                        } else {
+                            missingBoards.push(player.name);
+                        }
+                    }
+                });
+                
+                if (missingBoards.length > 0) {
+                    showNotification(`⚠️ Jugadores sin cartón: ${missingBoards.join(', ')}. Todos deben seleccionar cartón para iniciar.`, 'warning');
+                    return;
+                }
+                
+                if (playersWithBoard === 0) {
+                    showNotification('⚠️ Espera a que al menos un jugador seleccione cartón', 'warning');
+                    return;
+                }
+                
+                let insufficientBalance = [];
+                let playerCount = 0;
+                
+                Object.entries(players).forEach(([id, player]) => {
+                    if (player.boardId) {
+                        playerCount++;
+                        if (!player.balance || player.balance < 6) {
+                            insufficientBalance.push(player.name);
+                        }
+                    }
+                });
+                
+                if (insufficientBalance.length > 0) {
+                    showNotification(`⚠️ Jugadores sin saldo suficiente: ${insufficientBalance.join(', ')}`, 'warning');
+                    return;
+                }
+                
+                // Actualizar saldos
+                Object.entries(players).forEach(([id, player]) => {
+                    if (player.boardId && player.balance >= 6) {
+                        database.ref(`players/${id}`).update({
+                            balance: player.balance - 6
+                        });
+                    }
+                });
+                
+                // ✅ Cargar POZOS: 1 moneda por jugador por pozo
+                const newPots = {
+                    pokino: gameState.pots.pokino + playerCount,
+                    poker: gameState.pots.poker + playerCount,
+                    full: gameState.pots.full + playerCount,
+                    centro: gameState.pots.centro + playerCount,
+                    esquinas: gameState.pots.esquinas + playerCount,
+                    especial: gameState.pots.especial + playerCount
+                };
+                
+                // ✅ Reiniciar TODOS los marcados
+                const resetBoards = gameState.boards.map(board => ({
+                    ...board,
+                    marked: Array(25).fill(false)
+                }));
+                
+                database.ref('gameState').update({
+                    handStarted: true,
+                    handFinished: false,
+                    currentCard: null,
+                    cardsCount: 0,
+                    cardsUsed: [],
+                    pots: newPots,
+                    boards: resetBoards
+                });
+                
+                document.getElementById('drawBtn').disabled = false;
+                document.getElementById('initHandBtn').disabled = true;
+                showNotification(`▶️ ¡Mano iniciada! Cada pozo recibió ${playerCount} monedas.`, 'success');
             });
-        document.getElementById('transferDealerModal').classList.add('show');
-    });
-}
-
-function transferDealer(newId) {
-    if (!gameState.isDealer) return;
-    database.ref('gameState/dealerId').set(newId).then(() => {
-        showNotification('🔄 Rol transferido', 'success');
-        document.getElementById('transferDealerModal').classList.remove('show');
-    });
-}
-
-function openBalanceModal(playerId, playerName) {
-    selectedPlayerForBalance = playerId;
-    document.getElementById('balancePlayerName').textContent = playerName;
-    document.getElementById('balanceAmountInput').value = '';
-    document.getElementById('balanceModal').classList.add('show');
-}
-
-function saveBalance() {
-    const amount = parseInt(document.getElementById('balanceAmountInput').value);
-    if (isNaN(amount) || amount <= 0) {
-        showNotification('⚠️ Monto inválido', 'warning');
-        return;
-    }
-    database.ref(`players/${selectedPlayerForBalance}`).update({ balance: amount });
-    document.getElementById('balanceModal').classList.remove('show');
-    showNotification('✅ Saldo cargado', 'success');
-}
-
-function renderBoards() {
-    const container = document.getElementById('boardsContainer');
-    container.innerHTML = '';
-    gameState.boards.forEach(board => {
-        const el = document.createElement('div');
-        const isOwner = board.owner === gameState.playerId;
-        el.className = `board ${isOwner ? 'selected' : ''} ${board.locked ? 'locked' : ''}`;
-        if (!board.locked || isOwner) {
-            el.onclick = (e) => {
-                if (!e.target.classList.contains('board-cell')) selectBoard(board.id);
+        }
+        
+        function claimPrize(prizeType, boardId) {
+            if (gameState.currentClaim) {
+                showNotification('⚠️ Espera a que se resuelva el premio actual', 'warning');
+                return;
+            }
+            
+            if (!gameState.handStarted || gameState.handFinished) {
+                showNotification('⚠️ La mano no está activa', 'warning');
+                return;
+            }
+            
+            const board = gameState.boards.find(b => b.id === boardId);
+            if (!board || board.owner !== gameState.playerId) return;
+            
+            const markedCount = board.marked.filter(m => m).length;
+            if (markedCount === 0) {
+                showNotification('❌ No tienes cartas marcadas', 'error');
+                return;
+            }
+            
+            if (prizeType === 'centro' && gameState.cardsCount > 6) {
+                showNotification('❌ El centro solo se puede cantar hasta la 6ta carta', 'error');
+                return;
+            }
+            
+            database.ref('gameState').update({
+                currentClaim: prizeType,
+                claimingPlayer: gameState.playerName,
+                claimingBoardId: boardId
+            });
+        }
+        
+        function showClaimModal(prizeType, playerName, boardId) {
+            const board = gameState.boards.find(b => b.id === boardId);
+            if (!board) return;
+            
+            document.getElementById('modalClaimType').textContent = prizeType.toUpperCase();
+            document.getElementById('modalPlayer').textContent = playerName;
+            renderModalBoard(board);
+            renderModalCards();
+            
+            document.getElementById('verificationModal').classList.add('show');
+            
+            if (gameState.isDealer) {
+                document.querySelector('#verificationModal .modal-actions').style.display = 'grid';
+            } else {
+                document.querySelector('#verificationModal .modal-actions').style.display = 'none';
+            }
+        }
+        
+        function renderModalBoard(board) {
+            const container = document.getElementById('modalBoardPreview');
+            container.innerHTML = '';
+            
+            board.cards.forEach((card, idx) => {
+                const isCenter = idx === 12;
+                const isCorner = idx === 0 || idx === 4 || idx === 20 || idx === 24;
+                const isFull = idx >= 5 && idx <= 9;
+                const isPoker = idx >= 15 && idx <= 19;
+                const isMarked = board.marked[idx];
+                
+                const cell = document.createElement('div');
+                cell.className = `modal-cell ${isMarked ? 'marked' : ''}`;
+                
+                if (isCenter) cell.style.background = '#f39c12';
+                if (isCorner) cell.style.background = '#9b59b6';
+                if (isFull) cell.style.background = '#3498db';
+                if (isPoker) cell.style.background = '#1abc9c';
+                if (isMarked) cell.style.background = 'rgba(0, 0, 0, 0.65)';
+                if (isMarked) cell.style.color = 'white';
+                
+                cell.textContent = card;
+                container.appendChild(cell);
+            });
+        }
+        
+        function renderModalCards() {
+            const container = document.getElementById('modalCardsList');
+            container.innerHTML = '';
+            
+            if (gameState.cardsUsed.length === 0) {
+                container.innerHTML = '<div style="color:#95a5a6;text-align:center;width:100%;">No hay cartas cantadas aún</div>';
+                return;
+            }
+            
+            const suits = {
+                spade: { name: '♠ Picas', cards: [], symbol: '♠' },
+                heart: { name: '♥ Corazones', cards: [], symbol: '♥' },
+                diamond: { name: '♦ Diamantes', cards: [], symbol: '♦' },
+                club: { name: '♣ Tréboles', cards: [], symbol: '♣' }
             };
+            
+            gameState.cardsUsed.forEach(card => {
+                if (card.includes('♠')) suits.spade.cards.push(card);
+                else if (card.includes('♥')) suits.heart.cards.push(card);
+                else if (card.includes('♦')) suits.diamond.cards.push(card);
+                else if (card.includes('♣')) suits.club.cards.push(card);
+            });
+            
+            Object.entries(suits).forEach(([suitKey, suitData]) => {
+                if (suitData.cards.length === 0) return;
+                
+                const suitDiv = document.createElement('div');
+                suitDiv.className = 'suit-section';
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = `suit-title ${suitKey}`;
+                titleDiv.innerHTML = `<span>${suitData.symbol}</span> ${suitData.name} (${suitData.cards.length})`;
+                suitDiv.appendChild(titleDiv);
+                
+                const cardsContainer = document.createElement('div');
+                cardsContainer.className = 'cards-container';
+                
+                suitData.cards.slice(-10).reverse().forEach(card => {
+                    const cardItem = document.createElement('div');
+                    cardItem.className = `modal-card-item ${suitKey}`;
+                    cardItem.textContent = card;
+                    cardsContainer.appendChild(cardItem);
+                });
+                
+                suitDiv.appendChild(cardsContainer);
+                container.appendChild(suitDiv);
+            });
         }
         
-        let html = `<div class="board-title">${board.name}</div>`;
-        if (board.ownerName) html += `<div class="board-owner">👤 ${board.ownerName}</div>`;
-        html += `<div class="board-grid">`;
-        board.cards.forEach((card, idx) => {
-            let cls = 'board-cell';
-            if (card.includes('♥') || card.includes('♦')) cls += ' heart';
-            else cls += ' spade';
-            if (board.marked[idx]) cls += ' marked';
-            html += `<div class="${cls}" onclick="toggleCellMark(${board.id}, ${idx}, event)">${card}</div>`;
-        });
-        html += `</div>`;
+        function approveClaim() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede aprobar premios', 'warning');
+                return;
+            }
+            
+            if (!gameState.currentClaim) return;
+            
+            const prizeAmount = gameState.pots[gameState.currentClaim];
+            const prizeName = gameState.currentClaim.toUpperCase();
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                let winnerId = null;
+                
+                Object.entries(players).forEach(([id, player]) => {
+                    if (player.name === gameState.claimingPlayer) {
+                        winnerId = id;
+                        const newBalance = (player.balance || 0) + prizeAmount;
+                        
+                        database.ref(`players/${id}`).update({
+                            balance: newBalance
+                        });
+                    }
+                });
+                
+                const newHistory = [...gameState.history];
+                newHistory.push({
+                    round: gameState.round,
+                    hand: gameState.currentHand,
+                    date: new Date().toLocaleDateString(),
+                    winner: gameState.claimingPlayer,
+                    prize: prizeName,
+                    amount: prizeAmount
+                });
+                
+                // ✅ Reiniciar SOLO el pozo ganado
+                const newPots = { ...gameState.pots };
+                newPots[gameState.currentClaim] = 0;
+                
+                // ✅ CORREGIDO: En mano 6, solo "Especial" termina la ronda
+                const shouldEndHand = (gameState.currentClaim === 'pokino' && gameState.currentHand < 6) || 
+                                     (gameState.currentClaim === 'especial' && gameState.currentHand === 6);
+                
+                const updates = {
+                    history: newHistory,
+                    pots: newPots,
+                    currentClaim: null,
+                    claimingPlayer: null,
+                    claimingBoardId: null
+                };
+                
+                if (shouldEndHand) {
+                    updates.handFinished = true;
+                    updates.handStarted = false;
+                    
+                    if (gameState.currentHand < 6) {
+                        updates.currentHand = gameState.currentHand + 1;
+                    } else {
+                        // ✅ En mano 6, solo Especial termina la ronda
+                        if (gameState.currentClaim === 'especial') {
+                            updates.roundFinished = true;
+                        }
+                    }
+                }
+                
+                database.ref('gameState').update(updates);
+                
+                document.getElementById('verificationModal').classList.remove('show');
+                
+                if (shouldEndHand) {
+                    document.getElementById('drawBtn').disabled = true;
+                    document.getElementById('initHandBtn').disabled = false;
+                    
+                    if (gameState.currentHand === 6 && gameState.currentClaim === 'especial') {
+                        document.getElementById('endRoundBtn').style.display = 'block';
+                        showNotification(`🎉 ¡Mano ${gameState.currentHand} terminada! Ronda completada.`, 'success');
+                    } else if (gameState.currentHand === 6) {
+                        // Mano 6 terminada pero no con Especial, continuar normalmente
+                        showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
+                    } else {
+                        showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
+                    }
+                } else {
+                    showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}`, 'success');
+                }
+            });
+        }
         
-        if (isOwner) {
-            html += `<div class="claim-panel">
-                <button class="claim-btn pokino" onclick="event.stopPropagation(); claimPrize('pokino', ${board.id})">POKINO</button>
-                <button class="claim-btn poker" onclick="event.stopPropagation(); claimPrize('poker', ${board.id})">POKER</button>
-                <button class="claim-btn full" onclick="event.stopPropagation(); claimPrize('full', ${board.id})">FULL</button>
-                <button class="claim-btn centro" onclick="event.stopPropagation(); claimPrize('centro', ${board.id})">CENTRO</button>
-                <button class="claim-btn esquinas" onclick="event.stopPropagation(); claimPrize('esquinas', ${board.id})">ESQUINAS</button>
-                <button class="claim-btn especial" onclick="event.stopPropagation(); claimPrize('especial', ${board.id})" ${gameState.currentHand !== 6 ? 'disabled' : ''}>ESPECIAL</button>
-            </div>`;
-        }
-        el.innerHTML = html;
-        container.appendChild(el);
-    });
-}
-
-function selectBoard(boardId) {
-    if (gameState.boardSelectedThisRound || gameState.handStarted) {
-        showNotification('⚠️ No se puede cambiar', 'warning');
-        return;
-    }
-    const board = gameState.boards.find(b => b.id === boardId);
-    if (board.locked && board.owner !== gameState.playerId) {
-        showNotification('❌ Ocupado', 'error');
-        return;
-    }
-    if (board.owner === gameState.playerId) {
-        board.owner = null;
-        board.ownerName = null;
-        board.locked = false;
-        database.ref(`players/${gameState.playerId}`).update({ boardId: null, boardSelectedThisRound: false });
-    } else {
-        board.owner = gameState.playerId;
-        board.ownerName = gameState.playerName;
-        board.locked = true;
-        database.ref(`players/${gameState.playerId}`).update({ boardId: boardId, boardSelectedThisRound: true });
-        gameState.boardSelectedThisRound = true;
-    }
-    database.ref(`gameState/boards/${boardId - 1}`).update({
-        owner: board.owner,
-        ownerName: board.ownerName,
-        locked: board.locked
-    });
-    renderBoards();
-}
-
-function toggleCellMark(boardId, cellIndex, event) {
-    event.stopPropagation();
-    const board = gameState.boards.find(b => b.id === boardId);
-    if (!board || board.owner !== gameState.playerId) return;
-    if (!gameState.handStarted) {
-        showNotification('⚠️ Espera al crupier', 'warning');
-        return;
-    }
-    if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        clickTimeout = null;
-        board.marked[cellIndex] = false;
-    } else {
-        clickTimeout = setTimeout(() => {
-            clickTimeout = null;
-            board.marked[cellIndex] = !board.marked[cellIndex];
-            database.ref(`gameState/boards/${boardId - 1}/marked`).set(board.marked);
-        }, 300);
-    }
-    renderBoards();
-}
-
-function updateCurrentCardDisplay() {
-    const display = document.getElementById('currentCardDisplay');
-    if (!gameState.currentCard) {
-        display.innerHTML = '<div style="color:#95a5a6;font-style:italic;">Esperando carta...</div>';
-        return;
-    }
-    const card = gameState.currentCard;
-    const isRed = card.includes('♥') || card.includes('♦');
-    display.className = `card-display ${isRed ? 'heart' : 'spade'}`;
-    display.innerHTML = `
-        <div class="card-text">${card.replace(/[♠♥♦♣]/, '')}</div>
-        <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
-        <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
-    `;
-}
-
-function updateFloatingCardDisplay() {
-    const bar = document.getElementById('floatingCardBar');
-    const display = document.getElementById('floatingCardDisplay');
-    const text = document.getElementById('floatingCardText');
-    const symbol = document.getElementById('floatingCardSymbol');
-    const count = document.getElementById('floatingCardCount');
-    
-    if (!gameState.currentCard) {
-        bar.classList.remove('show');
-        return;
-    }
-    
-    const card = gameState.currentCard;
-    const isRed = card.includes('♥') || card.includes('♦');
-    
-    bar.classList.add('show');
-    text.textContent = card.replace(/[♠♥♦♣]/, '');
-    symbol.textContent = card.match(/[♠♥♦♣]/)[0];
-    count.textContent = gameState.cardsCount;
-    
-    if (isRed) {
-        display.classList.add('heart');
-        display.classList.remove('spade');
-    } else {
-        display.classList.add('spade');
-        display.classList.remove('heart');
-    }
-}
-
-function drawRandomCard() {
-    if (!gameState.handStarted || gameState.currentClaim) return;
-    const allCards = [];
-    ['♠', '♥', '♦', '♣'].forEach(s => ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'].forEach(v => allCards.push(`${v}${s}`)));
-    const available = allCards.filter(c => !gameState.cardsUsed.includes(c));
-    if (available.length === 0) return;
-    
-    const newCard = available[Math.floor(Math.random() * available.length)];
-    gameState.currentCard = newCard;
-    gameState.cardsUsed.push(newCard);
-    gameState.cardsCount++;
-    database.ref('gameState').update({
-        currentCard: newCard,
-        cardsUsed: gameState.cardsUsed,
-        cardsCount: gameState.cardsCount
-    });
-    showNotification(`🎴 ¡${newCard}!`, 'success');
-}
-
-function becomeDealer() {
-    if (gameState.dealerId) {
-        showNotification('⚠️ Ya hay crupier', 'warning');
-        return;
-    }
-    database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
-        showNotification('👑 ¡Eres el CRUPIER!', 'success');
-    });
-}
-
-function initHand() {
-    if (!gameState.isDealer || gameState.handStarted) return;
-    database.ref('players').once('value', (snapshot) => {
-        const players = snapshot.val() || {};
-        let count = 0;
-        Object.entries(players).forEach(([id, p]) => {
-            if (p.boardId && p.balance >= 6) {
-                count++;
-                database.ref(`players/${id}`).update({ balance: p.balance - 6 });
+        function denyClaim() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede denegar premios', 'warning');
+                return;
             }
-        });
-        if (count === 0) {
-            showNotification('⚠️ Sin jugadores', 'warning');
-            return;
+            
+            // ✅ CIERRA MODAL PARA TODOS
+            database.ref('gameState').update({
+                currentClaim: null,
+                claimingPlayer: null,
+                claimingBoardId: null
+            });
+            
+            // ✅ Cerrar modal localmente
+            document.getElementById('verificationModal').classList.remove('show');
+            showNotification('❌ Premio denegado. Continuamos jugando', 'warning');
         }
-        const newPots = {
-            pokino: gameState.pots.pokino + count,
-            poker: gameState.pots.poker + count,
-            full: gameState.pots.full + count,
-            centro: gameState.pots.centro + count,
-            esquinas: gameState.pots.esquinas + count,
-            especial: gameState.pots.especial + count
-        };
-        database.ref('gameState').update({
-            handStarted: true,
-            currentCard: null,
-            cardsCount: 0,
-            cardsUsed: [],
-            pots: newPots
-        });
-        document.getElementById('drawBtn').disabled = false;
-        document.getElementById('initHandBtn').disabled = true;
-        showNotification(`▶️ ¡Mano iniciada!`, 'success');
-    });
-}
-
-function claimPrize(prizeType, boardId) {
-    if (gameState.currentClaim || !gameState.handStarted) return;
-    const board = gameState.boards.find(b => b.id === boardId);
-    if (!board || board.owner !== gameState.playerId) return;
-    database.ref('gameState').update({
-        currentClaim: prizeType,
-        claimingPlayer: gameState.playerName,
-        claimingBoardId: boardId
-    });
-}
-
-function showClaimModal(prizeType, playerName, boardId) {
-    const board = gameState.boards.find(b => b.id === boardId);
-    if (!board) return;
-    document.getElementById('modalClaimType').textContent = prizeType.toUpperCase();
-    document.getElementById('modalPlayer').textContent = playerName;
-    const container = document.getElementById('modalBoardPreview');
-    container.innerHTML = '';
-    board.cards.forEach((card, idx) => {
-        const cell = document.createElement('div');
-        cell.className = `board-cell ${board.marked[idx] ? 'marked' : ''}`;
-        cell.textContent = card;
-        container.appendChild(cell);
-    });
-    document.getElementById('verificationModal').classList.add('show');
-}
-
-function approveClaim() {
-    if (!gameState.isDealer || !gameState.currentClaim) return;
-    const amount = gameState.pots[gameState.currentClaim];
-    database.ref('players').once('value', (snapshot) => {
-        const players = snapshot.val() || {};
-        Object.entries(players).forEach(([id, p]) => {
-            if (p.name === gameState.claimingPlayer) {
-                database.ref(`players/${id}`).update({ balance: (p.balance || 0) + amount });
+        
+        function endRound() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede finalizar la ronda', 'warning');
+                return;
             }
-        });
-        const newPots = { ...gameState.pots };
-        newPots[gameState.currentClaim] = 0;
-        database.ref('gameState').update({
-            pots: newPots,
-            currentClaim: null,
-            claimingPlayer: null,
-            claimingBoardId: null
-        });
-        showNotification(`🎉 ¡Ganó $${amount}!`, 'success');
-    });
-}
-
-function denyClaim() {
-    if (!gameState.isDealer) return;
-    database.ref('gameState').update({
-        currentClaim: null,
-        claimingPlayer: null,
-        claimingBoardId: null
-    });
-    document.getElementById('verificationModal').classList.remove('show');
-    showNotification('❌ Denegado', 'warning');
-}
-
-function endRound() {
-    if (!gameState.isDealer || !gameState.roundFinished) return;
-    document.getElementById('endRoundModal').classList.add('show');
-}
-
-function startNewRound() {
-    document.getElementById('endRoundModal').classList.remove('show');
-    database.ref('gameState').update({
-        round: gameState.round + 1,
-        currentHand: 1,
-        cardsUsed: [],
-        currentCard: null,
-        cardsCount: 0,
-        pots: { pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0 },
-        handStarted: false,
-        roundFinished: false
-    });
-    document.getElementById('players').once('value', (snapshot) => {
-        Object.keys(snapshot.val() || {}).forEach(id => {
-            database.ref(`players/${id}`).update({ boardId: null, boardSelectedThisRound: false });
-        });
-    });
-    gameState.boardSelectedThisRound = false;
-    showNotification('✨ Nueva ronda', 'success');
-}
-
-function endSession() {
-    if (!gameState.isDealer) return;
-    if (!confirm('¿Finalizar sesión?')) return;
-    database.ref('gameState/dealerDisconnected').set(true);
-    location.reload();
-}
-
-function resetAllBalances() {
-    if (!gameState.isDealer) return;
-    database.ref('players').once('value', (snapshot) => {
-        Object.keys(snapshot.val() || {}).forEach(id => {
-            database.ref(`players/${id}`).update({ balance: 0 });
-        });
-    });
-    showNotification('🔄 Saldos reiniciados', 'success');
-}
-
-function showHistoryModal() {
-    const content = document.getElementById('historyContent');
-    content.innerHTML = '';
-    if (gameState.history.length === 0) {
-        content.innerHTML = '<div style="text-align:center;color:#95a5a6;">Sin historial</div>';
-    } else {
-        gameState.history.slice(-10).reverse().forEach(item => {
-            const div = document.createElement('div');
-            div.style.padding = '10px';
-            div.style.borderBottom = '1px solid #eee';
-            div.innerHTML = `<strong>R${item.round}-M${item.hand}</strong>: ${item.winner} - ${item.prize}: $${item.amount}`;
-            content.appendChild(div);
-        });
-    }
-    document.getElementById('historyModal').classList.add('show');
-}
-
-function updateDisplay() {
-    document.getElementById('roundNumber').textContent = gameState.round;
-    document.getElementById('handNumber').textContent = gameState.currentHand;
-    document.getElementById('cardsCount').textContent = gameState.cardsCount;
-    document.getElementById('potPokino').textContent = `$${gameState.pots.pokino}`;
-    document.getElementById('potPoker').textContent = `$${gameState.pots.poker}`;
-    document.getElementById('potFull').textContent = `$${gameState.pots.full}`;
-    document.getElementById('potCentro').textContent = `$${gameState.pots.centro}`;
-    document.getElementById('potEsquinas').textContent = `$${gameState.pots.esquinas}`;
-    document.getElementById('potEspecial').textContent = `$${gameState.pots.especial}`;
-    
-    const summary = document.getElementById('cardsSummary');
-    summary.innerHTML = '';
-    if (gameState.cardsUsed.length === 0) {
-        summary.innerHTML = '<div style="text-align:center;color:#95a5a6;padding:15px;">Sin cartas</div>';
-    } else {
-        gameState.cardsUsed.slice(-20).reverse().forEach(card => {
-            const div = document.createElement('div');
-            div.className = `card-item ${card.includes('♥') || card.includes('♦') ? 'heart' : 'spade'}`;
-            div.textContent = card;
-            summary.appendChild(div);
-        });
-    }
-    
-    renderBoards();
-    updateCurrentCardDisplay();
-    updateFloatingCardDisplay();
-    
-    if (gameState.isDealer) {
-        document.getElementById('drawBtn').disabled = !gameState.handStarted;
-    }
-    
-    database.ref(`players/${gameState.playerId}`).once('value', (snapshot) => {
-        const p = snapshot.val();
-        if (p && p.balance !== undefined) {
-            document.getElementById('playerBalance').style.display = 'inline-block';
-            document.getElementById('balanceAmount').textContent = p.balance;
+            
+            if (!gameState.roundFinished) {
+                showNotification('⚠️ La ronda aún no ha terminado', 'warning');
+                return;
+            }
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                const balancesList = document.getElementById('finalBalancesList');
+                balancesList.innerHTML = '';
+                
+                Object.entries(players)
+                    .filter(([id, p]) => p.online && p.boardId)
+                    .sort((a, b) => b[1].balance - a[1].balance)
+                    .forEach(([id, player]) => {
+                        const div = document.createElement('div');
+                        div.style.padding = '8px';
+                        div.style.margin = '5px 0';
+                        div.style.background = '#fff';
+                        div.style.borderRadius = '5px';
+                        div.innerHTML = `<strong>${player.name}:</strong> $${player.balance || 0}`;
+                        balancesList.appendChild(div);
+                    });
+                
+                document.getElementById('endRoundModal').classList.add('show');
+            });
         }
-    });
-}
-
-function showNotification(message, type = 'success') {
-    const notif = document.getElementById('notification');
-    notif.textContent = message;
-    notif.className = `notification ${type}`;
-    notif.classList.remove('show');
-    void notif.offsetWidth;
-    notif.classList.add('show');
-    setTimeout(() => notif.classList.remove('show'), 3000);
-}
-
-function cleanupInactivePlayers() {
-    const now = Date.now();
-    database.ref('players').once('value', (snapshot) => {
-        Object.entries(snapshot.val() || {}).forEach(([id, p]) => {
-            if (p.lastSeen && (now - p.lastSeen > 120000) && id !== gameState.dealerId) {
-                database.ref(`players/${id}`).remove();
+        
+        function startNewRound() {
+            document.getElementById('endRoundModal').classList.remove('show');
+            
+            gameState.boards.forEach(board => {
+                board.locked = false;
+                board.owner = null;
+                board.ownerName = null;
+                board.marked = Array(25).fill(false);
+            });
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                
+                Object.keys(players).forEach(playerId => {
+                    database.ref(`players/${playerId}`).update({
+                        boardId: null,
+                        boardSelectedThisRound: false
+                    });
+                });
+                
+                database.ref('gameState').update({
+                    round: gameState.round + 1,
+                    currentHand: 1,
+                    cardsUsed: [],
+                    currentCard: null,
+                    cardsCount: 0,
+                    pots: {
+                        pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
+                    },
+                    boards: gameState.boards,
+                    handStarted: false,
+                    handFinished: false,
+                    roundFinished: false
+                });
+                
+                document.getElementById('endRoundBtn').style.display = 'none';
+                document.getElementById('drawBtn').disabled = true;
+                document.getElementById('initHandBtn').disabled = false;
+                
+                gameState.boardSelectedThisRound = false;
+                
+                showNotification(`✨ ¡Ronda ${gameState.round + 1} iniciada! Seleccionen nuevos cartones.`, 'success');
+            });
+        }
+        
+        function endSession() {
+            if (!gameState.isDealer) {
+                showNotification('⚠️ Solo el crupier puede finalizar la sesión', 'warning');
+                return;
             }
-        });
-    });
-}
-
-window.addEventListener('unload', () => {
-    if (cleanupInterval) clearInterval(cleanupInterval);
-    if (requestCheckInterval) clearInterval(requestCheckInterval);
-    if (gameState.playerId) {
-        if (!gameState.isDealer) {
-            database.ref(`players/${gameState.playerId}`).remove();
-        } else {
+            
+            if (!confirm('⚠️ ¿Seguro que quieres FINALIZAR LA SESIÓN? Se perderá todo el progreso y se reiniciará la base de datos.')) {
+                return;
+            }
+            
+            document.getElementById('endRoundModal').classList.remove('show');
+            
             database.ref('gameState/dealerDisconnected').set(true);
+            
+            cleanDatabase();
+            
+            showNotification('🔄 ¡Sesión finalizada! La base de datos se ha reiniciado.', 'success');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
         }
-    }
-});
-
-window.onload = initGame;
-</script>
+        
+        function resetGame() {
+            if (!gameState.isDealer && gameState.dealerId) {
+                showNotification('⚠️ Solo el crupier puede reiniciar el juego', 'warning');
+                return;
+            }
+            
+            if (!confirm('⚠️ ¿Seguro que quieres finalizar el juego? Se perderá todo el progreso.')) {
+                return;
+            }
+            
+            document.getElementById('endRoundModal').classList.remove('show');
+            
+            database.ref('gameState').set({
+                sessionId: gameState.sessionId,
+                round: 1,
+                currentHand: 1,
+                cardsUsed: [],
+                currentCard: null,
+                cardsCount: 0,
+                pots: {
+                    pokino: 0, poker: 0, full: 0, centro: 0, esquinas: 0, especial: 0
+                },
+                boards: generateFixedBoards(),
+                history: [],
+                currentClaim: null,
+                claimingPlayer: null,
+                claimingBoardId: null,
+                handStarted: false,
+                handFinished: false,
+                roundFinished: false,
+                dealerId: gameState.dealerId,
+                dealerDisconnected: false
+            });
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                Object.keys(players).forEach(playerId => {
+                    database.ref(`players/${playerId}`).update({
+                        boardId: null,
+                        balance: 0,
+                        approved: true,
+                        boardSelectedThisRound: false
+                    });
+                });
+            });
+            
+            database.ref('requests').remove();
+            
+            showNotification('🔄 ¡Juego reiniciado completamente!', 'success');
+        }
+        
+        function resetAllBalances() {
+            if (!gameState.isDealer && gameState.dealerId) {
+                showNotification('⚠️ Solo el crupier puede reiniciar saldos', 'warning');
+                return;
+            }
+            
+            if (!confirm('⚠️ ¿Seguro que quieres reiniciar TODOS los saldos a 0?')) {
+                return;
+            }
+            
+            database.ref('players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                Object.keys(players).forEach(playerId => {
+                    database.ref(`players/${playerId}`).update({
+                        balance: 0
+                    });
+                });
+            });
+            
+            showNotification('🔄 ¡Todos los saldos han sido reiniciados a 0!', 'success');
+        }
+        
+        function showHistoryModal() {
+            const content = document.getElementById('historyContent');
+            const empty = document.getElementById('emptyHistory');
+            
+            if (gameState.history.length === 0) {
+                empty.style.display = 'block';
+                content.innerHTML = '';
+            } else {
+                empty.style.display = 'none';
+                content.innerHTML = '';
+                
+                const sortedHistory = [...gameState.history].reverse();
+                
+                sortedHistory.forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.style.padding = '12px';
+                    div.style.borderBottom = '1px solid #ecf0f1';
+                    div.innerHTML = `
+                        <div style="font-weight:bold;color:#3498db;">Ronda ${item.round} - Mano ${item.hand}</div>
+                        <div style="color:#7f8c8d;margin:5px 0;">${item.date}</div>
+                        <div style="color:#e67e22;font-weight:bold;">${item.winner}</div>
+                        <div style="color:#27ae60;font-weight:bold;">${item.prize}: $${item.amount}</div>
+                    `;
+                    content.appendChild(div);
+                });
+            }
+            
+            document.getElementById('historyModal').classList.add('show');
+        }
+        
+        function updateDisplay() {
+            document.getElementById('roundNumber').textContent = gameState.round;
+            document.getElementById('handNumber').textContent = gameState.currentHand;
+            document.getElementById('cardsCount').textContent = gameState.cardsCount;
+            
+            document.getElementById('potPokino').textContent = `$${gameState.pots.pokino}`;
+            document.getElementById('potPoker').textContent = `$${gameState.pots.poker}`;
+            document.getElementById('potFull').textContent = `$${gameState.pots.full}`;
+            document.getElementById('potCentro').textContent = `$${gameState.pots.centro}`;
+            document.getElementById('potEsquinas').textContent = `$${gameState.pots.esquinas}`;
+            document.getElementById('potEspecial').textContent = `$${gameState.pots.especial}`;
+            
+            const summary = document.getElementById('cardsSummary');
+            summary.innerHTML = '';
+            
+            if (gameState.cardsUsed.length === 0) {
+                summary.innerHTML = '<div class="empty-summary">Aún no se han cantado cartas</div>';
+            } else {
+                gameState.cardsUsed.slice(-20).reverse().forEach(card => {
+                    const div = document.createElement('div');
+                    div.className = `card-item ${card.includes('♥') || card.includes('♦') ? 'heart' : 'spade'}`;
+                    div.textContent = card;
+                    summary.appendChild(div);
+                });
+            }
+            
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            if (gameState.history.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">Aún no hay partidas jugadas</div>';
+            } else {
+                const lastWins = [...gameState.history].reverse().slice(0, 5);
+                
+                lastWins.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+                        <div class="history-hand">R${item.round}-M${item.hand}</div>
+                        <div class="history-date">${item.date}</div>
+                        <div class="history-winner">${item.winner}</div>
+                        <div class="history-prize">${item.prize}: $${item.amount}</div>
+                    `;
+                    historyList.appendChild(div);
+                });
+            }
+            
+            renderBoards();
+            updateCurrentCardDisplay();
+            
+            if (gameState.isDealer) {
+                document.getElementById('drawBtn').disabled = !gameState.handStarted || gameState.handFinished;
+            }
+            
+            database.ref(`players/${gameState.playerId}`).once('value', (snapshot) => {
+                const player = snapshot.val();
+                if (player && player.balance !== undefined) {
+                    document.getElementById('playerBalance').style.display = 'inline-block';
+                    document.getElementById('balanceAmount').textContent = player.balance;
+                    gameState.playerBalance = player.balance;
+                }
+            });
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = `notification ${type}`;
+            notif.classList.remove('show');
+            void notif.offsetWidth;
+            notif.classList.add('show');
+            
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3000);
+        }
+        
+        window.addEventListener('unload', () => {
+            if (cleanupInterval) clearInterval(cleanupInterval);
+            if (requestCheckInterval) clearInterval(requestCheckInterval);
+            if (gameState.playerId) {
+                // ✅ SOLO eliminar jugador si NO es crupier
+                if (!gameState.isDealer) {
+                    database.ref(`players/${gameState.playerId}`).remove();
+                } else {
+                    database.ref('gameState/dealerDisconnected').set(true);
+                }
+                database.ref(`requests/${gameState.playerId}`).remove();
+            }
+        });
+        
+        window.onload = initGame;
+    </script>
 </body>
 </html>
