@@ -372,19 +372,21 @@ margin-bottom: 15px;
 flex-grow: 1;
 }
 .board-cell {
-aspect-ratio: 1;
+aspect-ratio: 1.5 / 1;
 background: #f8f9fa;
 border: 2px solid #ddd;
 display: flex;
 align-items: center;
 justify-content: center;
-font-size: 0.75em;
+font-size: 2em;
 font-weight: bold;
 border-radius: 4px;
 cursor: pointer;
 transition: all 0.2s;
-padding: 3px;
+padding: 6px 4px;
 user-select: none;
+flex-direction: column;
+line-height: 1.1;
 }
 .board-cell.heart, .board-cell.diamond { color: #e74c3c; }
 .board-cell.spade, .board-cell.club { color: #2c3e50; }
@@ -398,7 +400,7 @@ transform: scale(1.05);
 background: #f39c12;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 2em;
 }
 .board-cell.center.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -407,7 +409,7 @@ background: rgba(0, 0, 0, 0.65);
 background: #9b59b6;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 2em;
 }
 .board-cell.corner.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -416,7 +418,7 @@ background: rgba(0, 0, 0, 0.65);
 background: #3498db;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 2em;
 }
 .board-cell.full.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -425,7 +427,7 @@ background: rgba(0, 0, 0, 0.65);
 background: #1abc9c;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 2em;
 }
 .board-cell.poker.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -894,6 +896,11 @@ max-width: 95%;
 .card-display .card-symbol {
 font-size: 6em;
 }
+.board-cell {
+aspect-ratio: 1.4 / 1;
+font-size: 0.9em;
+padding: 5px 3px;
+    }
 }
 </style>
 </head>
