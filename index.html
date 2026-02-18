@@ -7,8 +7,6 @@
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<!-- ✅ NUEVO: SDK de Autenticación -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <style>
 * {
 margin: 0;
@@ -363,20 +361,25 @@ gap: 4px;
 margin-bottom: 15px;
 flex-grow: 1;
 }
+/* ✅ MEJORA 2: Celdas Rectangulares (no cuadradas) */
 .board-cell {
-aspect-ratio: 1;
+/* Aspect ratio rectangular (más ancho que alto) */
+aspect-ratio: 1.4 / 1;
 background: #f8f9fa;
 border: 2px solid #ddd;
 display: flex;
 align-items: center;
 justify-content: center;
-font-size: 0.75em;
+/* ✅ Texto ocupa 70% del espacio */
+font-size: 0.65em;
 font-weight: bold;
 border-radius: 4px;
 cursor: pointer;
 transition: all 0.2s;
-padding: 3px;
+padding: 4px 2px;
 user-select: none;
+flex-direction: column;
+line-height: 1.2;
 }
 .board-cell.heart, .board-cell.diamond { color: #e74c3c; }
 .board-cell.spade, .board-cell.club { color: #2c3e50; }
@@ -390,7 +393,7 @@ transform: scale(1.05);
 background: #f39c12;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 0.7em;
 }
 .board-cell.center.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -399,7 +402,7 @@ background: rgba(0, 0, 0, 0.65);
 background: #9b59b6;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 0.7em;
 }
 .board-cell.corner.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -408,7 +411,7 @@ background: rgba(0, 0, 0, 0.65);
 background: #3498db;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 0.7em;
 }
 .board-cell.full.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -417,7 +420,7 @@ background: rgba(0, 0, 0, 0.65);
 background: #1abc9c;
 color: white !important;
 font-weight: bold;
-font-size: 0.8em;
+font-size: 0.7em;
 }
 .board-cell.poker.marked {
 background: rgba(0, 0, 0, 0.65);
@@ -856,6 +859,84 @@ background: linear-gradient(135deg, #f39c12, #e67e22);
 .notification.success {
 background: linear-gradient(135deg, #27ae60, #229954);
 }
+
+/* ✅ MEJORA 1: Ventana Flotante de Carta para Móviles */
+.mobile-card-popup {
+display: none;
+position: fixed;
+bottom: 20px;
+right: 20px;
+background: white;
+border: 4px solid #3498db;
+border-radius: 15px;
+padding: 15px;
+box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+z-index: 1500;
+min-width: 120px;
+text-align: center;
+animation: slideIn 0.3s ease-out;
+}
+.mobile-card-popup.show {
+display: block;
+}
+@keyframes slideIn {
+from { 
+transform: translateX(200px);
+opacity: 0;
+}
+to { 
+transform: translateX(0);
+opacity: 1;
+}
+}
+.mobile-card-popup .popup-title {
+font-size: 0.8em;
+color: #7f8c8d;
+margin-bottom: 8px;
+font-weight: bold;
+}
+.mobile-card-popup .card-text {
+font-size: 2em;
+font-weight: bold;
+margin-bottom: 5px;
+}
+.mobile-card-popup .card-symbol {
+font-size: 5em;
+margin: 0;
+line-height: 1;
+}
+.mobile-card-popup.heart .card-text,
+.mobile-card-popup.heart .card-symbol,
+.mobile-card-popup.diamond .card-text,
+.mobile-card-popup.diamond .card-symbol {
+color: #e74c3c;
+}
+.mobile-card-popup.spade .card-text,
+.mobile-card-popup.spade .card-symbol,
+.mobile-card-popup.club .card-text,
+.mobile-card-popup.club .card-symbol {
+color: #2c3e50;
+}
+.mobile-card-popup .close-popup {
+position: absolute;
+top: 5px;
+right: 8px;
+background: #e74c3c;
+color: white;
+border: none;
+border-radius: 50%;
+width: 24px;
+height: 24px;
+cursor: pointer;
+font-size: 0.9em;
+font-weight: bold;
+}
+.mobile-card-popup .card-counter {
+font-size: 0.75em;
+color: #7f8c8d;
+margin-top: 8px;
+}
+
 @media (max-width: 1200px) {
 .game-container {
 grid-template-columns: 1fr;
@@ -885,6 +966,16 @@ max-width: 95%;
 }
 .card-display .card-symbol {
 font-size: 6em;
+}
+/* ✅ Mostrar popup en móviles */
+.mobile-card-popup {
+display: none !important;
+}
+}
+/* ✅ Mostrar popup en tablets (iPad) */
+@media (min-width: 601px) and (max-width: 1024px) {
+.mobile-card-popup {
+display: block !important;
 }
 }
 </style>
@@ -994,6 +1085,16 @@ font-size: 6em;
 </div>
 </div>
 </div>
+
+<!-- ✅ MEJORA 1: Ventana Flotante de Carta para Móviles/Tablets -->
+<div class="mobile-card-popup" id="mobileCardPopup">
+<button class="close-popup" onclick="closeMobileCardPopup()">×</button>
+<div class="popup-title">🃏 CARTA ACTUAL</div>
+<div class="card-text" id="mobileCardText">-</div>
+<div class="card-symbol" id="mobileCardSymbol">-</div>
+<div class="card-counter">Carta #<span id="mobileCardCount">0</span></div>
+</div>
+
 <!-- Modal de Verificación -->
 <div class="modal" id="verificationModal">
 <div class="modal-content">
@@ -1117,13 +1218,9 @@ storageBucket: "pokino-4383c.firebasestorage.app",
 messagingSenderId: "607174478777",
 appId: "1:607174478777:web:0b16906bd16ed568d60468"
 };
-
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-// ✅ NUEVO: Inicializar Autenticación
-const auth = firebase.auth();
-
 // ============================================
 // ESTADO DEL JUEGO
 // ============================================
@@ -1167,31 +1264,9 @@ let selectedPlayerForBalance = null;
 let cleanupInterval = null;
 let requestCheckInterval = null;
 let dealerDisconnectRef = null;
-
+let mobileCardPopupTimeout = null;
 // ============================================
-// ✅ NUEVO: INICIALIZACIÓN CON AUTENTICACIÓN
-// ============================================
-window.onload = function() {
-// ✅ Primero iniciar sesión anónima
-signInAnonymously();
-};
-
-function signInAnonymously() {
-auth.signInAnonymously()
-.then((result) => {
-console.log("✅ Autenticación anónima exitosa:", result.user.uid);
-gameState.playerId = result.user.uid; // ✅ Usar ID seguro de Firebase
-// ✅ Solo iniciar el juego después de autenticar
-initGame();
-})
-.catch((error) => {
-console.error("❌ Error de autenticación:", error);
-showNotification('❌ Error de conexión segura. Recarga la página.', 'error');
-});
-}
-
-// ============================================
-// INICIALIZACIÓN DEL JUEGO
+// INICIALIZACIÓN
 // ============================================
 function initGame() {
 database.ref('gameState/dealerDisconnected').once('value', (snapshot) => {
@@ -1200,7 +1275,6 @@ if (disconnected) {
 cleanDatabase();
 }
 });
-// ✅ Verificar si hay crupier al iniciar
 database.ref('gameState/dealerId').once('value', (snapshot) => {
 const dealerId = snapshot.val();
 if (!dealerId) {
@@ -1210,45 +1284,38 @@ document.getElementById('nameModal').classList.add('show');
 }
 });
 startFirebaseListeners();
-// ✅ Tiempo de inactividad más largo para móviles
 const inactiveTime = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-? 300000 // 5 minutos para móviles
-: 120000; // 2 minutos para escritorio
+? 300000
+: 120000;
 cleanupInterval = setInterval(cleanupInactivePlayers, inactiveTime);
 window.addEventListener('beforeunload', handleBeforeUnload);
 }
-
 function handleBeforeUnload() {
 if (gameState.playerId) {
-// ✅ SOLO eliminar jugador si NO es crupier
 if (!gameState.isDealer) {
 database.ref(`players/${gameState.playerId}`).remove();
 } else {
-// Si es crupier, marcar desconexión
 database.ref('gameState/dealerDisconnected').set(true);
 showNotification('👋 ¡Has salido de la sesión! Todos los jugadores serán desconectados.', 'warning');
 }
 database.ref(`requests/${gameState.playerId}`).remove();
 }
 }
-
 function cleanDatabase() {
 database.ref('gameState').remove();
 database.ref('players').remove();
 database.ref('requests').remove();
 console.log('✅ Base de datos limpiada');
 }
-
 function cleanupInactivePlayers() {
 const now = Date.now();
 const maxInactiveTime = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-? 300000 // 5 minutos para móviles
-: 120000; // 2 minutos para escritorio
+? 300000
+: 120000;
 database.ref('players').once('value', (snapshot) => {
 const players = snapshot.val() || {};
 Object.entries(players).forEach(([playerId, player]) => {
 if (player.lastSeen && (now - player.lastSeen > maxInactiveTime)) {
-// ✅ Solo eliminar si NO es el crupier
 if (gameState.dealerId !== playerId) {
 database.ref(`players/${playerId}`).remove();
 if (player.boardId) {
@@ -1263,7 +1330,6 @@ locked: false
 });
 });
 }
-
 function savePlayerName() {
 const nameInput = document.getElementById('playerNameInput').value.trim();
 if (!nameInput || nameInput.length < 2) {
@@ -1271,12 +1337,11 @@ alert('Por favor ingresa un nombre válido (mínimo 2 caracteres)');
 return;
 }
 gameState.playerName = nameInput;
-// ✅ YA NO generamos playerId aleatorio, usamos el de Auth
+gameState.playerId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 document.getElementById('playerName').textContent = nameInput;
 document.getElementById('nameModal').classList.remove('show');
 registerPlayer();
 }
-
 function registerPlayer() {
 const playerRef = database.ref(`players/${gameState.playerId}`);
 playerRef.set({
@@ -1289,31 +1354,25 @@ sessionId: gameState.playerId,
 approved: false,
 boardSelectedThisRound: false
 });
-// ✅ ELIMINADO: playerRef.onDisconnect().remove();
-// Los jugadores NO se eliminan al desconectar (solo crupier)
 setInterval(() => {
 playerRef.update({
 lastSeen: Date.now(),
 online: true
 });
 }, 15000);
-// ✅ Verificar si hay crupier y si es el primero
 database.ref('gameState').once('value', (snapshot) => {
 const gameStateData = snapshot.val();
 if (!gameStateData || !gameStateData.dealerId) {
-// ✅ Primera persona se convierte automáticamente en crupier
 database.ref('gameState/dealerId').set(gameState.playerId).then(() => {
 showNotification('👑 ¡Te has convertido automáticamente en CRUPIER!', 'success');
 gameState.isDealer = true;
 document.getElementById('dealerBadge').style.display = 'inline-block';
 document.getElementById('dealerControls').style.display = 'block';
 document.getElementById('becomeDealerBtn').style.display = 'none';
-// Configurar onDisconnect para el crupier
 dealerDisconnectRef = database.ref('gameState/dealerDisconnected');
 dealerDisconnectRef.onDisconnect().set(true);
 });
 } else if (gameStateData.dealerId) {
-// Hay crupier, solicitar unirse
 gameState.hasRequested = true;
 gameState.requestPending = true;
 const requestRef = database.ref(`requests/${gameState.playerId}`);
@@ -1331,7 +1390,6 @@ showNotification(`✅ ¡Bienvenido, ${gameState.playerName}!`, 'success');
 }
 });
 }
-
 function checkRequestStatus() {
 database.ref(`requests/${gameState.playerId}`).once('value', (snapshot) => {
 const request = snapshot.val();
@@ -1351,7 +1409,6 @@ approved: true
 }
 });
 }
-
 function cancelRequest() {
 if (gameState.requestPending) {
 database.ref(`requests/${gameState.playerId}`).remove();
@@ -1362,7 +1419,6 @@ gameState.requestPending = false;
 gameState.hasRequested = false;
 }
 }
-
 function startFirebaseListeners() {
 if (isListening) return;
 isListening = true;
@@ -1412,7 +1468,6 @@ updateRequestsList(requests);
 }
 });
 }
-
 function updateRequestsCount(requests) {
 const pendingCount = Object.values(requests).filter(r => r.status === 'pending').length;
 document.getElementById('requestsCount').textContent = pendingCount;
@@ -1422,7 +1477,6 @@ document.getElementById('requestsBtn').style.display = 'block';
 document.getElementById('requestsBtn').style.display = 'none';
 }
 }
-
 function updateRequestsList(requests) {
 const container = document.getElementById('requestList');
 container.innerHTML = '';
@@ -1444,11 +1498,9 @@ div.innerHTML = `
 container.appendChild(div);
 });
 }
-
 function showRequests() {
 document.getElementById('requestModal').classList.add('show');
 }
-
 function approveRequest(playerId) {
 database.ref(`requests/${playerId}`).update({
 status: 'approved'
@@ -1458,14 +1510,12 @@ approved: true
 });
 showNotification('✅ Solicitud aprobada', 'success');
 }
-
 function rejectRequest(playerId) {
 database.ref(`requests/${playerId}`).update({
 status: 'rejected'
 });
 showNotification('❌ Solicitud rechazada', 'warning');
 }
-
 function initializeGameInFirebase() {
 const sessionId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
 const initialGameState = {
@@ -1493,7 +1543,6 @@ database.ref('gameState').set(initialGameState);
 document.getElementById('sessionId').textContent = sessionId.substring(0, 8).toUpperCase();
 document.getElementById('sessionBadge').style.display = 'inline-block';
 }
-
 function generateFixedBoards() {
 const boards = [];
 const suits = ['♠', '♥', '♦', '♣'];
@@ -1559,7 +1608,6 @@ ownerName: null
 });
 return boards;
 }
-
 function loadGameState(data) {
 gameState.sessionId = data.sessionId || null;
 gameState.round = data.round || 1;
@@ -1599,7 +1647,6 @@ document.getElementById('dealerControls').style.display = 'none';
 document.getElementById('becomeDealerBtn').style.display = 'block';
 document.getElementById('transferDealerBtn').style.display = 'none';
 }
-// ✅ Cerrar modal si currentClaim es null
 const verificationModal = document.getElementById('verificationModal');
 if (data.currentClaim) {
 if (!verificationModal.classList.contains('show')) {
@@ -1610,15 +1657,15 @@ if (verificationModal.classList.contains('show')) {
 verificationModal.classList.remove('show');
 }
 }
-// ✅ Notificación para jugadores cuando se lanza carta
 if (!gameState.isDealer && data.currentCard && data.currentCard !== gameState.currentCard) {
 if (gameState.handStarted && !gameState.handFinished) {
 showNotification(`🎴 ¡Carta lanzada: ${data.currentCard}!`, 'success');
+// ✅ Mostrar popup en móvil/tablet cuando sale carta nueva
+showMobileCardPopup(data.currentCard, data.cardsCount);
 }
 }
 updateCurrentCardDisplay();
 }
-
 function updatePlayersList(players) {
 const container = document.getElementById('playersList');
 container.innerHTML = '';
@@ -1646,12 +1693,10 @@ let playerHTML = `
 ${player.boardId ? `<span class="player-board">Cartón #${player.boardId}</span>` : '<span class="player-board">Sin cartón</span>'}
 <span class="player-balance-display">$${player.balance || 0}</span>
 `;
-// ✅ Botón para transferir crupier (solo visible para crupier)
 if (gameState.isDealer && gameState.dealerId === gameState.playerId && !gameState.handStarted && !gameState.roundFinished && gameState.dealerId !== player.id) {
 playerHTML += `<button class="transfer-btn" onclick="transferDealer('${player.id}')">.Transferar</button>`;
 }
 playerEl.innerHTML = playerHTML;
-// ✅ Botón de carga de saldo solo si es crupier, mano no iniciada, y saldo < 6
 if (gameState.isDealer && !gameState.handStarted && (player.balance || 0) < 6) {
 const loadBtn = document.createElement('button');
 loadBtn.className = 'btn-dealer btn-init';
@@ -1665,7 +1710,6 @@ playerEl.appendChild(loadBtn);
 container.appendChild(playerEl);
 });
 }
-
 function transferDealer(newDealerId) {
 if (!gameState.isDealer) {
 showNotification('⚠️ Solo el crupier puede transferir el rol', 'warning');
@@ -1676,11 +1720,9 @@ showNotification('⚠️ No se puede transferir el rol durante una mano o ronda 
 return;
 }
 database.ref('gameState/dealerId').set(newDealerId).then(() => {
-// Eliminar rol de crupier del actual
 database.ref(`players/${gameState.playerId}`).update({
-approved: true // Mantener aprobado pero ya no es crupier
+approved: true
 });
-// Dar rol de crupier al nuevo
 database.ref(`players/${newDealerId}`).update({
 approved: true
 });
@@ -1688,7 +1730,6 @@ showNotification('🔄 ¡Rol de crupier transferido exitosamente!', 'success');
 document.getElementById('transferDealerModal').classList.remove('show');
 });
 }
-
 function showTransferDealerModal() {
 if (!gameState.isDealer) {
 showNotification('⚠️ Solo el crupier puede transferir el rol', 'warning');
@@ -1717,14 +1758,12 @@ container.innerHTML = '<div style="color:#95a5a6;text-align:center;">No hay juga
 document.getElementById('transferDealerModal').classList.add('show');
 });
 }
-
 function openBalanceModal(playerId, playerName) {
 selectedPlayerForBalance = playerId;
 document.getElementById('balancePlayerName').textContent = playerName;
 document.getElementById('balanceAmountInput').value = '';
 document.getElementById('balanceModal').classList.add('show');
 }
-
 function saveBalance() {
 const amount = parseInt(document.getElementById('balanceAmountInput').value);
 if (isNaN(amount) || amount <= 0) {
@@ -1737,7 +1776,6 @@ balance: amount
 document.getElementById('balanceModal').classList.remove('show');
 showNotification(`✅ Saldo cargado exitosamente`, 'success');
 }
-
 function renderBoards() {
 const container = document.getElementById('boardsContainer');
 container.innerHTML = '';
@@ -1808,7 +1846,6 @@ btn.disabled = false;
 }
 });
 }
-
 function selectBoard(boardId) {
 if (gameState.boardSelectedThisRound) {
 showNotification('⚠️ Ya seleccionaste cartón para esta ronda. No se puede cambiar hasta la próxima ronda.', 'warning');
@@ -1865,7 +1902,6 @@ locked: board.locked
 });
 renderBoards();
 }
-
 function toggleCellMark(boardId, cellIndex, event) {
 event.stopPropagation();
 const board = gameState.boards.find(b => b.id === boardId);
@@ -1891,7 +1927,6 @@ showNotification('✅ Casilla marcada', 'success');
 }
 renderBoards();
 }
-
 function updateCurrentCardDisplay() {
 const display = document.getElementById('currentCardDisplay');
 display.innerHTML = '';
@@ -1908,6 +1943,42 @@ display.innerHTML = `
 <div class="card-symbol">${card.match(/[♠♥♦♣]/)[0]}</div>
 <div style="margin-top:10px;font-size:0.9em;color:#7f8c8d;">Carta #${gameState.cardsCount}</div>
 `;
+}
+
+// ✅ MEJORA 1: Funciones para Popup Móvil
+function showMobileCardPopup(card, count) {
+const popup = document.getElementById('mobileCardPopup');
+const isRed = card.includes('♥') || card.includes('♦');
+const suitClass = isRed ? 'heart' : 'diamond' : 'spade';
+
+// Determinar clase correcta
+let finalSuitClass = 'spade';
+if (card.includes('♥') || card.includes('♦')) {
+finalSuitClass = 'heart';
+} else {
+finalSuitClass = 'spade';
+}
+
+popup.className = `mobile-card-popup show ${finalSuitClass}`;
+document.getElementById('mobileCardText').textContent = card.replace(/[♠♥♦♣]/, '');
+document.getElementById('mobileCardSymbol').textContent = card.match(/[♠♥♦♣]/)[0];
+document.getElementById('mobileCardCount').textContent = count;
+
+// Auto-ocultar después de 8 segundos
+if (mobileCardPopupTimeout) {
+clearTimeout(mobileCardPopupTimeout);
+}
+mobileCardPopupTimeout = setTimeout(() => {
+closeMobileCardPopup();
+}, 8000);
+}
+
+function closeMobileCardPopup() {
+const popup = document.getElementById('mobileCardPopup');
+popup.classList.remove('show');
+if (mobileCardPopupTimeout) {
+clearTimeout(mobileCardPopupTimeout);
+}
 }
 
 function drawRandomCard() {
@@ -1944,7 +2015,6 @@ cardsCount: gameState.cardsCount
 });
 showNotification(`🎴 ¡${newCard} lanzada!`, 'success');
 }
-
 function becomeDealer() {
 if (gameState.dealerId) {
 showNotification('⚠️ Ya hay un crupier asignado', 'warning');
@@ -1960,7 +2030,6 @@ dealerDisconnectRef.onDisconnect().set(true);
 showNotification('👑 ¡Ahora eres el CRUPIER!', 'success');
 });
 }
-
 function initHand() {
 if (!gameState.isDealer) {
 showNotification('⚠️ Solo el crupier puede iniciar la mano', 'warning');
@@ -1974,7 +2043,6 @@ if (gameState.roundFinished) {
 showNotification('⚠️ La ronda terminó. Reinicia para continuar.', 'warning');
 return;
 }
-// ✅ Verificar que TODOS los jugadores con saldo tengan cartón
 database.ref('players').once('value', (snapshot) => {
 const players = snapshot.val() || {};
 let playersWithBalance = 0;
@@ -2012,7 +2080,6 @@ if (insufficientBalance.length > 0) {
 showNotification(`⚠️ Jugadores sin saldo suficiente: ${insufficientBalance.join(', ')}`, 'warning');
 return;
 }
-// Actualizar saldos
 Object.entries(players).forEach(([id, player]) => {
 if (player.boardId && player.balance >= 6) {
 database.ref(`players/${id}`).update({
@@ -2020,7 +2087,6 @@ balance: player.balance - 6
 });
 }
 });
-// ✅ Cargar POZOS: 1 moneda por jugador por pozo
 const newPots = {
 pokino: gameState.pots.pokino + playerCount,
 poker: gameState.pots.poker + playerCount,
@@ -2029,7 +2095,6 @@ centro: gameState.pots.centro + playerCount,
 esquinas: gameState.pots.esquinas + playerCount,
 especial: gameState.pots.especial + playerCount
 };
-// ✅ Reiniciar TODOS los marcados
 const resetBoards = gameState.boards.map(board => ({
 ...board,
 marked: Array(25).fill(false)
@@ -2048,7 +2113,6 @@ document.getElementById('initHandBtn').disabled = true;
 showNotification(`▶️ ¡Mano iniciada! Cada pozo recibió ${playerCount} monedas.`, 'success');
 });
 }
-
 function claimPrize(prizeType, boardId) {
 if (gameState.currentClaim) {
 showNotification('⚠️ Espera a que se resuelva el premio actual', 'warning');
@@ -2075,7 +2139,6 @@ claimingPlayer: gameState.playerName,
 claimingBoardId: boardId
 });
 }
-
 function showClaimModal(prizeType, playerName, boardId) {
 const board = gameState.boards.find(b => b.id === boardId);
 if (!board) return;
@@ -2090,7 +2153,6 @@ document.querySelector('#verificationModal .modal-actions').style.display = 'gri
 document.querySelector('#verificationModal .modal-actions').style.display = 'none';
 }
 }
-
 function renderModalBoard(board) {
 const container = document.getElementById('modalBoardPreview');
 container.innerHTML = '';
@@ -2112,7 +2174,6 @@ cell.textContent = card;
 container.appendChild(cell);
 });
 }
-
 function renderModalCards() {
 const container = document.getElementById('modalCardsList');
 container.innerHTML = '';
@@ -2152,7 +2213,6 @@ suitDiv.appendChild(cardsContainer);
 container.appendChild(suitDiv);
 });
 }
-
 function approveClaim() {
 if (!gameState.isDealer) {
 showNotification('⚠️ Solo el crupier puede aprobar premios', 'warning');
@@ -2182,10 +2242,8 @@ winner: gameState.claimingPlayer,
 prize: prizeName,
 amount: prizeAmount
 });
-// ✅ Reiniciar SOLO el pozo ganado
 const newPots = { ...gameState.pots };
 newPots[gameState.currentClaim] = 0;
-// ✅ CORREGIDO: En mano 6, solo "Especial" termina la ronda
 const shouldEndHand = (gameState.currentClaim === 'pokino' && gameState.currentHand < 6) ||
 (gameState.currentClaim === 'especial' && gameState.currentHand === 6);
 const updates = {
@@ -2201,7 +2259,6 @@ updates.handStarted = false;
 if (gameState.currentHand < 6) {
 updates.currentHand = gameState.currentHand + 1;
 } else {
-// ✅ En mano 6, solo Especial termina la ronda
 if (gameState.currentClaim === 'especial') {
 updates.roundFinished = true;
 }
@@ -2216,7 +2273,6 @@ if (gameState.currentHand === 6 && gameState.currentClaim === 'especial') {
 document.getElementById('endRoundBtn').style.display = 'block';
 showNotification(`🎉 ¡Mano ${gameState.currentHand} terminada! Ronda completada.`, 'success');
 } else if (gameState.currentHand === 6) {
-// Mano 6 terminada pero no con Especial, continuar normalmente
 showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
 } else {
 showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${prizeAmount}. Mano ${gameState.currentHand} terminada.`, 'success');
@@ -2226,23 +2282,19 @@ showNotification(`🎉 ¡${gameState.claimingPlayer} ganó ${prizeName}! $${priz
 }
 });
 }
-
 function denyClaim() {
 if (!gameState.isDealer) {
 showNotification('⚠️ Solo el crupier puede denegar premios', 'warning');
 return;
 }
-// ✅ CIERRA MODAL PARA TODOS
 database.ref('gameState').update({
 currentClaim: null,
 claimingPlayer: null,
 claimingBoardId: null
 });
-// ✅ Cerrar modal localmente
 document.getElementById('verificationModal').classList.remove('show');
 showNotification('❌ Premio denegado. Continuamos jugando', 'warning');
 }
-
 function endRound() {
 if (!gameState.isDealer) {
 showNotification('⚠️ Solo el crupier puede finalizar la ronda', 'warning');
@@ -2271,7 +2323,6 @@ balancesList.appendChild(div);
 document.getElementById('endRoundModal').classList.add('show');
 });
 }
-
 function startNewRound() {
 document.getElementById('endRoundModal').classList.remove('show');
 gameState.boards.forEach(board => {
@@ -2309,7 +2360,6 @@ gameState.boardSelectedThisRound = false;
 showNotification(`✨ ¡Ronda ${gameState.round + 1} iniciada! Seleccionen nuevos cartones.`, 'success');
 });
 }
-
 function endSession() {
 if (!gameState.isDealer) {
 showNotification('⚠️ Solo el crupier puede finalizar la sesión', 'warning');
@@ -2326,7 +2376,6 @@ setTimeout(() => {
 location.reload();
 }, 3000);
 }
-
 function resetGame() {
 if (!gameState.isDealer && gameState.dealerId) {
 showNotification('⚠️ Solo el crupier puede reiniciar el juego', 'warning');
@@ -2371,7 +2420,6 @@ boardSelectedThisRound: false
 database.ref('requests').remove();
 showNotification('🔄 ¡Juego reiniciado completamente!', 'success');
 }
-
 function resetAllBalances() {
 if (!gameState.isDealer && gameState.dealerId) {
 showNotification('⚠️ Solo el crupier puede reiniciar saldos', 'warning');
@@ -2390,7 +2438,6 @@ balance: 0
 });
 showNotification('🔄 ¡Todos los saldos han sido reiniciados a 0!', 'success');
 }
-
 function showHistoryModal() {
 const content = document.getElementById('historyContent');
 const empty = document.getElementById('emptyHistory');
@@ -2416,7 +2463,6 @@ content.appendChild(div);
 }
 document.getElementById('historyModal').classList.add('show');
 }
-
 function updateDisplay() {
 document.getElementById('roundNumber').textContent = gameState.round;
 document.getElementById('handNumber').textContent = gameState.currentHand;
@@ -2471,7 +2517,6 @@ gameState.playerBalance = player.balance;
 }
 });
 }
-
 function showNotification(message, type = 'success') {
 const notif = document.getElementById('notification');
 notif.textContent = message;
@@ -2483,12 +2528,10 @@ setTimeout(() => {
 notif.classList.remove('show');
 }, 3000);
 }
-
 window.addEventListener('unload', () => {
 if (cleanupInterval) clearInterval(cleanupInterval);
 if (requestCheckInterval) clearInterval(requestCheckInterval);
 if (gameState.playerId) {
-// ✅ SOLO eliminar jugador si NO es crupier
 if (!gameState.isDealer) {
 database.ref(`players/${gameState.playerId}`).remove();
 } else {
@@ -2497,7 +2540,7 @@ database.ref('gameState/dealerDisconnected').set(true);
 database.ref(`requests/${gameState.playerId}`).remove();
 }
 });
-// ✅ ELIMINADO: window.onload = initGame; (Ahora se llama desde signInAnonymously)
+window.onload = initGame;
 </script>
 </body>
 </html>
